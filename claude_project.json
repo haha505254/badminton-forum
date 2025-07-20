@@ -1,0 +1,34 @@
+{
+  "name": "Badminton Forum",
+  "description": "A modern badminton discussion forum built with .NET 8 Web API and Vue 3",
+  "type": "fullstack_web_application",
+  "languages": ["csharp", "javascript", "typescript"],
+  "frameworks": {
+    "backend": [".NET 8", "Entity Framework Core", "ASP.NET Core Web API"],
+    "frontend": ["Vue 3", "Vite", "Pinia", "Vue Router"],
+    "database": ["PostgreSQL"]
+  },
+  "structure": {
+    "backend": "BadmintonForum.API/",
+    "frontend": "badminton-forum-vue/",
+    "api_pattern": "RESTful API with JWT authentication",
+    "deployment": "Separate backend API and frontend SPA"
+  },
+  "conventions": {
+    "backend": {
+      "naming": "PascalCase for classes and methods, camelCase for parameters",
+      "architecture": "Controller-Service-Repository pattern with DTOs",
+      "api_routes": "/api/{controller}/{action}"
+    },
+    "frontend": {
+      "naming": "PascalCase for components, camelCase for variables",
+      "state_management": "Pinia stores",
+      "component_style": "Composition API with script setup"
+    }
+  },
+  "development": {
+    "backend_port": 5246,
+    "frontend_port": 5173,
+    "api_documentation": "Swagger/OpenAPI at /swagger"
+  }
+}
