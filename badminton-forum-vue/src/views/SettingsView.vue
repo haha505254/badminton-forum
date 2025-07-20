@@ -34,6 +34,38 @@
           ></textarea>
         </div>
         
+        <div class="form-group">
+          <label for="playingStyle">打球風格</label>
+          <select id="playingStyle" v-model="profile.playingStyle">
+            <option value="">請選擇</option>
+            <option value="攻擊型">攻擊型</option>
+            <option value="防守型">防守型</option>
+            <option value="全能型">全能型</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="yearsOfExperience">球齡（年）</label>
+          <input
+            id="yearsOfExperience"
+            v-model.number="profile.yearsOfExperience"
+            type="number"
+            min="0"
+            max="100"
+            placeholder="例如：5"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="signature">簽名檔</label>
+          <textarea
+            id="signature"
+            v-model="profile.signature"
+            placeholder="你的個性簽名..."
+            rows="3"
+          ></textarea>
+        </div>
+        
         <button type="submit" :disabled="loading">
           {{ loading ? '保存中...' : '保存更改' }}
         </button>
@@ -92,7 +124,10 @@ const authStore = useAuthStore()
 const profile = reactive({
   username: '',
   email: '',
-  bio: ''
+  bio: '',
+  playingStyle: '',
+  yearsOfExperience: null,
+  signature: ''
 })
 
 const REMOVEDForm = reactive({
@@ -108,7 +143,10 @@ const updateProfile = async () => {
   try {
     await profileApi.updateProfile({
       email: profile.email,
-      bio: profile.bio
+      bio: profile.bio,
+      playingStyle: profile.playingStyle || null,
+      yearsOfExperience: profile.yearsOfExperience || null,
+      signature: profile.signature || null
     })
     alert('個人資料已更新！')
     
@@ -116,6 +154,9 @@ const updateProfile = async () => {
     if (authStore.user) {
       authStore.user.email = profile.email
       authStore.user.bio = profile.bio
+      authStore.user.playingStyle = profile.playingStyle
+      authStore.user.yearsOfExperience = profile.yearsOfExperience
+      authStore.user.signature = profile.signature
       localStorage.setItem('user', JSON.stringify(authStore.user))
     }
   } catch (error) {
@@ -158,6 +199,9 @@ onMounted(() => {
     profile.username = authStore.user.username
     profile.email = authStore.user.email
     profile.bio = authStore.user.bio || ''
+    profile.playingStyle = authStore.user.playingStyle || ''
+    profile.yearsOfExperience = authStore.user.yearsOfExperience || null
+    profile.signature = authStore.user.signature || ''
   }
 })
 </script>

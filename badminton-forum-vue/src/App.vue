@@ -21,6 +21,7 @@ const handleLogout = () => {
         
         <div class="nav-links">
           <RouterLink to="/categories">版塊</RouterLink>
+          <RouterLink to="/search">搜尋</RouterLink>
           
           <template v-if="authStore.isAuthenticated">
             <RouterLink to="/new-post">發表文章</RouterLink>
@@ -28,6 +29,7 @@ const handleLogout = () => {
               {{ authStore.user.username }}
             </RouterLink>
             <RouterLink to="/settings">設置</RouterLink>
+            <RouterLink v-if="authStore.user?.isAdmin" to="/admin">管理</RouterLink>
             <button @click="handleLogout" class="logout-btn">
               登出
             </button>

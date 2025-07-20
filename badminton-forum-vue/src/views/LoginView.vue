@@ -8,13 +8,13 @@
       </div>
       
       <div class="form-group">
-        <label for="username">用戶名</label>
+        <label for="email">電子郵件</label>
         <input
-          id="username"
-          v-model="formData.username"
-          type="text"
+          id="email"
+          v-model="formData.email"
+          type="email"
           required
-          placeholder="請輸入用戶名"
+          placeholder="請輸入電子郵件"
         />
       </div>
       
@@ -33,6 +33,10 @@
         {{ loading ? '登入中...' : '登入' }}
       </button>
       
+      <p class="forgot-REMOVED-link">
+        <RouterLink to="/forgot-REMOVED">忘記密碼？</RouterLink>
+      </p>
+      
       <p class="register-link">
         還沒有帳號？
         <RouterLink to="/register">立即註冊</RouterLink>
@@ -50,7 +54,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const formData = reactive({
-  username: '',
+  email: '',
   REMOVED: ''
 })
 
@@ -152,9 +156,24 @@ input:focus {
   cursor: not-allowed;
 }
 
-.register-link {
+.forgot-REMOVED-link {
   text-align: center;
   margin-top: 1rem;
+  color: #666;
+}
+
+.forgot-REMOVED-link a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.forgot-REMOVED-link a:hover {
+  text-decoration: underline;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 0.5rem;
   color: #666;
 }
 

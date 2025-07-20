@@ -26,12 +26,10 @@
       
       <div class="form-group">
         <label for="content">文章內容</label>
-        <textarea
-          id="content"
+        <RichTextEditor
           v-model="formData.content"
-          required
           placeholder="請輸入文章內容..."
-        ></textarea>
+        />
       </div>
       
       <div class="form-actions">
@@ -49,6 +47,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { categoriesApi } from '../api/categories'
 import { postsApi } from '../api/posts'
+import RichTextEditor from '../components/RichTextEditor.vue'
 
 const router = useRouter()
 
@@ -116,8 +115,7 @@ label {
 }
 
 input,
-select,
-textarea {
+select {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -126,14 +124,8 @@ textarea {
   font-family: inherit;
 }
 
-textarea {
-  min-height: 300px;
-  resize: vertical;
-}
-
 input:focus,
-select:focus,
-textarea:focus {
+select:focus {
   outline: none;
   border-color: #3498db;
 }

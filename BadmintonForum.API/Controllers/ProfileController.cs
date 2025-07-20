@@ -32,7 +32,10 @@ namespace BadmintonForum.API.Controllers
                     Bio = u.Bio,
                     CreatedAt = u.CreatedAt,
                     PostCount = u.Posts.Count,
-                    ReplyCount = u.Replies.Count
+                    ReplyCount = u.Replies.Count,
+                    PlayingStyle = u.PlayingStyle,
+                    YearsOfExperience = u.YearsOfExperience,
+                    Signature = u.Signature
                 })
                 .FirstOrDefaultAsync();
 
@@ -122,6 +125,21 @@ namespace BadmintonForum.API.Controllers
             if (updateProfileDto.Avatar != null)
             {
                 user.Avatar = updateProfileDto.Avatar;
+            }
+
+            if (updateProfileDto.PlayingStyle != null)
+            {
+                user.PlayingStyle = updateProfileDto.PlayingStyle;
+            }
+
+            if (updateProfileDto.YearsOfExperience.HasValue)
+            {
+                user.YearsOfExperience = updateProfileDto.YearsOfExperience;
+            }
+
+            if (updateProfileDto.Signature != null)
+            {
+                user.Signature = updateProfileDto.Signature;
             }
 
             await _context.SaveChangesAsync();

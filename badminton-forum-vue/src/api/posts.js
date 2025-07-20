@@ -31,5 +31,12 @@ export const postsApi = {
   // 點讚文章
   likePost(id) {
     return api.post(`/posts/${id}/like`)
+  },
+
+  // 搜尋文章
+  searchPosts(keyword, page = 1, pageSize = 20) {
+    return api.get('/posts/search', {
+      params: { keyword, page, pageSize }
+    })
   }
 }

@@ -3,6 +3,7 @@ using System;
 using BadmintonForum.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BadmintonForum.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250720115822_AddIsAdminToUser")]
+    partial class AddIsAdminToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,46 +61,37 @@ namespace BadmintonForum.API.Migrations
                         {
                             Id = 1,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "羽毛球相關的一般討論",
+                            Description = "分享和討論羽毛球技術",
                             DisplayOrder = 1,
-                            Icon = "💬",
-                            Name = "綜合討論區"
+                            Icon = "🏸",
+                            Name = "技術討論"
                         },
                         new
                         {
                             Id = 2,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "技術分享與教學討論",
+                            Description = "球拍、球鞋等裝備討論",
                             DisplayOrder = 2,
-                            Icon = "🏸",
-                            Name = "技術交流區"
+                            Icon = "🎾",
+                            Name = "裝備推薦"
                         },
                         new
                         {
                             Id = 3,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "球拍、球鞋、裝備評測與推薦",
+                            Description = "比賽和活動信息",
                             DisplayOrder = 3,
-                            Icon = "🎾",
-                            Name = "裝備討論區"
+                            Icon = "📅",
+                            Name = "活動公告"
                         },
                         new
                         {
                             Id = 4,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "國內外賽事討論與轉播",
+                            Description = "尋找球友，組織活動",
                             DisplayOrder = 4,
-                            Icon = "🏆",
-                            Name = "賽事專區"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "各地區球友交流與約球",
-                            DisplayOrder = 5,
-                            Icon = "📍",
-                            Name = "地區球友會"
+                            Icon = "👥",
+                            Name = "球友交流"
                         });
                 });
 
@@ -226,25 +220,10 @@ namespace BadmintonForum.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PasswordResetToken")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("PasswordResetTokenExpiry")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("PlayingStyle")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Signature")
-                        .HasColumnType("text");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<int?>("YearsOfExperience")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

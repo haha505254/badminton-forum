@@ -56,6 +56,49 @@ namespace BadmintonForum.API.Controllers
             return Ok(posts);
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<PostDto>>> SearchPosts([FromQuery] string keyword, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return BadRequest("Keyword is required");
+            }
+
+            var query = _context.Posts
+                .Where(p => p.Title.Contains(keyword) || p.Content.Contains(keyword))
+                .OrderByDescending(p => p.CreatedAt);
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var posts = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new PostDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    AuthorId = p.AuthorId,
+                    AuthorName = p.Author.Username,
+                    CategoryId = p.CategoryId,
+                    CategoryName = p.Category.Name,
+                    ViewCount = p.ViewCount,
+                    LikeCount = p.LikeCount,
+                    ReplyCount = p.Replies.Count,
+                    IsPinned = p.IsPinned,
+                    IsLocked = p.IsLocked,
+                    CreatedAt = p.CreatedAt,
+                    UpdatedAt = p.UpdatedAt
+                })
+                .ToListAsync();
+
+            Response.Headers.Append("X-Total-Count", totalItems.ToString());
+            Response.Headers.Append("X-Total-Pages", totalPages.ToString());
+
+            return Ok(posts);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<PostDto>> GetPost(int id)
         {

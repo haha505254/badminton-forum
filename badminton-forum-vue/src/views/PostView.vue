@@ -7,7 +7,7 @@
         <span>發表於: {{ formatDate(post.createdAt) }}</span>
         <span>瀏覽: {{ post.viewCount }}</span>
       </div>
-      <div class="post-content" v-html="post.content"></div>
+      <RichTextDisplay :content="post.content" />
     </article>
     
     <section class="replies">
@@ -17,14 +17,14 @@
           <strong>{{ reply.authorName }}</strong>
           <span>{{ formatDate(reply.createdAt) }}</span>
         </div>
-        <div class="reply-content">{{ reply.content }}</div>
+        <RichTextDisplay :content="reply.content" class="reply-content" />
       </div>
     </section>
     
     <section v-if="authStore.isAuthenticated" class="reply-form">
       <h3>發表回覆</h3>
-      <textarea v-model="newReply" placeholder="寫下您的回覆..."></textarea>
-      <button @click="submitReply" :disabled="submitting">
+      <RichTextEditor v-model="newReply" placeholder="寫下您的回覆..." />
+      <button @click="submitReply" :disabled="submitting" class="submit-btn">
         {{ submitting ? '發表中...' : '發表' }}
       </button>
     </section>
@@ -37,6 +37,8 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { postsApi } from '../api/posts'
 import { repliesApi } from '../api/replies'
+import RichTextEditor from '../components/RichTextEditor.vue'
+import RichTextDisplay from '../components/RichTextDisplay.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -159,26 +161,23 @@ onMounted(async () => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.reply-form textarea {
-  width: 100%;
-  min-height: 100px;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-family: inherit;
-}
-
-.reply-form button {
+.submit-btn {
+  margin-top: 1rem;
   background-color: #3498db;
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 1rem;
 }
 
-.reply-form button:hover {
+.submit-btn:hover:not(:disabled) {
   background-color: #2980b9;
+}
+
+.submit-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
 }
 </style>

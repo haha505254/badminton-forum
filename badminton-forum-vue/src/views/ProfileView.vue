@@ -11,6 +11,15 @@
           <h1>{{ user.username }}</h1>
           <p>{{ user.email }}</p>
           <p class="bio">{{ user.bio || '這個用戶還沒有填寫簡介' }}</p>
+          <div class="badminton-info">
+            <span v-if="user.playingStyle" class="info-item">
+              <strong>打球風格:</strong> {{ user.playingStyle }}
+            </span>
+            <span v-if="user.yearsOfExperience" class="info-item">
+              <strong>球齡:</strong> {{ user.yearsOfExperience }} 年
+            </span>
+          </div>
+          <p v-if="user.signature" class="signature">{{ user.signature }}</p>
           <p class="join-date">加入於 {{ formatDate(user.createdAt) }}</p>
         </div>
       </div>
@@ -121,6 +130,33 @@ onMounted(async () => {
 .join-date {
   color: #999;
   font-size: 0.9rem;
+}
+
+.badminton-info {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+.info-item {
+  background-color: #f0f0f0;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.info-item strong {
+  color: #333;
+}
+
+.signature {
+  font-style: italic;
+  color: #666;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-left: 3px solid #4CAF50;
 }
 
 .profile-content {

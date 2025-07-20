@@ -8,20 +8,7 @@
       </div>
       
       <div class="form-group">
-        <label for="username">用戶名</label>
-        <input
-          id="username"
-          v-model="formData.username"
-          type="text"
-          required
-          minlength="3"
-          maxlength="50"
-          placeholder="3-50個字符"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="email">電子郵件</label>
+        <label for="email">電子郵件 (帳號)</label>
         <input
           id="email"
           v-model="formData.email"
@@ -29,6 +16,7 @@
           required
           placeholder="example@email.com"
         />
+        <small>您的電子郵件將作為登入帳號使用</small>
       </div>
       
       <div class="form-group">
@@ -75,7 +63,6 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const formData = reactive({
-  username: '',
   email: '',
   REMOVED: '',
   confirmPassword: ''

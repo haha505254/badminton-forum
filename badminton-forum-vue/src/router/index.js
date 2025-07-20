@@ -50,6 +50,29 @@ const routes = [
     name: 'settings',
     component: () => import('../views/SettingsView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('../views/SearchView.vue')
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('../views/AdminView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/forgot-REMOVED',
+    name: 'forgot-REMOVED',
+    component: () => import('../views/ForgotPasswordView.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/reset-REMOVED',
+    name: 'reset-REMOVED',
+    component: () => import('../views/ResetPasswordView.vue'),
+    meta: { requiresGuest: true }
   }
 ]
 
@@ -65,6 +88,8 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login', query: { redirect: to.fullPath } })
   } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    next({ name: 'home' })
+  } else if (to.meta.requiresAdmin && (!authStore.user || !authStore.user.isAdmin)) {
     next({ name: 'home' })
   } else {
     next()
