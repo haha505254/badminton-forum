@@ -7,6 +7,9 @@ WORKDIR /app
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
+# 安裝 postgresql-client 用於健康檢查
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
 # 複製專案檔案
 COPY *.csproj ./
 RUN dotnet restore
