@@ -25,7 +25,7 @@ sudo systemctl status postgresql --no-pager
 echo "5. 設置資料庫..."
 sudo -u postgres psql << EOF
 -- 創建資料庫用戶
-CREATE USER badmintonuser WITH PASSWORD 'REMOVED';
+CREATE USER badmintonuser WITH PASSWORD 'BadmintonPass123!';
 
 -- 創建資料庫
 CREATE DATABASE BadmintonForumDb OWNER badmintonuser;
@@ -43,6 +43,6 @@ echo ""
 echo "資料庫資訊："
 echo "  資料庫名稱: BadmintonForumDb"
 echo "  用戶名: badmintonuser"
-echo "  密碼: REMOVED"
+echo "  密碼: BadmintonPass123!"
 echo ""
 echo "請記得更新 appsettings.json 中的連接字串！"

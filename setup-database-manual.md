@@ -34,7 +34,7 @@ sudo systemctl status postgresql
 sudo -u postgres psql
 
 # 在 psql 提示符下執行以下 SQL 命令：
-CREATE USER badmintonuser WITH PASSWORD 'REMOVED';
+CREATE USER badmintonuser WITH PASSWORD 'BadmintonPass123!';
 CREATE DATABASE BadmintonForumDb OWNER badmintonuser;
 GRANT ALL PRIVILEGES ON DATABASE BadmintonForumDb TO badmintonuser;
 \q
@@ -45,7 +45,7 @@ GRANT ALL PRIVILEGES ON DATABASE BadmintonForumDb TO badmintonuser;
 ```bash
 # 創建用戶
 sudo -u postgres createuser -P badmintonuser
-# (系統會提示輸入密碼，輸入: REMOVED)
+# (系統會提示輸入密碼，輸入: BadmintonPass123!)
 
 # 創建資料庫
 sudo -u postgres createdb -O badmintonuser BadmintonForumDb
@@ -81,7 +81,7 @@ sudo systemctl restart postgresql
 ```bash
 # 測試連接到新建的資料庫
 psql -h localhost -U badmintonuser -d BadmintonForumDb
-# 輸入密碼: REMOVED
+# 輸入密碼: BadmintonPass123!
 ```
 
 ## 6. 更新專案配置
@@ -91,7 +91,7 @@ psql -h localhost -U badmintonuser -d BadmintonForumDb
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=BadmintonForumDb;Username=badmintonuser;Password=REMOVED"
+    "DefaultConnection": "Host=localhost;Database=BadmintonForumDb;Username=badmintonuser;Password=BadmintonPass123!"
   }
 }
 ```

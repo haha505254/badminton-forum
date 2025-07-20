@@ -27,7 +27,7 @@ echo ""
 
 # 測試連接
 echo "測試資料庫連接..."
-PGPASSWORD='REMOVED' psql -h localhost -U badmintonuser -d badmintonforumdb -c '\l' &> /dev/null
+PGPASSWORD='BadmintonPass123!' psql -h localhost -U badmintonuser -d badmintonforumdb -c '\l' &> /dev/null
 
 if [ $? -eq 0 ]; then
     echo "✓ 成功連接到 BadmintonForumDb 資料庫"

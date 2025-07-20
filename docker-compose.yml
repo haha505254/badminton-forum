@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-badmintonforumdb}
       POSTGRES_USER: ${POSTGRES_USER:-badmintonuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-REMOVED}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-BadmintonPass123!}
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -32,8 +32,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5246
-      ConnectionStrings__DefaultConnection: "Host=db;Database=${POSTGRES_DB:-badmintonforumdb};Username=${POSTGRES_USER:-badmintonuser};Password=${POSTGRES_PASSWORD:-REMOVED}"
-      JwtSettings__Secret: ${JWT_SECRET:-REMOVED}
+      ConnectionStrings__DefaultConnection: "Host=db;Database=${POSTGRES_DB:-badmintonforumdb};Username=${POSTGRES_USER:-badmintonuser};Password=${POSTGRES_PASSWORD:-BadmintonPass123!}"
+      JwtSettings__Secret: ${JWT_SECRET:-ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction}
       JwtSettings__Issuer: ${JWT_ISSUER:-BadmintonForumAPI}
       JwtSettings__Audience: ${JWT_AUDIENCE:-BadmintonForumClient}
       JwtSettings__ExpirationInDays: ${JWT_EXPIRATION_DAYS:-7}

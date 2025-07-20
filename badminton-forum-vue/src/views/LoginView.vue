@@ -19,11 +19,11 @@
       </div>
       
       <div class="form-group">
-        <label for="REMOVED">密碼</label>
+        <label for="password">密碼</label>
         <input
-          id="REMOVED"
-          v-model="formData.REMOVED"
-          type="REMOVED"
+          id="password"
+          v-model="formData.password"
+          type="password"
           required
           placeholder="請輸入密碼"
         />
@@ -33,8 +33,8 @@
         {{ loading ? '登入中...' : '登入' }}
       </button>
       
-      <p class="forgot-REMOVED-link">
-        <RouterLink to="/forgot-REMOVED">忘記密碼？</RouterLink>
+      <p class="forgot-password-link">
+        <RouterLink to="/forgot-password">忘記密碼？</RouterLink>
       </p>
       
       <p class="register-link">
@@ -55,7 +55,7 @@ const authStore = useAuthStore()
 
 const formData = reactive({
   email: '',
-  REMOVED: ''
+  password: ''
 })
 
 const loading = ref(false)
@@ -156,18 +156,18 @@ input:focus {
   cursor: not-allowed;
 }
 
-.forgot-REMOVED-link {
+.forgot-password-link {
   text-align: center;
   margin-top: 1rem;
   color: #666;
 }
 
-.forgot-REMOVED-link a {
+.forgot-password-link a {
   color: #3498db;
   text-decoration: none;
 }
 
-.forgot-REMOVED-link a:hover {
+.forgot-password-link a:hover {
   text-decoration: underline;
 }
 

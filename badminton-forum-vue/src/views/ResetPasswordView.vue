@@ -1,6 +1,6 @@
 <template>
-  <div class="reset-REMOVED-container">
-    <form @submit.prevent="handleSubmit" class="reset-REMOVED-form">
+  <div class="reset-password-container">
+    <form @submit.prevent="handleSubmit" class="reset-password-form">
       <h2>重置密碼</h2>
       
       <div v-if="successMessage" class="success-message">
@@ -16,11 +16,11 @@
       
       <div v-if="!successMessage">
         <div class="form-group">
-          <label for="REMOVED">新密碼</label>
+          <label for="password">新密碼</label>
           <input
-            id="REMOVED"
+            id="password"
             v-model="formData.newPassword"
-            type="REMOVED"
+            type="password"
             required
             placeholder="請輸入新密碼（至少6個字元）"
             minlength="6"
@@ -32,7 +32,7 @@
           <input
             id="confirmPassword"
             v-model="formData.confirmPassword"
-            type="REMOVED"
+            type="password"
             required
             placeholder="請再次輸入新密碼"
           />
@@ -87,7 +87,7 @@ const handleSubmit = async () => {
   error.value = ''
   
   try {
-    const response = await axios.post(`${API_URL}/auth/reset-REMOVED`, {
+    const response = await axios.post(`${API_URL}/auth/reset-password`, {
       token: token.value,
       newPassword: formData.newPassword,
       confirmPassword: formData.confirmPassword
@@ -108,14 +108,14 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.reset-REMOVED-container {
+.reset-password-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 200px);
 }
 
-.reset-REMOVED-form {
+.reset-password-form {
   background: white;
   padding: 2rem;
   border-radius: 8px;

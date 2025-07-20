@@ -15,12 +15,12 @@ export const authApi = {
 
   // 忘記密碼
   forgotPassword: (email) => {
-    return axios.post(`${API_URL}/auth/forgot-REMOVED`, { email })
+    return axios.post(`${API_URL}/auth/forgot-password`, { email })
   },
 
   // 重置密碼
   resetPassword: (data) => {
-    return axios.post(`${API_URL}/auth/reset-REMOVED`, data)
+    return axios.post(`${API_URL}/auth/reset-password`, data)
   }
 }
 

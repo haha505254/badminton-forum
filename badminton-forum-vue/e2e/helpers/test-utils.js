@@ -1,9 +1,9 @@
 // 測試輔助工具
 
-export async function loginUser(page, username = 'testuser', REMOVED = 'REMOVED') {
+export async function loginUser(page, username = 'testuser', password = 'TestPassword123!') {
   await page.goto('/login');
   await page.fill('input[placeholder="請輸入用戶名"]', username);
-  await page.fill('input[placeholder="請輸入密碼"]', REMOVED);
+  await page.fill('input[placeholder="請輸入密碼"]', password);
   await page.click('button:has-text("登入")');
   await page.waitForURL('/');
 }
@@ -13,8 +13,8 @@ export async function createTestUser(request) {
     data: {
       username: 'testuser' + Date.now(),
       email: `test${Date.now()}@example.com`,
-      REMOVED: 'REMOVED',
-      confirmPassword: 'REMOVED'
+      password: 'TestPassword123!',
+      confirmPassword: 'TestPassword123!'
     }
   });
   
@@ -32,7 +32,7 @@ export function generateTestData() {
   return {
     username: `testuser${timestamp}`,
     email: `test${timestamp}@example.com`,
-    REMOVED: 'REMOVED',
+    password: 'TestPassword123!',
     postTitle: `測試文章 ${timestamp}`,
     postContent: `這是測試文章的內容 ${timestamp}`,
     replyContent: `這是測試回覆 ${timestamp}`

@@ -15,29 +15,29 @@
 在 `BadmintonForum.API` 目錄下執行：
 
 ```bash
-dotnet user-REMOVEDs init
+dotnet user-secrets init
 ```
 
 ### 2. 設定敏感資訊
 
 ```bash
 # 設定資料庫連接字串
-dotnet user-REMOVEDs set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=badmintonforumdb;Username=youruser;Password=yourREMOVED"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=badmintonforumdb;Username=youruser;Password=yourpassword"
 
 # 設定 JWT Secret
-dotnet user-REMOVEDs set "JwtSettings:Secret" "YourVerySecretKeyAtLeast32CharactersLong1234567890"
+dotnet user-secrets set "JwtSettings:Secret" "YourVerySecretKeyAtLeast32CharactersLong1234567890"
 ```
 
-### 3. 查看已設定的 REMOVEDs
+### 3. 查看已設定的 secrets
 
 ```bash
-dotnet user-REMOVEDs list
+dotnet user-secrets list
 ```
 
-### 4. 移除 REMOVED
+### 4. 移除 secret
 
 ```bash
-dotnet user-REMOVEDs remove "ConnectionStrings:DefaultConnection"
+dotnet user-secrets remove "ConnectionStrings:DefaultConnection"
 ```
 
 ## 使用環境變數（適用於生產環境）

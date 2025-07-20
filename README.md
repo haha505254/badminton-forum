@@ -104,16 +104,16 @@ cd BadmintonForum.API
 
 ```bash
 # 初始化 User Secrets
-dotnet user-REMOVEDs init
+dotnet user-secrets init
 
 # 設定資料庫連接字串（記得替換成你的密碼）
-dotnet user-REMOVEDs set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=badmintonforumdb;Username=badmintonuser;Password=你設定的密碼"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=badmintonforumdb;Username=badmintonuser;Password=你設定的密碼"
 
 # 生成並設定 JWT 密鑰
-dotnet user-REMOVEDs set "JwtSettings:Secret" "$(openssl rand -base64 64 | tr -d '\n')"
+dotnet user-secrets set "JwtSettings:Secret" "$(openssl rand -base64 64 | tr -d '\n')"
 
 # 確認設定成功
-dotnet user-REMOVEDs list
+dotnet user-secrets list
 ```
 
 #### 3.4 還原套件並執行資料庫遷移
@@ -169,14 +169,14 @@ npm run dev
 
 ### 敏感資訊位置
 
-- **User Secrets**: `~/.microsoft/userREMOVEDs/[專案ID]/REMOVEDs.json`
+- **User Secrets**: `~/.microsoft/usersecrets/[專案ID]/secrets.json`
 - **不會**被 Git 追蹤，很安全
 
 ### 查看目前的設定
 
 ```bash
 # 在 BadmintonForum.API 目錄下
-dotnet user-REMOVEDs list
+dotnet user-secrets list
 ```
 
 ## 🔧 常用維護指令
@@ -209,13 +209,13 @@ dotnet ef migrations remove
 2. 更新 User Secrets：
    ```bash
    cd BadmintonForum.API
-   dotnet user-REMOVEDs set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=badmintonforumdb;Username=badmintonuser;Password=新密碼"
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=badmintonforumdb;Username=badmintonuser;Password=新密碼"
    ```
 
 ### 重新生成 JWT 密鑰
 
 ```bash
-dotnet user-REMOVEDs set "JwtSettings:Secret" "$(openssl rand -base64 64 | tr -d '\n')"
+dotnet user-secrets set "JwtSettings:Secret" "$(openssl rand -base64 64 | tr -d '\n')"
 ```
 
 ## 🐛 疑難排解
@@ -234,7 +234,7 @@ dotnet user-REMOVEDs set "JwtSettings:Secret" "$(openssl rand -base64 64 | tr -d
 
 3. 檢查 User Secrets 設定：
    ```bash
-   dotnet user-REMOVEDs list
+   dotnet user-secrets list
    ```
 
 ### 問題：前端無法連接後端

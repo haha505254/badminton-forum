@@ -147,7 +147,7 @@ namespace BadmintonForum.API.Controllers
             return NoContent();
         }
 
-        [HttpPost("change-REMOVED")]
+        [HttpPost("change-password")]
         [Authorize]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
@@ -159,13 +159,13 @@ namespace BadmintonForum.API.Controllers
                 return NotFound();
             }
 
-            // Verify current REMOVED
+            // Verify current password
             if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.CurrentPassword, user.PasswordHash))
             {
                 return BadRequest(new { message = "當前密碼不正確" });
             }
 
-            // Update REMOVED
+            // Update password
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword);
             await _context.SaveChangesAsync();
 

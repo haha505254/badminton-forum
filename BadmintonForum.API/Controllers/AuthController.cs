@@ -127,7 +127,7 @@ namespace BadmintonForum.API.Controllers
             });
         }
 
-        [HttpPost("forgot-REMOVED")]
+        [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == forgotPasswordDto.Email);
@@ -151,11 +151,11 @@ namespace BadmintonForum.API.Controllers
                 message = "如果該電子郵件地址存在，我們已發送重置密碼的說明。",
                 // 僅用於開發測試
                 resetToken = token,
-                resetUrl = $"http://localhost:5173/reset-REMOVED?token={token}"
+                resetUrl = $"http://localhost:5173/reset-password?token={token}"
             });
         }
 
-        [HttpPost("reset-REMOVED")]
+        [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => 

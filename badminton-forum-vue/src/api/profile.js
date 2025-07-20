@@ -20,6 +20,6 @@ export const profileApi = {
 
   // 修改密碼
   changePassword(data) {
-    return api.post('/profile/change-REMOVED', data)
+    return api.post('/profile/change-password', data)
   }
 }

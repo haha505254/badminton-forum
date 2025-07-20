@@ -19,7 +19,7 @@
 **/node_modules
 **/npm-debug.log
 **/obj
-**/REMOVEDs.dev.yaml
+**/secrets.dev.yaml
 **/values.dev.yaml
 **/build
 **/dist

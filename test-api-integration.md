@@ -33,8 +33,8 @@
 - 填寫表單：
   - 用戶名：testuser
   - 電子郵件：test@example.com
-  - 密碼：REMOVED123
-  - 確認密碼：REMOVED123
+  - 密碼：password123
+  - 確認密碼：password123
 - 點擊「註冊」
 - 成功後應該自動登入並跳轉到首頁
 
@@ -110,4 +110,4 @@
   - GET /api/profile/{username}
   - GET /api/profile/{username}/posts
   - PUT /api/profile
-  - POST /api/profile/change-REMOVED
+  - POST /api/profile/change-password

@@ -79,8 +79,8 @@
           <label for="currentPassword">當前密碼</label>
           <input
             id="currentPassword"
-            v-model="REMOVEDForm.currentPassword"
-            type="REMOVED"
+            v-model="passwordForm.currentPassword"
+            type="password"
             required
           />
         </div>
@@ -89,8 +89,8 @@
           <label for="newPassword">新密碼</label>
           <input
             id="newPassword"
-            v-model="REMOVEDForm.newPassword"
-            type="REMOVED"
+            v-model="passwordForm.newPassword"
+            type="password"
             required
             minlength="6"
           />
@@ -100,8 +100,8 @@
           <label for="confirmPassword">確認新密碼</label>
           <input
             id="confirmPassword"
-            v-model="REMOVEDForm.confirmPassword"
-            type="REMOVED"
+            v-model="passwordForm.confirmPassword"
+            type="password"
             required
           />
         </div>
@@ -130,7 +130,7 @@ const profile = reactive({
   signature: ''
 })
 
-const REMOVEDForm = reactive({
+const passwordForm = reactive({
   currentPassword: '',
   newPassword: '',
   confirmPassword: ''
@@ -168,7 +168,7 @@ const updateProfile = async () => {
 }
 
 const changePassword = async () => {
-  if (REMOVEDForm.newPassword !== REMOVEDForm.confirmPassword) {
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
     alert('新密碼與確認密碼不符！')
     return
   }
@@ -176,17 +176,17 @@ const changePassword = async () => {
   loading.value = true
   try {
     await profileApi.changePassword({
-      currentPassword: REMOVEDForm.currentPassword,
-      newPassword: REMOVEDForm.newPassword
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword
     })
     alert('密碼已更改！')
     
     // Reset form
-    REMOVEDForm.currentPassword = ''
-    REMOVEDForm.newPassword = ''
-    REMOVEDForm.confirmPassword = ''
+    passwordForm.currentPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
   } catch (error) {
-    console.error('Failed to change REMOVED:', error)
+    console.error('Failed to change password:', error)
     alert(error.response?.data?.message || '密碼更改失敗')
   } finally {
     loading.value = false

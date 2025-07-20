@@ -83,12 +83,12 @@ appsettings.Production.json
 appsettings.*.json
 !appsettings.json
 !appsettings.Example.json
-REMOVEDs.json
-*.REMOVEDs.json
+secrets.json
+*.secrets.json
 LOCAL_SECRETS.md
 
 # User Secrets
-**/REMOVEDs.json
+**/secrets.json
 
 # Node.js / Vue.js
 node_modules/

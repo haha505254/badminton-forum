@@ -13,8 +13,8 @@ test.describe('使用者認證功能', () => {
     // 填寫註冊表單
     await page.fill('input[placeholder="3-50個字符"]', 'testuser' + Date.now());
     await page.fill('input[placeholder="example@email.com"]', `test${Date.now()}@example.com`);
-    await page.fill('input[placeholder="至少6個字符"]', 'REMOVED');
-    await page.fill('input[placeholder="請再次輸入密碼"]', 'REMOVED');
+    await page.fill('input[placeholder="至少6個字符"]', 'TestPassword123!');
+    await page.fill('input[placeholder="請再次輸入密碼"]', 'TestPassword123!');
 
     // 提交表單
     await page.click('button:has-text("註冊")');
@@ -31,7 +31,7 @@ test.describe('使用者認證功能', () => {
 
     // 填寫登入表單
     await page.fill('input[placeholder="請輸入用戶名"]', 'testuser');
-    await page.fill('input[placeholder="請輸入密碼"]', 'REMOVED');
+    await page.fill('input[placeholder="請輸入密碼"]', 'TestPassword123!');
 
     // 提交表單
     await page.click('button:has-text("登入")');
@@ -46,14 +46,14 @@ test.describe('使用者認證功能', () => {
     const timestamp = Date.now();
     const username = `testuser${timestamp}`;
     const email = `test${timestamp}@example.com`;
-    const REMOVED = 'REMOVED';
+    const password = 'TestPassword123!';
 
     // 註冊新用戶
     await page.goto('/register');
     await page.fill('input[placeholder="3-50個字符"]', username);
     await page.fill('input[placeholder="example@email.com"]', email);
-    await page.fill('input[placeholder="至少6個字符"]', REMOVED);
-    await page.fill('input[placeholder="請再次輸入密碼"]', REMOVED);
+    await page.fill('input[placeholder="至少6個字符"]', password);
+    await page.fill('input[placeholder="請再次輸入密碼"]', password);
     await page.click('button:has-text("註冊")');
 
     // 等待註冊成功並重定向到首頁

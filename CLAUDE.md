@@ -41,7 +41,7 @@ npm run dev
 位於 `appsettings.json`:
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Host=localhost;Database=badmintonforumdb;Username=badmintonuser;Password=REMOVED"
+  "DefaultConnection": "Host=localhost;Database=badmintonforumdb;Username=badmintonuser;Password=BadmintonPass123!"
 }
 ```
 

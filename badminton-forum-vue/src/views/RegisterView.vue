@@ -20,11 +20,11 @@
       </div>
       
       <div class="form-group">
-        <label for="REMOVED">密碼</label>
+        <label for="password">密碼</label>
         <input
-          id="REMOVED"
-          v-model="formData.REMOVED"
-          type="REMOVED"
+          id="password"
+          v-model="formData.password"
+          type="password"
           required
           minlength="6"
           placeholder="至少6個字符"
@@ -36,7 +36,7 @@
         <input
           id="confirmPassword"
           v-model="formData.confirmPassword"
-          type="REMOVED"
+          type="password"
           required
           placeholder="請再次輸入密碼"
         />
@@ -64,7 +64,7 @@ const authStore = useAuthStore()
 
 const formData = reactive({
   email: '',
-  REMOVED: '',
+  password: '',
   confirmPassword: ''
 })
 
@@ -74,8 +74,8 @@ const error = ref('')
 const handleRegister = async () => {
   error.value = ''
   
-  // Validate REMOVEDs match
-  if (formData.REMOVED !== formData.confirmPassword) {
+  // Validate passwords match
+  if (formData.password !== formData.confirmPassword) {
     error.value = '兩次輸入的密碼不一致'
     return
   }

@@ -1,6 +1,6 @@
 <template>
-  <div class="forgot-REMOVED-container">
-    <form @submit.prevent="handleSubmit" class="forgot-REMOVED-form">
+  <div class="forgot-password-container">
+    <form @submit.prevent="handleSubmit" class="forgot-password-form">
       <h2>忘記密碼</h2>
       
       <div v-if="successMessage" class="success-message">
@@ -61,7 +61,7 @@ const handleSubmit = async () => {
   successMessage.value = ''
   
   try {
-    const response = await axios.post(`${API_URL}/auth/forgot-REMOVED`, {
+    const response = await axios.post(`${API_URL}/auth/forgot-password`, {
       email: email.value
     })
     
@@ -80,14 +80,14 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.forgot-REMOVED-container {
+.forgot-password-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 200px);
 }
 
-.forgot-REMOVED-form {
+.forgot-password-form {
   background: white;
   padding: 2rem;
   border-radius: 8px;
