@@ -75,9 +75,14 @@ namespace BadmintonForum.API.Controllers
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == loginDto.Username);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+            if (user == null)
             {
-                return Unauthorized(new { message = "用戶名或密碼錯誤" });
+                return Unauthorized(new { message = "用戶名錯誤" });
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+            {
+                return Unauthorized(new { message = "密碼錯誤" });
             }
 
             if (!user.IsActive)

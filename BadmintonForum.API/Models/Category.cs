@@ -18,7 +18,7 @@ namespace BadmintonForum.API.Models
 
         public int DisplayOrder { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         // Navigation properties
         public virtual ICollection<Post> Posts { get; set; } = new List<Post>();

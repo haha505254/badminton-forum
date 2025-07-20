@@ -17,7 +17,7 @@ namespace BadmintonForum.API.Models
 
         public int LikeCount { get; set; } = 0;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
 

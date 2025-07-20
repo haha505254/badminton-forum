@@ -23,7 +23,8 @@ namespace BadmintonForum.API.Services
         public string GenerateToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
-            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
+            var REMOVEDKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret is not configured");
+            var key = Encoding.ASCII.GetBytes(REMOVEDKey);
             var tokenHandler = new JwtSecurityTokenHandler();
 
             var claims = new List<Claim>

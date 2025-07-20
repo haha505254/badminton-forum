@@ -36,10 +36,10 @@ namespace BadmintonForum.API.Data
 
                 // Seed some initial categories
                 entity.HasData(
-                    new Category { Id = 1, Name = "技術討論", Description = "分享和討論羽毛球技術", Icon = "🏸" },
-                    new Category { Id = 2, Name = "裝備推薦", Description = "球拍、球鞋等裝備討論", Icon = "🎾" },
-                    new Category { Id = 3, Name = "活動公告", Description = "比賽和活動信息", Icon = "📅" },
-                    new Category { Id = 4, Name = "球友交流", Description = "尋找球友，組織活動", Icon = "👥" }
+                    new Category { Id = 1, Name = "技術討論", Description = "分享和討論羽毛球技術", Icon = "🏸", DisplayOrder = 1, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                    new Category { Id = 2, Name = "裝備推薦", Description = "球拍、球鞋等裝備討論", Icon = "🎾", DisplayOrder = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                    new Category { Id = 3, Name = "活動公告", Description = "比賽和活動信息", Icon = "📅", DisplayOrder = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                    new Category { Id = 4, Name = "球友交流", Description = "尋找球友，組織活動", Icon = "👥", DisplayOrder = 4, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
                 );
             });
 

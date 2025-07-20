@@ -1,0 +1,242 @@
+<template>
+  <div class="settings">
+    <h1>帳戶設置</h1>
+    
+    <div class="settings-section">
+      <h2>個人資料</h2>
+      <form @submit.prevent="updateProfile">
+        <div class="form-group">
+          <label for="username">用戶名</label>
+          <input
+            id="username"
+            v-model="profile.username"
+            type="text"
+            disabled
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="email">電子郵件</label>
+          <input
+            id="email"
+            v-model="profile.email"
+            type="email"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="bio">個人簡介</label>
+          <textarea
+            id="bio"
+            v-model="profile.bio"
+            placeholder="介紹一下自己..."
+          ></textarea>
+        </div>
+        
+        <button type="submit" :disabled="loading">
+          {{ loading ? '保存中...' : '保存更改' }}
+        </button>
+      </form>
+    </div>
+    
+    <div class="settings-section">
+      <h2>修改密碼</h2>
+      <form @submit.prevent="changePassword">
+        <div class="form-group">
+          <label for="currentPassword">當前密碼</label>
+          <input
+            id="currentPassword"
+            v-model="REMOVEDForm.currentPassword"
+            type="REMOVED"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="newPassword">新密碼</label>
+          <input
+            id="newPassword"
+            v-model="REMOVEDForm.newPassword"
+            type="REMOVED"
+            required
+            minlength="6"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="confirmPassword">確認新密碼</label>
+          <input
+            id="confirmPassword"
+            v-model="REMOVEDForm.confirmPassword"
+            type="REMOVED"
+            required
+          />
+        </div>
+        
+        <button type="submit" :disabled="loading">
+          {{ loading ? '修改中...' : '修改密碼' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
+import { profileApi } from '../api/profile'
+
+const authStore = useAuthStore()
+
+const profile = reactive({
+  username: '',
+  email: '',
+  bio: ''
+})
+
+const REMOVEDForm = reactive({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const loading = ref(false)
+
+const updateProfile = async () => {
+  loading.value = true
+  try {
+    await profileApi.updateProfile({
+      email: profile.email,
+      bio: profile.bio
+    })
+    alert('個人資料已更新！')
+    
+    // Update auth store
+    if (authStore.user) {
+      authStore.user.email = profile.email
+      authStore.user.bio = profile.bio
+      localStorage.setItem('user', JSON.stringify(authStore.user))
+    }
+  } catch (error) {
+    console.error('Failed to update profile:', error)
+    alert('更新失敗，請重試')
+  } finally {
+    loading.value = false
+  }
+}
+
+const changePassword = async () => {
+  if (REMOVEDForm.newPassword !== REMOVEDForm.confirmPassword) {
+    alert('新密碼與確認密碼不符！')
+    return
+  }
+  
+  loading.value = true
+  try {
+    await profileApi.changePassword({
+      currentPassword: REMOVEDForm.currentPassword,
+      newPassword: REMOVEDForm.newPassword
+    })
+    alert('密碼已更改！')
+    
+    // Reset form
+    REMOVEDForm.currentPassword = ''
+    REMOVEDForm.newPassword = ''
+    REMOVEDForm.confirmPassword = ''
+  } catch (error) {
+    console.error('Failed to change REMOVED:', error)
+    alert(error.response?.data?.message || '密碼更改失敗')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  // Load user data
+  if (authStore.user) {
+    profile.username = authStore.user.username
+    profile.email = authStore.user.email
+    profile.bio = authStore.user.bio || ''
+  }
+})
+</script>
+
+<style scoped>
+.settings {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+}
+
+.settings-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.settings-section h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+</style>

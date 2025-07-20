@@ -23,49 +23,25 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { categoriesApi } from '../api/categories'
 
 const router = useRouter()
-
-// Mock data - will be replaced with API call
-const categories = ref([
-  {
-    id: 1,
-    name: '技術討論',
-    description: '分享和討論羽毛球技術',
-    icon: '🏸',
-    postCount: 156
-  },
-  {
-    id: 2,
-    name: '裝備推薦',
-    description: '球拍、球鞋等裝備討論',
-    icon: '🎾',
-    postCount: 89
-  },
-  {
-    id: 3,
-    name: '活動公告',
-    description: '比賽和活動信息',
-    icon: '📅',
-    postCount: 45
-  },
-  {
-    id: 4,
-    name: '球友交流',
-    description: '尋找球友，組織活動',
-    icon: '👥',
-    postCount: 234
-  }
-])
+const categories = ref([])
+const loading = ref(true)
 
 const goToCategory = (categoryId) => {
   router.push(`/category/${categoryId}`)
 }
 
 onMounted(async () => {
-  // TODO: Fetch categories from API
-  // const response = await api.get('/categories')
-  // categories.value = response.data
+  try {
+    const response = await categoriesApi.getCategories()
+    categories.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch categories:', error)
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 

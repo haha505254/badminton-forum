@@ -25,7 +25,7 @@ namespace BadmintonForum.API.Models
 
         public bool IsLocked { get; set; } = false;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
 

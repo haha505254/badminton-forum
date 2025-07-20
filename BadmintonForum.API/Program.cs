@@ -20,7 +20,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
+var REMOVEDKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret is not configured");
+var key = Encoding.ASCII.GetBytes(REMOVEDKey);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -48,7 +49,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("VueCorsPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:5173", "http://localhost:3000")
+        builder.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();

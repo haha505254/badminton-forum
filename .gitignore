@@ -75,7 +75,7 @@ artifacts/
 ScaffoldingReadMe.txt
 
 # Entity Framework
-Migrations/
+# Keep Migrations in source control
 
 # Node.js / Vue.js
 node_modules/
@@ -171,3 +171,7 @@ PublishProfiles/
 # Temporary files
 *.tmp
 *.temp
+
+# Backup folders
+*.backup/
+BadmintonForum.API.backup/
