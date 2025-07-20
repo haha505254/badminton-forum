@@ -1,0 +1,60 @@
+# 開發階段
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# 安裝 pnpm (更快的套件管理器，選用)
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# 複製 package.json 和 lock 檔案
+COPY package*.json ./
+COPY pnpm-lock.yaml* ./
+
+# 安裝相依套件
+RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    else npm install; fi
+
+# 複製所有檔案
+COPY . .
+
+# 開發模式
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# 建置階段
+FROM node:18-alpine AS build
+
+WORKDIR /app
+
+# 複製 package.json 和 lock 檔案
+COPY package*.json ./
+COPY pnpm-lock.yaml* ./
+
+# 安裝相依套件
+RUN if [ -f pnpm-lock.yaml ]; then \
+      corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    else npm install; fi
+
+# 複製所有檔案
+COPY . .
+
+# 建置專案
+RUN npm run build
+
+# 生產階段 - 使用 nginx
+FROM nginx:alpine AS production
+
+# 複製建置結果
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# 複製 nginx 設定
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 健康檢查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost || exit 1
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

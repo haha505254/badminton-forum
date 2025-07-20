@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 資料庫
+  db:
+    image: postgres:16-alpine
+    container_name: badminton-forum-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-badmintonforumdb}
+      POSTGRES_USER: ${POSTGRES_USER:-badmintonuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-REMOVED}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-badmintonuser} -d ${POSTGRES_DB:-badmintonforumdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - badminton-network
+
+  # .NET Core API
+  api:
+    build:
+      context: ./BadmintonForum.API
+      dockerfile: Dockerfile
+      target: development
+    container_name: badminton-forum-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5246
+      ConnectionStrings__DefaultConnection: "Host=db;Database=${POSTGRES_DB:-badmintonforumdb};Username=${POSTGRES_USER:-badmintonuser};Password=${POSTGRES_PASSWORD:-REMOVED}"
+      JwtSettings__Secret: ${JWT_SECRET:-REMOVED}
+      JwtSettings__Issuer: ${JWT_ISSUER:-BadmintonForumAPI}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-BadmintonForumClient}
+      JwtSettings__ExpirationInDays: ${JWT_EXPIRATION_DAYS:-7}
+    ports:
+      - "${API_PORT:-5246}:5246"
+    volumes:
+      - ./BadmintonForum.API:/app
+      - ~/.nuget/packages:/root/.nuget/packages:ro
+      - dotnet_tools:/root/.dotnet/tools
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - badminton-network
+    command: ["./docker-entrypoint.sh"]
+
+  # Vue.js 前端
+  web:
+    build:
+      context: ./badminton-forum-vue
+      dockerfile: Dockerfile
+      target: development
+    container_name: badminton-forum-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:5246/api}
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    volumes:
+      - ./badminton-forum-vue:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - badminton-network
+
+  # Adminer (資料庫管理介面，選用)
+  adminer:
+    image: adminer:latest
+    container_name: badminton-forum-adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
+    networks:
+      - badminton-network
+    profiles:
+      - tools
+
+networks:
+  badminton-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  dotnet_tools:

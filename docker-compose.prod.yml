@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  # 生產環境的 API 設定
+  api:
+    build:
+      target: production
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    volumes: []  # 生產環境不掛載原始碼
+    command: ["dotnet", "BadmintonForum.API.dll"]
+
+  # 生產環境的前端設定
+  web:
+    build:
+      target: production
+    ports:
+      - "${WEB_PORT:-80}:80"
+    volumes: []  # 生產環境不掛載原始碼
+    
+  # 生產環境不需要 Adminer
+  adminer:
+    deploy:
+      replicas: 0
