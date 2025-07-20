@@ -17,7 +17,7 @@ cd badminton-forum
 
 ### 2️⃣ 設定環境變數
 ```bash
-cp .env.docker.example .env.docker
+cp .env.docker.example .env
 ```
 
 ### 3️⃣ 啟動所有服務
@@ -85,7 +85,7 @@ docker-compose exec api dotnet ef database update
 
 ## 🔧 環境變數說明
 
-編輯 `.env.docker` 來自訂設定：
+編輯 `.env` 來自訂設定：
 
 ```env
 # 資料庫密碼（重要！請更改）
@@ -129,7 +129,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 ### 問題：連接埠已被占用
 ```bash
-# 修改 .env.docker 中的連接埠設定
+# 修改 .env 中的連接埠設定
 API_PORT=5247
 WEB_PORT=5174
 ```
@@ -166,7 +166,7 @@ docker-compose up
 ```
 badminton-forum/
 ├── docker-compose.yml         # 主要編排檔案
-├── .env.docker               # 環境變數設定
+├── .env                      # 環境變數設定
 ├── .env.docker.example       # 環境變數範例
 ├── BadmintonForum.API/
 │   ├── Dockerfile           # API 容器定義
