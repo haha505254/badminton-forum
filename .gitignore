@@ -77,6 +77,18 @@ ScaffoldingReadMe.txt
 # Entity Framework
 # Keep Migrations in source control
 
+# Sensitive Configuration Files
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Example.json
+REMOVEDs.json
+*.REMOVEDs.json
+
+# User Secrets
+**/REMOVEDs.json
+
 # Node.js / Vue.js
 node_modules/
 dist/
