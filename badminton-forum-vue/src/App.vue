@@ -77,6 +77,11 @@ body {
   color: white;
   padding: 1rem 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .nav-container {
@@ -99,6 +104,7 @@ body {
   display: flex;
   gap: 1.5rem;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .nav-links a {
@@ -136,6 +142,7 @@ body {
   margin: 2rem auto;
   padding: 0 1rem;
   width: 100%;
+  margin-top: calc(60px + 2rem);
 }
 
 .footer {
@@ -144,5 +151,50 @@ body {
   text-align: center;
   padding: 2rem 0;
   margin-top: auto;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-wrap: wrap;
+    padding: 0.5rem 1rem;
+  }
+  
+  .brand {
+    font-size: 1.2rem;
+  }
+  
+  .nav-links {
+    gap: 0.8rem;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  
+  .logout-btn {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .main-content {
+    margin-top: calc(80px + 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .main-content {
+    margin-top: calc(100px + 1rem);
+    padding: 0 0.5rem;
+  }
 }
 </style>

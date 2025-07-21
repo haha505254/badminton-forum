@@ -28,7 +28,7 @@
     
     <div class="tab-content">
       <!-- 使用者管理 -->
-      <div v-if="activeTab === 'users'" class="users-management">
+      <div v-show="activeTab === 'users'" class="users-management">
         <h2>使用者管理</h2>
         
         <div v-if="loading" class="loading">載入中...</div>
@@ -38,7 +38,6 @@
             <tr>
               <th>ID</th>
               <th>使用者名稱</th>
-              <th>電子郵件</th>
               <th>註冊時間</th>
               <th>最後登入</th>
               <th>文章數</th>
@@ -52,7 +51,6 @@
             <tr v-for="user in users" :key="user.id">
               <td>{{ user.id }}</td>
               <td>{{ user.username }}</td>
-              <td>{{ user.email }}</td>
               <td>{{ formatDate(user.createdAt) }}</td>
               <td>{{ user.lastLoginAt ? formatDate(user.lastLoginAt) : '從未登入' }}</td>
               <td>{{ user.postCount }}</td>
@@ -109,7 +107,7 @@
       </div>
       
       <!-- 版塊管理 -->
-      <div v-if="activeTab === 'categories'" class="categories-management">
+      <div v-show="activeTab === 'categories'" class="categories-management">
         <h2>版塊管理</h2>
         
         <button @click="showCreateCategory = true" class="btn-primary">
@@ -187,7 +185,7 @@
       </div>
       
       <!-- 文章管理 -->
-      <div v-if="activeTab === 'posts'" class="posts-management">
+      <div v-show="activeTab === 'posts'" class="posts-management">
         <h2>文章管理</h2>
         
         <div v-if="loading" class="loading">載入中...</div>
@@ -543,6 +541,7 @@ onMounted(() => {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
+  min-height: 100vh;
 }
 
 .admin-dashboard h1 {
@@ -577,6 +576,11 @@ onMounted(() => {
   border-bottom-color: #4CAF50;
 }
 
+.tab-content {
+  min-height: 600px;
+  position: relative;
+}
+
 .tab-content h2 {
   font-size: 24px;
   margin-bottom: 20px;
@@ -594,6 +598,7 @@ onMounted(() => {
   border-collapse: collapse;
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  table-layout: fixed;
 }
 
 .admin-table th {
@@ -604,9 +609,25 @@ onMounted(() => {
   border-bottom: 2px solid #e0e0e0;
 }
 
+.admin-table th:nth-child(1) {
+  width: 60px;
+}
+
+.admin-table th:nth-child(2) {
+  width: 200px;
+  max-width: 200px;
+}
+
 .admin-table td {
   padding: 12px;
   border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-table td:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
 }
 
 .admin-table tr:hover {
