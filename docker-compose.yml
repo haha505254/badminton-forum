@@ -37,6 +37,8 @@ services:
       JwtSettings__Issuer: ${JWT_ISSUER:-BadmintonForumAPI}
       JwtSettings__Audience: ${JWT_AUDIENCE:-BadmintonForumClient}
       JwtSettings__ExpirationInDays: ${JWT_EXPIRATION_DAYS:-7}
+      Email__UseConsoleEmail: "true"
+      Email__BaseUrl: ${EMAIL_BASE_URL:-http://localhost:5173}
     ports:
       - "${API_PORT:-5246}:5246"
     volumes:

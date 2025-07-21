@@ -14,6 +14,17 @@ builder.Services.AddControllers();
 // Register application services
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+// Email 服務設定
+var useConsoleEmail = builder.Configuration.GetValue<bool>("Email:UseConsoleEmail");
+if (useConsoleEmail || builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, EmailService>();
+}
+
 // Configure Entity Framework with PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

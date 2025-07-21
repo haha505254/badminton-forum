@@ -15,12 +15,21 @@ namespace BadmintonForum.API.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IJwtService _jwtService;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(ApplicationDbContext context, IJwtService jwtService, IConfiguration configuration)
+        public AuthController(
+            ApplicationDbContext context,
+            IJwtService jwtService,
+            IConfiguration configuration,
+            IEmailService emailService,
+            ILogger<AuthController> logger)
         {
             _context = context;
             _jwtService = jwtService;
             _configuration = configuration;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -141,18 +150,26 @@ namespace BadmintonForum.API.Controllers
             // 生成重置令牌
             var token = GeneratePasswordResetToken();
             user.PasswordResetToken = token;
-            user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1); // 令牌有效期1小時
+            user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(24); // 令牌有效期24小時
 
             await _context.SaveChangesAsync();
 
-            // TODO: 實際應用中這裡應該發送郵件
-            // 為了開發測試，我們返回令牌（實際應用中絕不要這麼做）
+            try
+            {
+                // 發送重置密碼郵件
+                await _emailService.SendPasswordResetEmailAsync(user.Email, user.Username, token);
+                _logger.LogInformation($"Password reset email sent to {user.Email}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to send password reset email to {user.Email}");
+                // 即使郵件發送失敗，也不要讓用戶知道
+            }
+
+            // 不要洩露任何資訊給用戶
             return Ok(new
             {
-                message = "如果該電子郵件地址存在，我們已發送重置密碼的說明。",
-                // 僅用於開發測試
-                resetToken = token,
-                resetUrl = $"http://localhost:5173/reset-password?token={token}"
+                message = "如果該電子郵件地址存在，我們已發送重置密碼的說明。請檢查您的郵箱。"
             });
         }
 

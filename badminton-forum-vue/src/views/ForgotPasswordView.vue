@@ -5,9 +5,6 @@
       
       <div v-if="successMessage" class="success-message">
         {{ successMessage }}
-        <p v-if="resetUrl" class="dev-only">
-          開發測試用：<a :href="resetUrl" target="_blank">{{ resetUrl }}</a>
-        </p>
       </div>
       
       <div v-if="error" class="error-message">
@@ -66,11 +63,6 @@ const handleSubmit = async () => {
     })
     
     successMessage.value = response.data.message
-    
-    // 開發環境下顯示重置連結
-    if (response.data.resetUrl) {
-      resetUrl.value = response.data.resetUrl
-    }
   } catch (err) {
     error.value = err.response?.data?.message || '發送失敗，請稍後再試'
   } finally {
