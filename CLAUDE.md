@@ -172,11 +172,13 @@ GitHub Actions workflows:
 
 To maintain a clear and consistent version history, please follow these commit message guidelines:
 
-1.  **Refer to Existing Style**: Before committing, please check the recent history with `git log` to maintain a consistent style.
+1.  **Commit Frequency**: **Commit after each logical unit of change.** Make it a habit to commit after completing each paragraph or section of work. This creates a more granular history and makes it easier to track changes or revert if needed.
 
-2.  **Language Consistency**: **Commit messages MUST be written in Traditional Chinese.** Avoid mixing English and Chinese within a single commit message.
+2.  **Refer to Existing Style**: Before committing, please check the recent history with `git log` to maintain a consistent style.
 
-3.  **Recommended Format (Conventional Commits)**: It is recommended to follow the Conventional Commits format for structured and trackable messages.
+3.  **Language Consistency**: **Commit messages MUST be written in Traditional Chinese.** Avoid mixing English and Chinese within a single commit message.
+
+4.  **Recommended Format (Conventional Commits)**: It is recommended to follow the Conventional Commits format for structured and trackable messages.
     ```
     <type>(<scope>): <subject>
     ```
