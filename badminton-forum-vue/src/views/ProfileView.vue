@@ -69,15 +69,15 @@ const formatDate = (date) => {
 }
 
 onMounted(async () => {
-  const username = route.params.username
+  const userId = route.params.id
   
   try {
-    // Fetch user profile
-    const profileResponse = await profileApi.getProfile(username)
+    // Fetch user profile by ID
+    const profileResponse = await profileApi.getProfileById(userId)
     user.value = profileResponse.data
     
-    // Fetch user posts
-    const postsResponse = await profileApi.getUserPosts(username)
+    // Fetch user posts (still using username for now)
+    const postsResponse = await profileApi.getUserPosts(user.value.username)
     posts.value = postsResponse.data
   } catch (err) {
     console.error('Failed to fetch profile data:', err)

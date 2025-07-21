@@ -1,7 +1,12 @@
 import api from './index'
 
 export const profileApi = {
-  // 獲取用戶資料
+  // 獲取用戶資料 (透過 ID)
+  getProfileById(userId) {
+    return api.get(`/profile/by-id/${userId}`)
+  },
+
+  // 獲取用戶資料 (透過 username - 保留以相容舊版)
   getProfile(username) {
     return api.get(`/profile/${username}`)
   },

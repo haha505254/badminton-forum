@@ -25,7 +25,7 @@ const handleLogout = () => {
           
           <template v-if="authStore.isAuthenticated">
             <RouterLink to="/new-post">發表文章</RouterLink>
-            <RouterLink :to="`/profile/${authStore.user.username}`">
+            <RouterLink :to="`/profile/${authStore.user.id}`">
               {{ authStore.user.username }}
             </RouterLink>
             <RouterLink to="/settings">設置</RouterLink>

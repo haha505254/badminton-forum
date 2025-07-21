@@ -18,6 +18,35 @@ namespace BadmintonForum.API.Controllers
             _context = context;
         }
 
+        [HttpGet("by-id/{id:int}")]
+        public async Task<ActionResult<ProfileDto>> GetProfileById(int id)
+        {
+            var profile = await _context.Users
+                .Where(u => u.Id == id)
+                .Select(u => new ProfileDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Email = u.Email,
+                    Avatar = u.Avatar,
+                    Bio = u.Bio,
+                    CreatedAt = u.CreatedAt,
+                    PostCount = u.Posts.Count,
+                    ReplyCount = u.Replies.Count,
+                    PlayingStyle = u.PlayingStyle,
+                    YearsOfExperience = u.YearsOfExperience,
+                    Signature = u.Signature
+                })
+                .FirstOrDefaultAsync();
+
+            if (profile == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(profile);
+        }
+
         [HttpGet("{username}")]
         public async Task<ActionResult<ProfileDto>> GetProfile(string username)
         {

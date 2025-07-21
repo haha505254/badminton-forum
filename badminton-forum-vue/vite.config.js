@@ -9,5 +9,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    // 處理所有路由到 index.html
+    historyApiFallback: true
   }
 })

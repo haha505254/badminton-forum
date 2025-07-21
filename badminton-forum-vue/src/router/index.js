@@ -41,7 +41,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/profile/:username',
+    path: '/profile/:id(\\d+)',  // 只接受數字 ID
     name: 'profile',
     component: () => import('../views/ProfileView.vue')
   },
