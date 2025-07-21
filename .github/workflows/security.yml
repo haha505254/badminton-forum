@@ -23,12 +23,12 @@ jobs:
     
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./badminton-forum/BadmintonForum.API
+      working-directory: ./BadmintonForum.API
     
     - name: Run security scan
       run: |
         dotnet list package --vulnerable --include-transitive
-      working-directory: ./badminton-forum/BadmintonForum.API
+      working-directory: ./BadmintonForum.API
 
   security-scan-npm:
     name: NPM Security Scan
@@ -44,16 +44,16 @@ jobs:
     
     - name: Install dependencies
       run: npm ci
-      working-directory: ./badminton-forum/badminton-forum-vue
+      working-directory: ./badminton-forum-vue
     
     - name: Run npm audit
       run: npm audit --production
-      working-directory: ./badminton-forum/badminton-forum-vue
+      working-directory: ./badminton-forum-vue
       continue-on-error: true
     
     - name: Run npm audit fix
       run: npm audit fix --force
-      working-directory: ./badminton-forum/badminton-forum-vue
+      working-directory: ./badminton-forum-vue
       if: failure()
 
   docker-scan:
@@ -67,7 +67,7 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'config'
-        scan-ref: './badminton-forum/BadmintonForum.API/Dockerfile'
+        scan-ref: './BadmintonForum.API/Dockerfile'
         format: 'sarif'
         output: 'trivy-api-results.sarif'
     
@@ -75,7 +75,7 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'config'
-        scan-ref: './badminton-forum/badminton-forum-vue/Dockerfile'
+        scan-ref: './badminton-forum-vue/Dockerfile'
         format: 'sarif'
         output: 'trivy-frontend-results.sarif'
     
@@ -101,10 +101,10 @@ jobs:
     
     - name: Run code format check
       run: dotnet format --verify-no-changes
-      working-directory: ./badminton-forum/BadmintonForum.API
+      working-directory: ./BadmintonForum.API
     
     - name: Run ESLint
       run: |
         npm ci
         npm run lint --if-present
-      working-directory: ./badminton-forum/badminton-forum-vue
+      working-directory: ./badminton-forum-vue
