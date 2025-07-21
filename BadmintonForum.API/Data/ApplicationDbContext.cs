@@ -38,16 +38,16 @@ namespace BadmintonForum.API.Data
                 entity.HasData(
                     // 綜合討論區
                     new Category { Id = 1, Name = "綜合討論區", Description = "羽毛球相關的一般討論", Icon = "💬", DisplayOrder = 1, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                    
+
                     // 技術交流區
                     new Category { Id = 2, Name = "技術交流區", Description = "技術分享與教學討論", Icon = "🏸", DisplayOrder = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                    
+
                     // 裝備討論區
                     new Category { Id = 3, Name = "裝備討論區", Description = "球拍、球鞋、裝備評測與推薦", Icon = "🎾", DisplayOrder = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                    
+
                     // 賽事專區
                     new Category { Id = 4, Name = "賽事專區", Description = "國內外賽事討論與轉播", Icon = "🏆", DisplayOrder = 4, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                    
+
                     // 地區球友會
                     new Category { Id = 5, Name = "地區球友會", Description = "各地區球友交流與約球", Icon = "📍", DisplayOrder = 5, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
                 );

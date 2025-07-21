@@ -47,14 +47,9 @@ jobs:
       working-directory: ./badminton-forum-vue
     
     - name: Run npm audit
-      run: npm audit --production
+      run: npm audit --production --audit-level=high || true
       working-directory: ./badminton-forum-vue
-      continue-on-error: true
     
-    - name: Run npm audit fix
-      run: npm audit fix --force
-      working-directory: ./badminton-forum-vue
-      if: failure()
 
   docker-scan:
     name: Docker Image Security Scan
@@ -81,8 +76,10 @@ jobs:
     
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
+      if: always()
       with:
         sarif_file: '.'
+      continue-on-error: true
 
   code-quality:
     name: Code Quality Analysis

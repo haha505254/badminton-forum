@@ -100,7 +100,7 @@ jobs:
       working-directory: ./badminton-forum-vue
     
     - name: Start services with Docker Compose
-      run: docker-compose up -d
+      run: docker compose up -d
     
     - name: Wait for services
       run: |
@@ -191,6 +191,6 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY }}
         script: |
           cd /opt/badminton-forum
-          docker-compose -f docker-compose.prod.yml pull
-          docker-compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
           docker system prune -f

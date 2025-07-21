@@ -27,8 +27,8 @@ jobs:
         key: ${{ secrets.STAGING_KEY }}
         script: |
           cd /opt/badminton-forum
-          docker-compose -f docker-compose.staging.yml pull
-          docker-compose -f docker-compose.staging.yml up -d
+          docker compose -f docker-compose.staging.yml pull
+          docker compose -f docker-compose.staging.yml up -d
           docker system prune -f
     
     - name: Health Check
@@ -51,8 +51,8 @@ jobs:
         key: ${{ secrets.PROD_KEY }}
         script: |
           cd /opt/badminton-forum
-          docker-compose -f docker-compose.prod.yml pull
-          docker-compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
           docker system prune -f
     
     - name: Health Check

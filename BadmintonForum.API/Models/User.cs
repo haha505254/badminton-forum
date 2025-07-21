@@ -31,9 +31,9 @@ namespace BadmintonForum.API.Models
 
         // Badminton-specific fields
         public string? PlayingStyle { get; set; } // 攻擊型、防守型、全能型
-        
+
         public int? YearsOfExperience { get; set; }
-        
+
         public string? Signature { get; set; } // 簽名檔
 
         // Password Reset

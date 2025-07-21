@@ -34,7 +34,7 @@ namespace BadmintonForum.API.Controllers
 
             // Use email as username
             var username = registerDto.Email;
-            
+
             // Check if username already exists (for safety)
             if (await _context.Users.AnyAsync(u => u.Username == username))
             {
@@ -131,7 +131,7 @@ namespace BadmintonForum.API.Controllers
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == forgotPasswordDto.Email);
-            
+
             if (user == null)
             {
                 // 不要洩露用戶是否存在
@@ -147,7 +147,8 @@ namespace BadmintonForum.API.Controllers
 
             // TODO: 實際應用中這裡應該發送郵件
             // 為了開發測試，我們返回令牌（實際應用中絕不要這麼做）
-            return Ok(new { 
+            return Ok(new
+            {
                 message = "如果該電子郵件地址存在，我們已發送重置密碼的說明。",
                 // 僅用於開發測試
                 resetToken = token,
@@ -158,7 +159,7 @@ namespace BadmintonForum.API.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => 
+            var user = await _context.Users.FirstOrDefaultAsync(u =>
                 u.PasswordResetToken == resetPasswordDto.Token &&
                 u.PasswordResetTokenExpiry > DateTime.UtcNow);
 

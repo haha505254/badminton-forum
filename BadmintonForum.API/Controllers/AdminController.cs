@@ -179,13 +179,13 @@ namespace BadmintonForum.API.Controllers
 
             if (!string.IsNullOrWhiteSpace(dto.Name))
                 category.Name = dto.Name;
-            
+
             if (dto.Description != null)
                 category.Description = dto.Description;
-            
+
             if (dto.Icon != null)
                 category.Icon = dto.Icon;
-            
+
             if (dto.DisplayOrder.HasValue)
                 category.DisplayOrder = dto.DisplayOrder.Value;
 
