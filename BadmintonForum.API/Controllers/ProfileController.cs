@@ -200,5 +200,67 @@ namespace BadmintonForum.API.Controllers
 
             return Ok(new { message = "密碼已成功更改" });
         }
+
+        [HttpPost("upload-avatar")]
+        [Authorize]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "請選擇一個檔案" });
+            }
+
+            // 驗證檔案類型
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(extension))
+            {
+                return BadRequest(new { message = "只允許上傳 JPG, PNG 或 GIF 格式的圖片" });
+            }
+
+            // 限制檔案大小 (5MB)
+            if (file.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest(new { message = "檔案大小不能超過 5MB" });
+            }
+
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // 生成唯一檔名
+            var fileName = $"{userId}_{Guid.NewGuid()}{extension}";
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+            
+            // 確保目錄存在
+            Directory.CreateDirectory(uploadsFolder);
+            
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            // 刪除舊頭像
+            if (!string.IsNullOrEmpty(user.Avatar))
+            {
+                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.Avatar.TrimStart('/'));
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+            }
+
+            // 儲存新頭像
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // 更新資料庫
+            user.Avatar = $"/uploads/avatars/{fileName}";
+            await _context.SaveChangesAsync();
+
+            return Ok(new { avatarUrl = user.Avatar });
+        }
     }
 }

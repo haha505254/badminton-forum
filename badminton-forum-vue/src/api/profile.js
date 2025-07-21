@@ -26,5 +26,16 @@ export const profileApi = {
   // 修改密碼
   changePassword(data) {
     return api.post('/profile/change-password', data)
+  },
+
+  // 上傳頭像
+  uploadAvatar(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/profile/upload-avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
 }

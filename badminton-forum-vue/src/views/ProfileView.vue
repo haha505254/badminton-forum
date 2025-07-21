@@ -6,7 +6,28 @@
     </div>
     <template v-else>
       <div class="profile-header">
-        <img :src="user.avatar || '/default-avatar.png'" alt="Avatar" class="avatar">
+        <div class="avatar-container">
+          <img 
+            v-if="getAvatarUrl() && !avatarLoadError" 
+            :src="getAvatarUrl()" 
+            alt="Avatar" 
+            class="avatar"
+            @error="handleAvatarError"
+          >
+          <div v-else class="avatar avatar-placeholder">
+            <span>{{ user.username.charAt(0).toUpperCase() }}</span>
+          </div>
+          <div v-if="isCurrentUser" class="avatar-overlay" @click="triggerFileInput">
+            <span class="upload-text">{{ (getAvatarUrl() && !avatarLoadError) ? '更換頭像' : '上傳頭像' }}</span>
+          </div>
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
+            style="display: none"
+            @change="handleFileSelect"
+          >
+        </div>
         <div class="profile-info">
           <h1>{{ user.username }}</h1>
           <p>{{ user.email }}</p>
@@ -46,11 +67,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { profileApi } from '../api/profile'
+import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
+const authStore = useAuthStore()
 
 const user = ref({
   username: '載入中...',
@@ -63,9 +86,84 @@ const user = ref({
 const posts = ref([])
 const loading = ref(true)
 const error = ref('')
+const fileInput = ref(null)
+const avatarUrl = ref('')
+const uploadingAvatar = ref(false)
+const avatarLoadError = ref(false)
+
+const isCurrentUser = computed(() => {
+  return authStore.user && authStore.user.id === user.value.id
+})
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('zh-TW')
+}
+
+const getAvatarUrl = () => {
+  if (avatarUrl.value) {
+    return avatarUrl.value
+  }
+  if (user.value.avatar) {
+    // 如果是相對路徑，加上 API 基礎 URL
+    if (user.value.avatar.startsWith('/')) {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      return apiBaseUrl.replace('/api', '') + user.value.avatar
+    }
+    return user.value.avatar
+  }
+  return ''
+}
+
+const handleAvatarError = () => {
+  avatarLoadError.value = true
+  console.log('頭像載入失敗，顯示占位符')
+}
+
+const triggerFileInput = () => {
+  fileInput.value.click()
+}
+
+const handleFileSelect = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // 檢查檔案大小
+  if (file.size > 5 * 1024 * 1024) {
+    alert('檔案大小不能超過 5MB')
+    return
+  }
+
+  // 檢查檔案類型
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+  if (!allowedTypes.includes(file.type)) {
+    alert('只能上傳 JPG、PNG 或 GIF 格式的圖片')
+    return
+  }
+
+  // 預覽圖片
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    avatarUrl.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+
+  // 上傳圖片
+  uploadingAvatar.value = true
+  try {
+    const response = await profileApi.uploadAvatar(file)
+    user.value.avatar = response.data.avatarUrl
+    avatarLoadError.value = false // 重置錯誤狀態
+    // 更新 authStore 中的用戶資料
+    if (isCurrentUser.value) {
+      authStore.user.avatar = response.data.avatarUrl
+    }
+  } catch (err) {
+    console.error('上傳頭像失敗:', err)
+    alert('上傳頭像失敗，請稍後再試')
+    avatarUrl.value = '' // 重置預覽
+  } finally {
+    uploadingAvatar.value = false
+  }
 }
 
 onMounted(async () => {
@@ -75,6 +173,7 @@ onMounted(async () => {
     // Fetch user profile by ID
     const profileResponse = await profileApi.getProfileById(userId)
     user.value = profileResponse.data
+    avatarLoadError.value = false // 重置錯誤狀態
     
     // Fetch user posts (still using username for now)
     const postsResponse = await profileApi.getUserPosts(user.value.username)
@@ -109,12 +208,54 @@ onMounted(async () => {
   margin-bottom: 2rem;
 }
 
+.avatar-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+}
+
 .avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
   background-color: #e0e0e0;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-container:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.upload-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 48px;
+  font-weight: bold;
 }
 
 .profile-info h1 {
