@@ -1,0 +1,36 @@
+name: Test CI/CD Setup
+
+on:
+  workflow_dispatch:  # 允許手動觸發
+
+jobs:
+  test-pipeline:
+    name: Test CI/CD Pipeline
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Test Step 1 - Check Environment
+      run: |
+        echo "✅ GitHub Actions 正在運作"
+        echo "當前分支: ${{ github.ref }}"
+        echo "觸發者: ${{ github.actor }}"
+    
+    - name: Test Step 2 - Check Files
+      run: |
+        echo "✅ 檢查專案檔案"
+        ls -la
+        echo "找到 API 專案" && ls BadmintonForum.API/
+        echo "找到前端專案" && ls badminton-forum-vue/
+    
+    - name: Test Step 3 - Docker Check
+      run: |
+        echo "✅ 檢查 Docker"
+        docker --version
+        docker-compose --version
+    
+    - name: Final Success Message
+      run: |
+        echo "🎉 恭喜！CI/CD 設定成功！"
+        echo "您可以開始使用自動化流程了"

@@ -1,0 +1,110 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+
+jobs:
+  security-scan-dotnet:
+    name: .NET Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ./badminton-forum/BadmintonForum.API
+    
+    - name: Run security scan
+      run: |
+        dotnet list package --vulnerable --include-transitive
+      working-directory: ./badminton-forum/BadmintonForum.API
+
+  security-scan-npm:
+    name: NPM Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./badminton-forum/badminton-forum-vue
+    
+    - name: Run npm audit
+      run: npm audit --production
+      working-directory: ./badminton-forum/badminton-forum-vue
+      continue-on-error: true
+    
+    - name: Run npm audit fix
+      run: npm audit fix --force
+      working-directory: ./badminton-forum/badminton-forum-vue
+      if: failure()
+
+  docker-scan:
+    name: Docker Image Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner for API
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'config'
+        scan-ref: './badminton-forum/BadmintonForum.API/Dockerfile'
+        format: 'sarif'
+        output: 'trivy-api-results.sarif'
+    
+    - name: Run Trivy vulnerability scanner for Frontend
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'config'
+        scan-ref: './badminton-forum/badminton-forum-vue/Dockerfile'
+        format: 'sarif'
+        output: 'trivy-frontend-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: '.'
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install dotnet-format
+      run: dotnet tool install -g dotnet-format
+    
+    - name: Run code format check
+      run: dotnet format --verify-no-changes
+      working-directory: ./badminton-forum/BadmintonForum.API
+    
+    - name: Run ESLint
+      run: |
+        npm ci
+        npm run lint --if-present
+      working-directory: ./badminton-forum/badminton-forum-vue
