@@ -1,39 +1,168 @@
 <template>
-  <div class="post-view">
-    <article class="post">
-      <h1>{{ post.title }}</h1>
-      <div class="post-meta">
-        <span>作者: {{ post.authorName }}</span>
-        <span>發表於: {{ formatDate(post.createdAt) }}</span>
-        <span>瀏覽: {{ post.viewCount }}</span>
+  <div class="max-w-5xl mx-auto">
+    <!-- Loading State -->
+    <div v-if="loading" class="space-y-4">
+      <div class="card-dark animate-pulse">
+        <div class="h-8 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+        <div class="flex space-x-4 mb-4">
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-24"></div>
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32"></div>
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-20"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-5/6"></div>
+        </div>
       </div>
-      <RichTextDisplay :content="post.content" />
+    </div>
+
+    <!-- Post Content -->
+    <article v-else class="card-dark mb-6">
+      <!-- Post Header -->
+      <div class="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          {{ post.title }}
+        </h1>
+        
+        <!-- Post Meta -->
+        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>{{ post.authorName }}</span>
+          </div>
+          
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>{{ formatDate(post.createdAt) }}</span>
+          </div>
+          
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span>{{ post.viewCount }} 次瀏覽</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Post Content -->
+      <div class="prose prose-lg max-w-none dark:prose-invert">
+        <RichTextDisplay :content="post.content" />
+      </div>
     </article>
     
-    <section class="replies">
-      <h2>回覆 ({{ replies.length }})</h2>
-      <div v-for="reply in replies" :key="reply.id" class="reply-item">
-        <div class="reply-header">
-          <strong>{{ reply.authorName }}</strong>
-          <span>{{ formatDate(reply.createdAt) }}</span>
+    <!-- Replies Section -->
+    <section class="card-dark mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        回覆 ({{ replies.length }})
+      </h2>
+      
+      <!-- Reply List -->
+      <div v-if="replies.length > 0" class="space-y-4">
+        <div 
+          v-for="reply in replies" 
+          :key="reply.id" 
+          class="border-l-4 border-primary-200 dark:border-primary-800 pl-4 py-4"
+        >
+          <!-- Reply Header -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+                <span class="text-sm font-medium text-primary-600 dark:text-primary-400">
+                  {{ reply.authorName.charAt(0).toUpperCase() }}
+                </span>
+              </div>
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ reply.authorName }}
+              </span>
+            </div>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              {{ formatDate(reply.createdAt) }}
+            </span>
+          </div>
+          
+          <!-- Reply Content -->
+          <div class="prose prose-sm max-w-none dark:prose-invert">
+            <RichTextDisplay :content="reply.content" />
+          </div>
         </div>
-        <RichTextDisplay :content="reply.content" class="reply-content" />
+      </div>
+      
+      <!-- Empty State -->
+      <div v-else class="text-center py-8">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          還沒有任何回覆，成為第一個回覆的人吧！
+        </p>
       </div>
     </section>
     
-    <section v-if="authStore.isAuthenticated" class="reply-form">
-      <h3>發表回覆</h3>
-      <RichTextEditor v-model="newReply" placeholder="寫下您的回覆..." />
-      <button @click="submitReply" :disabled="submitting" class="submit-btn">
-        {{ submitting ? '發表中...' : '發表' }}
-      </button>
+    <!-- Reply Form -->
+    <section v-if="authStore.isAuthenticated" class="card-dark">
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        發表回覆
+      </h3>
+      
+      <div class="space-y-4">
+        <RichTextEditor 
+          v-model="newReply" 
+          placeholder="寫下您的回覆..." 
+          class="min-h-[150px]"
+        />
+        
+        <div class="flex justify-end">
+          <button 
+            @click="submitReply" 
+            :disabled="submitting || !newReply.trim()" 
+            class="btn-primary"
+          >
+            <span v-if="submitting" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              發表中...
+            </span>
+            <span v-else>發表回覆</span>
+          </button>
+        </div>
+      </div>
     </section>
+    
+    <!-- Login Prompt -->
+    <div v-else class="card-dark text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+        登入後即可回覆
+      </h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        加入討論，分享您的觀點
+      </p>
+      <div class="mt-6">
+        <RouterLink to="/login" class="btn-primary">
+          立即登入
+        </RouterLink>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { postsApi } from '../api/posts'
 import { repliesApi } from '../api/replies'
@@ -44,7 +173,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const post = ref({
-  title: '載入中...',
+  title: '',
   authorName: '',
   content: '',
   createdAt: new Date(),
@@ -57,7 +186,13 @@ const loading = ref(true)
 const submitting = ref(false)
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleString('zh-TW')
+  return new Date(date).toLocaleString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 const submitReply = async () => {
@@ -96,88 +231,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style scoped>
-.post-view {
-  padding: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.post {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
-}
-
-.post h1 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-}
-
-.post-meta {
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  gap: 1rem;
-}
-
-.post-content {
-  line-height: 1.6;
-}
-
-.replies {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
-}
-
-.reply-item {
-  padding: 1rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.reply-item:last-child {
-  border-bottom: none;
-}
-
-.reply-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.reply-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.submit-btn {
-  margin-top: 1rem;
-  background-color: #3498db;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #2980b9;
-}
-
-.submit-btn:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
-}
-</style>

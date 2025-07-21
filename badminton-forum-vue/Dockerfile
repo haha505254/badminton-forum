@@ -10,7 +10,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package*.json ./
 COPY pnpm-lock.yaml* ./
 
-# 安裝相依套件
+# 安裝相依套件（包含開發依賴）
 RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
     elif [ -f package-lock.json ]; then npm ci; \
     else npm install; fi

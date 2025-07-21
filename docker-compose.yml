@@ -67,7 +67,6 @@ services:
       - "${WEB_PORT:-5173}:5173"
     volumes:
       - ./badminton-forum-vue:/app
-      - /app/node_modules
     depends_on:
       - api
     networks:
