@@ -3,10 +3,10 @@
     <!-- Hero Section -->
     <div class="text-center mb-12">
       <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-        歡迎來到羽毛球論壇
+        🎉 CI/CD 自動部署成功！🎉
       </h1>
       <p class="text-xl text-gray-600 dark:text-gray-300">
-        分享您的羽毛球經驗，與球友交流技術！
+        這段文字是透過 GitHub Actions 自動部署上來的！
       </p>
     </div>
 
