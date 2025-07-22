@@ -234,10 +234,10 @@ namespace BadmintonForum.API.Controllers
             // 生成唯一檔名
             var fileName = $"{userId}_{Guid.NewGuid()}{extension}";
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
-            
+
             // 確保目錄存在
             Directory.CreateDirectory(uploadsFolder);
-            
+
             var filePath = Path.Combine(uploadsFolder, fileName);
 
             // 刪除舊頭像
