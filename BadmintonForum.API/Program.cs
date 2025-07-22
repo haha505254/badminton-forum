@@ -67,15 +67,12 @@ builder.Services.AddCors(options =>
             "http://localhost:3000"
         };
 
-        // Add production URLs from environment variable or configuration
-        var productionUrl = Environment.GetEnvironmentVariable("PRODUCTION_URL");
-        if (!string.IsNullOrEmpty(productionUrl))
+        // Add frontend URL from environment variable
+        var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? builder.Configuration["Frontend:Url"];
+        if (!string.IsNullOrEmpty(frontendUrl))
         {
-            allowedOrigins.Add(productionUrl);
+            allowedOrigins.Add(frontendUrl);
         }
-
-        // For now, also allow the EC2 URL
-        allowedOrigins.Add("http://34.199.113.111");
 
         builder.WithOrigins(allowedOrigins.ToArray())
                .AllowAnyHeader()

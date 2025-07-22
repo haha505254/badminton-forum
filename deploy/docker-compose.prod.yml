@@ -40,8 +40,7 @@ services:
       Email__SmtpPassword: ${SMTP_PASSWORD:-}
       Email__FromEmail: ${FROM_EMAIL:-noreply@badmintonforum.com}
       Email__FromName: ${FROM_NAME:-Badminton Forum}
-    ports:
-      - "5246:5246"
+      FRONTEND_URL: http://34.199.113.111
     depends_on:
       db:
         condition: service_healthy
@@ -53,8 +52,6 @@ services:
     image: 814247511761.dkr.ecr.us-east-1.amazonaws.com/badminton-forum-frontend:latest
     container_name: badminton-forum-web
     restart: always
-    environment:
-      VITE_API_URL: ${API_URL:-http://34.199.113.111:5246/api}
     ports:
       - "80:80"
     depends_on:

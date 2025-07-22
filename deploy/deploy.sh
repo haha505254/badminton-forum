@@ -29,13 +29,9 @@ docker pull $FRONTEND_IMAGE
 # Navigate to deployment directory
 cd ~/badminton-forum
 
-# Stop existing containers
-echo "Stopping existing containers..."
-docker-compose -f docker-compose.prod.yml down || true
-
-# Start new containers
-echo "Starting new containers..."
-docker-compose -f docker-compose.prod.yml up -d
+# Update containers with zero downtime
+echo "Updating containers..."
+docker-compose -f docker-compose.prod.yml up -d --remove-orphans
 
 # Wait for services to be healthy
 echo "Waiting for services to be healthy..."
@@ -45,9 +41,13 @@ sleep 30
 echo "Checking service health..."
 docker-compose -f docker-compose.prod.yml ps
 
-# Run database migrations
-echo "Running database migrations..."
-docker-compose -f docker-compose.prod.yml exec -T api dotnet ef database update || echo "Migration completed or no changes needed"
+# Database migrations
+# Note: Production container no longer includes EF tools for security and size optimization
+# Migrations should be handled separately, e.g.:
+# - Use a dedicated migration container during deployment
+# - Run migrations from CI/CD pipeline before deployment
+# - Or manually run migrations when needed
+echo "Skipping database migrations (should be handled separately)"
 
 # Clean up old images
 echo "Cleaning up old images..."

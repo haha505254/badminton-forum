@@ -11,18 +11,15 @@ done
 
 echo "資料庫已就緒！"
 
-# 執行資料庫遷移
-echo "執行資料庫遷移..."
-dotnet ef database update
-
-# 啟動應用程式 (開發模式使用 watch)
+# 啟動應用程式
 echo "啟動 API 服務..."
 if [ "$ASPNETCORE_ENVIRONMENT" = "Development" ]; then
   echo "以開發模式啟動 (支援熱重載)..."
+  # 執行資料庫遷移 (開發環境有 ef 工具)
+  dotnet ef database update
   dotnet watch run --no-launch-profile --urls http://+:5246
 else
   echo "以生產模式啟動..."
-  # 先建置再執行
-  dotnet build -c Release
-  dotnet run -c Release --no-build --urls http://+:5246
+  # 生產環境直接執行已編譯的 dll
+  exec dotnet BadmintonForum.API.dll
 fi

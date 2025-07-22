@@ -86,7 +86,7 @@ jobs:
       run: |
         cd badminton-forum-vue
         docker build \
-          --build-arg VITE_API_URL=http://${{ secrets.EC2_HOST }}:5246/api \
+          --build-arg VITE_API_URL=/api \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
           --target production .

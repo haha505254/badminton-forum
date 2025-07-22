@@ -118,7 +118,7 @@ Docker Compose 使用的環境變數可在 `.env` 檔案中設定：
 # 資料庫設定
 POSTGRES_DB=badmintonforumdb
 POSTGRES_USER=badmintonuser
-POSTGRES_PASSWORD=BadmintonPass123!
+POSTGRES_PASSWORD=BadmintonPass123
 
 # JWT 設定
 JWT_SECRET=ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction
