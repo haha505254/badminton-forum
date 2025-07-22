@@ -23,7 +23,7 @@ const handleLogout = () => {
           <div class="flex items-center">
             <RouterLink to="/" class="flex items-center space-x-2 text-xl font-bold text-gray-900 dark:text-white">
               <span class="text-2xl">🏸</span>
-              <span>羽毛球論壇</span>
+              <span>羽毛球論壇 (CI/CD 測試中)</span>
             </RouterLink>
           </div>
           
