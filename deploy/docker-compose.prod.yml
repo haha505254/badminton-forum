@@ -54,7 +54,7 @@ services:
     container_name: badminton-forum-web
     restart: always
     environment:
-      VITE_API_URL: ${API_URL:-http://54.87.200.235:5246/api}
+      VITE_API_URL: ${API_URL:-http://34.199.113.111:5246/api}
     ports:
       - "80:80"
     depends_on:

@@ -75,7 +75,7 @@ builder.Services.AddCors(options =>
         }
 
         // For now, also allow the EC2 URL
-        allowedOrigins.Add("http://54.87.200.235");
+        allowedOrigins.Add("http://34.199.113.111");
 
         builder.WithOrigins(allowedOrigins.ToArray())
                .AllowAnyHeader()

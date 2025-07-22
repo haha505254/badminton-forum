@@ -21,4 +21,4 @@ echo "按 Ctrl+C 結束連接"
 echo ""
 
 # 建立 SSH 隧道
-ssh -i /home/one123/my-ec2-key.pem -L 5433:localhost:5432 ubuntu@54.87.200.235 -N
+ssh -i /home/one123/my-ec2-key.pem -L 5433:localhost:5432 ubuntu@34.199.113.111 -N
