@@ -55,5 +55,8 @@ RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/ap
 # 複製整個專案（為了執行遷移）
 COPY --from=build /src .
 
+# 確保 entrypoint script 有執行權限
+RUN chmod +x docker-entrypoint.sh
+
 # 使用 entrypoint script 來執行遷移
 ENTRYPOINT ["./docker-entrypoint.sh"]
