@@ -40,6 +40,10 @@ RUN if [ -f pnpm-lock.yaml ]; then \
 # 複製所有檔案
 COPY . .
 
+# 設定建置時的環境變數
+ARG VITE_API_URL=http://localhost:5246/api
+ENV VITE_API_URL=$VITE_API_URL
+
 # 建置專案
 RUN npm run build
 

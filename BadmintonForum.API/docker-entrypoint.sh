@@ -22,5 +22,7 @@ if [ "$ASPNETCORE_ENVIRONMENT" = "Development" ]; then
   dotnet watch run --no-launch-profile --urls http://+:5246
 else
   echo "以生產模式啟動..."
-  dotnet BadmintonForum.API.dll
+  # 先建置再執行
+  dotnet build -c Release
+  dotnet run -c Release --no-build --urls http://+:5246
 fi

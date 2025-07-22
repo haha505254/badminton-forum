@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 資料庫
+  db:
+    image: postgres:16-alpine
+    container_name: badminton-forum-db
+    restart: always
+    environment:
+      POSTGRES_DB: badmintonforumdb
+      POSTGRES_USER: badmintonuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - badminton-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U badmintonuser -d badmintonforumdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # .NET Core API
+  api:
+    image: 814247511761.dkr.ecr.us-east-1.amazonaws.com/badminton-forum-api:latest
+    container_name: badminton-forum-api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5246
+      ConnectionStrings__DefaultConnection: "Host=db;Database=badmintonforumdb;Username=badmintonuser;Password=${DB_PASSWORD}"
+      JwtSettings__Secret: ${JWT_SECRET}
+      JwtSettings__Issuer: BadmintonForumAPI
+      JwtSettings__Audience: BadmintonForumClient
+      JwtSettings__ExpirationInDays: 7
+      Email__UseConsoleEmail: "false"
+      Email__SmtpHost: ${SMTP_HOST:-smtp.gmail.com}
+      Email__SmtpPort: ${SMTP_PORT:-587}
+      Email__SmtpUser: ${SMTP_USER:-}
+      Email__SmtpPassword: ${SMTP_PASSWORD:-}
+      Email__FromEmail: ${FROM_EMAIL:-noreply@badmintonforum.com}
+      Email__FromName: ${FROM_NAME:-Badminton Forum}
+    ports:
+      - "5246:5246"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - badminton-network
+
+  # Vue.js 前端
+  web:
+    image: 814247511761.dkr.ecr.us-east-1.amazonaws.com/badminton-forum-frontend:latest
+    container_name: badminton-forum-web
+    restart: always
+    environment:
+      VITE_API_URL: ${API_URL:-http://54.87.200.235:5246/api}
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - badminton-network
+
+networks:
+  badminton-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

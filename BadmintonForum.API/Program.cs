@@ -60,7 +60,24 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("VueCorsPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000")
+        var allowedOrigins = new List<string> 
+        { 
+            "http://localhost:5173", 
+            "http://127.0.0.1:5173", 
+            "http://localhost:3000" 
+        };
+        
+        // Add production URLs from environment variable or configuration
+        var productionUrl = Environment.GetEnvironmentVariable("PRODUCTION_URL");
+        if (!string.IsNullOrEmpty(productionUrl))
+        {
+            allowedOrigins.Add(productionUrl);
+        }
+        
+        // For now, also allow the EC2 URL
+        allowedOrigins.Add("http://54.87.200.235");
+        
+        builder.WithOrigins(allowedOrigins.ToArray())
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();

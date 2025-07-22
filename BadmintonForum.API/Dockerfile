@@ -40,16 +40,20 @@ FROM build AS publish
 RUN dotnet publish -c Release -o /app/publish
 
 # 多階段建置 - 生產階段
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS production
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS production
 
 WORKDIR /app
 EXPOSE 5246
 
+# 安裝 Entity Framework Core 工具
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
 # 安裝 postgresql-client 用於健康檢查
 RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
-# 從發布階段複製檔案
-COPY --from=publish /app/publish .
+# 複製整個專案（為了執行遷移）
+COPY --from=build /src .
 
-# 生產環境直接執行
-ENTRYPOINT ["dotnet", "BadmintonForum.API.dll"]
+# 使用 entrypoint script 來執行遷移
+ENTRYPOINT ["./docker-entrypoint.sh"]
