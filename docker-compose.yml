@@ -1,20 +1,23 @@
 services:
-  # PostgreSQL 資料庫
+  # MariaDB 資料庫
   db:
-    image: postgres:16-alpine
+    image: mariadb:11
     container_name: badminton-forum-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-badmintonforumdb}
-      POSTGRES_USER: ${POSTGRES_USER:-badmintonuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-BadmintonPass123}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-badmintonforumdb}
+      MARIADB_USER: ${MARIADB_USER:-badmintonuser}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-BadmintonPass123}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-rootpass123}
+      MARIADB_CHARACTER_SET: utf8mb4
+      MARIADB_COLLATION: utf8mb4_unicode_ci
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-3306}:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-badmintonuser} -d ${POSTGRES_DB:-badmintonforumdb}"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,7 +35,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5246
-      ConnectionStrings__DefaultConnection: "Host=db;Database=${POSTGRES_DB:-badmintonforumdb};Username=${POSTGRES_USER:-badmintonuser};Password=${POSTGRES_PASSWORD:-BadmintonPass123}"
+      ConnectionStrings__DefaultConnection: "Server=db;Database=${MARIADB_DATABASE:-badmintonforumdb};User=${MARIADB_USER:-badmintonuser};Password=${MARIADB_PASSWORD:-BadmintonPass123};"
       JwtSettings__Secret: ${JWT_SECRET:-ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction}
       JwtSettings__Issuer: ${JWT_ISSUER:-BadmintonForumAPI}
       JwtSettings__Audience: ${JWT_AUDIENCE:-BadmintonForumClient}
@@ -93,5 +96,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  mariadb_data:
   dotnet_tools:

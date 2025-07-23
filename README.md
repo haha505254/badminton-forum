@@ -15,7 +15,7 @@
 
 - **後端**: ASP.NET Core 8.0 Web API
 - **前端**: Vue 3 + Vite + Tailwind CSS
-- **資料庫**: PostgreSQL 16+
+- **資料庫**: MariaDB 11+
 - **認證**: JWT Token
 - **ORM**: Entity Framework Core
 - **狀態管理**: Pinia
@@ -87,7 +87,7 @@ docker-compose exec api bash
 docker-compose exec web sh
 
 # 連接到資料庫
-docker-compose exec db psql -U badmintonuser -d badmintonforumdb
+docker-compose exec db mariadb -u badmintonuser -p badmintonforumdb
 ```
 
 ### 重新建置服務
@@ -106,8 +106,8 @@ docker-compose up -d --build web
 
 ```bash
 # 將指定用戶設為管理員（替換 email@example.com）
-docker-compose exec db psql -U badmintonuser -d badmintonforumdb \
-  -c "UPDATE \"Users\" SET \"IsAdmin\" = true WHERE \"Email\" = 'email@example.com';"
+docker-compose exec db mariadb -u badmintonuser -pBadmintonPass123 badmintonforumdb \
+  -e "UPDATE Users SET IsAdmin = true WHERE Email = 'email@example.com';"
 ```
 
 ## 🛠️ 環境變數設定
@@ -116,9 +116,10 @@ Docker Compose 使用的環境變數可在 `.env` 檔案中設定：
 
 ```env
 # 資料庫設定
-POSTGRES_DB=badmintonforumdb
-POSTGRES_USER=badmintonuser
-POSTGRES_PASSWORD=BadmintonPass123
+MARIADB_DATABASE=badmintonforumdb
+MARIADB_USER=badmintonuser
+MARIADB_PASSWORD=BadmintonPass123
+MARIADB_ROOT_PASSWORD=rootpass123
 
 # JWT 設定
 JWT_SECRET=ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction

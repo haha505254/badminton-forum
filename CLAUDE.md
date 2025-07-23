@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Full-stack badminton forum application:
-- **Backend**: ASP.NET Core 8.0 Web API with PostgreSQL
+- **Backend**: ASP.NET Core 8.0 Web API with MariaDB
 - **Frontend**: Vue 3 SPA with Vite
 - **Architecture**: RESTful API with JWT authentication
 
@@ -36,7 +36,7 @@ dotnet test                          # Run tests
 dotnet format                        # Format code (required by CI)
 
 # User secrets (development)
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=badmintonforumdb;Username=badmintonuser;Password=your-password"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Database=badmintonforumdb;User=badmintonuser;Password=your-password"
 dotnet user-secrets set "JwtSettings:Secret" "your-secret-key-at-least-32-chars"
 ```
 

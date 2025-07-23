@@ -3,8 +3,8 @@ set -e
 
 echo "等待資料庫就緒..."
 
-# 等待資料庫可用
-until pg_isready -h db -p 5432 -U badmintonuser; do
+# 等待資料庫可用 (MariaDB)
+until mariadb -h db -P 3306 -u badmintonuser -pBadmintonPass123 -e "SELECT 1" > /dev/null 2>&1; do
   echo "資料庫尚未就緒，等待中..."
   sleep 2
 done

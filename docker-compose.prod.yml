@@ -1,0 +1,95 @@
+# 生產環境覆蓋設定
+# 使用方式: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  # MariaDB 資料庫 - 生產環境設定
+  db:
+    restart: always  # 生產環境使用 always 確保服務持續運行
+    environment:
+      # 生產環境應該使用更強的密碼，從 .env.production 讀取
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    # 生產環境不對外暴露資料庫埠
+    ports: []
+    # 可選：限制資源使用
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  # .NET Core API - 生產環境設定
+  api:
+    build:
+      target: production  # 使用生產階段映像
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5246
+      # 從環境變數讀取敏感資訊
+      ConnectionStrings__DefaultConnection: "Server=db;Database=${MARIADB_DATABASE};User=${MARIADB_USER};Password=${MARIADB_PASSWORD};"
+      JwtSettings__Secret: ${JWT_SECRET}
+      # 生產環境使用真實 Email 服務
+      Email__UseConsoleEmail: "false"
+      Email__SmtpHost: ${SMTP_HOST}
+      Email__SmtpPort: ${SMTP_PORT}
+      Email__SmtpUsername: ${SMTP_USERNAME}
+      Email__SmtpPassword: ${SMTP_PASSWORD}
+      Email__FromAddress: ${EMAIL_FROM_ADDRESS}
+      Email__BaseUrl: ${FRONTEND_URL}
+      # 額外的生產環境設定
+      FRONTEND_URL: ${FRONTEND_URL}
+    # 移除開發用的 volume mount
+    volumes: []
+    # 生產環境通常使用反向代理，不直接暴露埠
+    ports:
+      - "127.0.0.1:5246:5246"  # 只綁定 localhost
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # Vue.js 前端 - 生產環境設定
+  web:
+    build:
+      target: production  # 使用 nginx 生產映像
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5246/api}
+    restart: always
+    environment:
+      NODE_ENV: production
+    # 移除開發用的 volume mount
+    volumes: []
+    # 生產環境使用標準 HTTP 埠，覆蓋開發埠設定
+    ports:
+      - "${WEB_PORT:-80}:80"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  # Adminer 在生產環境中預設不啟用
+  adminer:
+    # 使用 profiles 確保預設不啟動
+    profiles:
+      - tools
+      - debug
+
+# 生產環境專用服務（可選）
+  # nginx-proxy:
+  #   image: nginx:alpine
+  #   container_name: badminton-forum-proxy
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - api
+  #     - web
+  #   networks:
+  #     - badminton-network

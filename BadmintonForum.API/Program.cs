@@ -27,9 +27,13 @@ else
     builder.Services.AddScoped<IEmailService, EmailService>();
 }
 
-// Configure Entity Framework with PostgreSQL
+// Configure Entity Framework with MariaDB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var serverVersion = new MariaDbServerVersion(new Version(11, 0, 0));
+    options.UseMySql(connectionString, serverVersion);
+});
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
