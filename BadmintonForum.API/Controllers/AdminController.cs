@@ -10,7 +10,7 @@ namespace BadmintonForum.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     public class AdminController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -20,20 +20,10 @@ namespace BadmintonForum.API.Controllers
             _context = context;
         }
 
-        private async Task<bool> IsUserAdmin()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var user = await _context.Users.FindAsync(userId);
-            return user?.IsAdmin ?? false;
-        }
 
         [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<UserAdminDto>>> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var query = _context.Users.OrderBy(u => u.Username);
 
@@ -66,10 +56,6 @@ namespace BadmintonForum.API.Controllers
         [HttpPut("users/{id}/toggle-active")]
         public async Task<IActionResult> ToggleUserActive(int id)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -93,10 +79,6 @@ namespace BadmintonForum.API.Controllers
         [HttpPut("users/{id}/toggle-admin")]
         public async Task<IActionResult> ToggleUserAdmin(int id)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -120,10 +102,6 @@ namespace BadmintonForum.API.Controllers
         [HttpGet("categories")]
         public async Task<ActionResult<IEnumerable<CategoryAdminDto>>> GetCategoriesAdmin()
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var categories = await _context.Categories
                 .OrderBy(c => c.DisplayOrder)
@@ -144,10 +122,6 @@ namespace BadmintonForum.API.Controllers
         [HttpPost("categories")]
         public async Task<ActionResult<Category>> CreateCategory(CreateCategoryDto dto)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var category = new Category
             {
@@ -166,10 +140,6 @@ namespace BadmintonForum.API.Controllers
         [HttpPut("categories/{id}")]
         public async Task<IActionResult> UpdateCategory(int id, UpdateCategoryDto dto)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var category = await _context.Categories.FindAsync(id);
             if (category == null)
@@ -197,10 +167,6 @@ namespace BadmintonForum.API.Controllers
         [HttpDelete("categories/{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var category = await _context.Categories
                 .Include(c => c.Posts)
@@ -225,10 +191,6 @@ namespace BadmintonForum.API.Controllers
         [HttpGet("posts")]
         public async Task<ActionResult<IEnumerable<PostAdminDto>>> GetPostsAdmin([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var query = _context.Posts.OrderByDescending(p => p.CreatedAt);
 
@@ -264,10 +226,6 @@ namespace BadmintonForum.API.Controllers
         [HttpDelete("posts/{id}")]
         public async Task<IActionResult> DeletePostAdmin(int id)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var post = await _context.Posts
                 .Include(p => p.Replies)
@@ -287,10 +245,6 @@ namespace BadmintonForum.API.Controllers
         [HttpPut("posts/{id}/move")]
         public async Task<IActionResult> MovePost(int id, [FromBody] MovePostDto dto)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var post = await _context.Posts.FindAsync(id);
             if (post == null)
@@ -313,10 +267,6 @@ namespace BadmintonForum.API.Controllers
         [HttpPut("posts/{id}/toggle-pin")]
         public async Task<IActionResult> TogglePostPin(int id)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var post = await _context.Posts.FindAsync(id);
             if (post == null)
@@ -333,10 +283,6 @@ namespace BadmintonForum.API.Controllers
         [HttpPut("posts/{id}/toggle-lock")]
         public async Task<IActionResult> TogglePostLock(int id)
         {
-            if (!await IsUserAdmin())
-            {
-                return Forbid();
-            }
 
             var post = await _context.Posts.FindAsync(id);
             if (post == null)

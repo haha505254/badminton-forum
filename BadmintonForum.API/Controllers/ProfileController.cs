@@ -76,17 +76,17 @@ namespace BadmintonForum.API.Controllers
             return Ok(profile);
         }
 
-        [HttpGet("{username}/posts")]
-        public async Task<ActionResult<IEnumerable<PostDto>>> GetUserPosts(string username, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        [HttpGet("by-id/{id:int}/posts")]
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetUserPostsById(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
 
             var query = _context.Posts
-                .Where(p => p.AuthorId == user.Id)
+                .Where(p => p.AuthorId == id)
                 .OrderByDescending(p => p.CreatedAt);
 
             var totalItems = await query.CountAsync();

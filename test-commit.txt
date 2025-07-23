@@ -1,2 +1,0 @@
-This is a test file to trigger CI/CD pipeline.
-Created at: 2025-01-21

@@ -1,5 +1,6 @@
 using BadmintonForum.API.Data;
 using BadmintonForum.API.Services;
+using BadmintonForum.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -13,6 +14,7 @@ builder.Services.AddControllers();
 
 // Register application services
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // Email 服務設定
 var useConsoleEmail = builder.Configuration.GetValue<bool>("Email:UseConsoleEmail");
@@ -53,6 +55,14 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         ClockSkew = TimeSpan.Zero
     };
+});
+
+// Configure Authorization Policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdmin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "IsAdmin" && c.Value == "True")));
 });
 
 // Configure CORS

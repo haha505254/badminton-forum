@@ -176,7 +176,7 @@ onMounted(async () => {
     avatarLoadError.value = false // 重置錯誤狀態
     
     // Fetch user posts (still using username for now)
-    const postsResponse = await profileApi.getUserPosts(user.value.username)
+    const postsResponse = await profileApi.getUserPostsById(userId)
     posts.value = postsResponse.data
   } catch (err) {
     console.error('Failed to fetch profile data:', err)

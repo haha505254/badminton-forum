@@ -43,5 +43,6 @@ namespace BadmintonForum.API.Models
         // Navigation properties
         public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
         public virtual ICollection<Reply> Replies { get; set; } = new List<Reply>();
+        public virtual ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
     }
 }

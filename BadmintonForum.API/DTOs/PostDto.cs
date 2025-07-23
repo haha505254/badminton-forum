@@ -14,6 +14,7 @@ namespace BadmintonForum.API.DTOs
         public int ReplyCount { get; set; }
         public bool IsPinned { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsLiked { get; set; } // 當前使用者是否已點讚
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

@@ -14,6 +14,7 @@ namespace BadmintonForum.API.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Reply> Replies { get; set; }
+        public DbSet<PostLike> PostLikes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -74,6 +75,23 @@ namespace BadmintonForum.API.Data
                     .WithMany(u => u.Replies)
                     .HasForeignKey(r => r.AuthorId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // PostLike configuration
+            modelBuilder.Entity<PostLike>(entity =>
+            {
+                // 複合唯一索引，確保每個使用者對每篇文章只能點讚一次
+                entity.HasIndex(pl => new { pl.PostId, pl.UserId }).IsUnique();
+
+                entity.HasOne(pl => pl.Post)
+                    .WithMany(p => p.PostLikes)
+                    .HasForeignKey(pl => pl.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pl => pl.User)
+                    .WithMany(u => u.PostLikes)
+                    .HasForeignKey(pl => pl.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

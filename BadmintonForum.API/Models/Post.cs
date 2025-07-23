@@ -33,5 +33,6 @@ namespace BadmintonForum.API.Models
         public virtual User Author { get; set; } = null!;
         public virtual Category Category { get; set; } = null!;
         public virtual ICollection<Reply> Replies { get; set; } = new List<Reply>();
+        public virtual ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
     }
 }
