@@ -68,7 +68,7 @@ builder.Services.AddCors(options =>
         };
 
         // Add frontend URL from environment variable
-        var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? builder.Configuration["Frontend:Url"];
+        var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL");
         if (!string.IsNullOrEmpty(frontendUrl))
         {
             allowedOrigins.Add(frontendUrl);
