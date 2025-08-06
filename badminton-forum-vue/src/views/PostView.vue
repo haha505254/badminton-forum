@@ -115,10 +115,35 @@
       </h3>
       
       <div class="space-y-4">
+        <!-- 戰術圖切換按鈕 -->
+        <div class="editor-toolbar-custom">
+          <button
+            type="button"
+            @click="toggleDiagramMode"
+            class="diagram-btn"
+            :class="{ active: showDiagram }"
+          >
+            🏸 插入戰術圖
+          </button>
+          <button
+            v-if="post.content.includes('badminton-diagram-placeholder')"
+            type="button"
+            @click="loadOriginalDiagram"
+            class="diagram-btn"
+          >
+            📋 引用原文戰術圖
+          </button>
+        </div>
+        
         <RichTextEditor 
+          v-if="!showDiagram"
           v-model="newReply" 
           placeholder="寫下您的回覆..." 
           class="min-h-[150px]"
+        />
+        <BadmintonCourtDiagram
+          v-else
+          v-model="diagramData"
         />
         
         <div class="flex justify-end">
@@ -161,13 +186,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { postsApi } from '../api/posts'
 import { repliesApi } from '../api/replies'
 import RichTextEditor from '../components/RichTextEditor.vue'
 import RichTextDisplay from '../components/RichTextDisplay.vue'
+import BadmintonCourtDiagram from '../components/BadmintonCourtDiagram.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -184,6 +210,14 @@ const replies = ref([])
 const newReply = ref('')
 const loading = ref(true)
 const submitting = ref(false)
+const showDiagram = ref(false)
+const diagramData = ref({
+  players: [],
+  shuttle: null,
+  arrows: [],
+  textAnnotations: [],
+  description: ''
+})
 
 const formatDate = (date) => {
   return new Date(date).toLocaleString('zh-TW', {
@@ -195,6 +229,59 @@ const formatDate = (date) => {
   })
 }
 
+const toggleDiagramMode = () => {
+  showDiagram.value = !showDiagram.value
+}
+
+// 載入原文的戰術圖
+const loadOriginalDiagram = () => {
+  try {
+    // 從原文中解析戰術圖資料
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(post.value.content, 'text/html')
+    const diagramElement = doc.querySelector('.badminton-diagram-placeholder')
+    
+    if (diagramElement) {
+      const originalData = JSON.parse(diagramElement.getAttribute('data-diagram'))
+      // 深拷貝原始資料
+      diagramData.value = {
+        players: [...(originalData.players || [])],
+        shuttle: originalData.shuttle ? { ...originalData.shuttle } : null,
+        arrows: [...(originalData.arrows || [])],
+        textAnnotations: [...(originalData.textAnnotations || [])],
+        description: originalData.description ? `回應：${originalData.description}` : '回應戰術圖'
+      }
+      showDiagram.value = true
+    }
+  } catch (error) {
+    console.error('Failed to load original diagram:', error)
+    alert('載入原文戰術圖失敗')
+  }
+}
+
+// 當戰術圖資料更新時，將其嵌入到內容中
+watch(diagramData, (newData) => {
+  if (showDiagram.value && newData) {
+    // 將戰術圖資料以特殊格式嵌入到內容中
+    const diagramHtml = `
+      <div class="badminton-diagram-placeholder" data-diagram='${JSON.stringify(newData)}'>
+        <p>[羽球戰術圖: ${newData.description || '戰術示意圖'}]</p>
+      </div>
+    `
+    
+    // 保留原有內容並添加戰術圖
+    if (!newReply.value.includes('badminton-diagram-placeholder')) {
+      newReply.value += diagramHtml
+    } else {
+      // 更新現有的戰術圖
+      newReply.value = newReply.value.replace(
+        /<div class="badminton-diagram-placeholder".*?<\/div>/s,
+        diagramHtml
+      )
+    }
+  }
+}, { deep: true })
+
 const submitReply = async () => {
   if (!newReply.value.trim()) return
   
@@ -205,6 +292,14 @@ const submitReply = async () => {
     })
     replies.value.push(response.data)
     newReply.value = ''
+    showDiagram.value = false
+    diagramData.value = {
+      players: [],
+      shuttle: null,
+      arrows: [],
+      textAnnotations: [],
+      description: ''
+    }
   } catch (error) {
     console.error('Failed to submit reply:', error)
     alert('發表回覆失敗')
@@ -250,5 +345,31 @@ onMounted(async () => {
   max-width: 64rem; /* 1024px */
   margin-left: auto;
   margin-right: auto;
+}
+
+.editor-toolbar-custom {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.diagram-btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.95rem;
+}
+
+.diagram-btn:hover {
+  background: #f0f0f0;
+}
+
+.diagram-btn.active {
+  background: #27ae60;
+  color: white;
+  border-color: #27ae60;
 }
 </style>
