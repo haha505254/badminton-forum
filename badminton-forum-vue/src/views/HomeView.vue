@@ -1,13 +1,41 @@
 <template>
   <div>
     <!-- Hero Section -->
-    <div class="text-center mb-12">
+    <div class="text-center mb-8">
       <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
         歡迎來到羽毛球論壇
       </h1>
       <p class="text-xl text-gray-600 dark:text-gray-300">
         分享您的羽毛球經驗，與球友交流技術！
       </p>
+    </div>
+
+    <!-- Categories Section -->
+    <div class="mb-12">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">論壇板塊</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <RouterLink
+          v-for="category in categories"
+          :key="category.id"
+          :to="`/category/${category.id}`"
+          class="card-dark hover:shadow-lg transition-all duration-300 group block"
+        >
+          <div class="flex items-start space-x-4">
+            <div class="flex-shrink-0 text-3xl">{{ category.icon }}</div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 mb-1">
+                {{ category.name }}
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                {{ category.description }}
+              </p>
+              <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                {{ category.postCount || 0 }} 篇文章
+              </div>
+            </div>
+          </div>
+        </RouterLink>
+      </div>
     </div>
 
     <!-- Stats Cards -->
@@ -162,6 +190,11 @@ import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import StatsCard from '../components/ui/StatsCard.vue'
 import DataTable from '../components/ui/DataTable.vue'
+import { categoryData } from '../data/categories'
+import { categoriesApi } from '../api/categories'
+
+// 板塊數據
+const categories = ref([])
 
 // Mock data - 實際應該從 API 獲取
 const stats = ref({
@@ -185,7 +218,28 @@ const latestPosts = ref([
   { id: 5, title: '請問大家都用什麼羽球？', author: '新手上路', replies: 15 }
 ])
 
-onMounted(() => {
-  // TODO: 從 API 獲取實際數據
+onMounted(async () => {
+  // 加載板塊數據
+  try {
+    const response = await categoriesApi.getCategories()
+    // 將 API 數據與本地配置數據合併
+    categories.value = response.data.map(apiCategory => {
+      const localCategory = categoryData.find(c => c.id === apiCategory.id)
+      return {
+        ...apiCategory,
+        icon: localCategory?.icon || '📁',
+        description: localCategory?.description || apiCategory.description
+      }
+    })
+  } catch (error) {
+    // 如果 API 失敗，使用本地數據
+    console.error('Failed to fetch categories:', error)
+    categories.value = categoryData.map(cat => ({
+      ...cat,
+      postCount: 0
+    }))
+  }
+  
+  // TODO: 從 API 獲取統計數據
 })
 </script>

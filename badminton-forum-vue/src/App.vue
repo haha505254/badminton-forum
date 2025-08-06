@@ -1,16 +1,38 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterView, RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { categoryData } from './data/categories'
+import { categoriesApi } from './api/categories'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
+const categoriesDropdownOpen = ref(false)
+const categories = ref([])
 
 const handleLogout = () => {
   authStore.logout()
   router.push('/')
 }
+
+// 加載板塊數據
+onMounted(async () => {
+  try {
+    const response = await categoriesApi.getCategories()
+    categories.value = response.data.map(apiCategory => {
+      const localCategory = categoryData.find(c => c.id === apiCategory.id)
+      return {
+        ...apiCategory,
+        icon: localCategory?.icon || '📁',
+        description: localCategory?.description || apiCategory.description
+      }
+    })
+  } catch (error) {
+    console.error('Failed to fetch categories:', error)
+    categories.value = categoryData
+  }
+})
 </script>
 
 <template>
@@ -29,7 +51,33 @@ const handleLogout = () => {
           
           <!-- Navigation Links -->
           <div class="hidden md:flex items-center space-x-8">
-            <RouterLink to="/categories" class="nav-link">版塊</RouterLink>
+            <!-- Categories Dropdown -->
+            <div class="relative" @mouseenter="categoriesDropdownOpen = true" @mouseleave="categoriesDropdownOpen = false">
+              <RouterLink to="/categories" class="nav-link flex items-center">
+                版塊
+                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </RouterLink>
+              
+              <!-- Dropdown Menu -->
+              <div v-if="categoriesDropdownOpen" class="absolute left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 z-50">
+                <RouterLink
+                  v-for="category in categories"
+                  :key="category.id"
+                  :to="`/category/${category.id}`"
+                  class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  @click="categoriesDropdownOpen = false"
+                >
+                  <span class="text-xl mr-3">{{ category.icon }}</span>
+                  <div>
+                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ category.name }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ category.description }}</div>
+                  </div>
+                </RouterLink>
+              </div>
+            </div>
+            
             <RouterLink to="/search" class="nav-link">搜尋</RouterLink>
             
             <template v-if="authStore.isAuthenticated">
@@ -67,7 +115,30 @@ const handleLogout = () => {
       <!-- Mobile menu -->
       <div v-if="mobileMenuOpen" class="md:hidden">
         <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <RouterLink to="/categories" class="mobile-nav-link">版塊</RouterLink>
+          <!-- Categories with Submenu -->
+          <div>
+            <button @click="categoriesDropdownOpen = !categoriesDropdownOpen" class="mobile-nav-link w-full flex items-center justify-between">
+              <span>版塊</span>
+              <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': categoriesDropdownOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <!-- Categories Submenu -->
+            <div v-if="categoriesDropdownOpen" class="pl-4 mt-2 space-y-1">
+              <RouterLink
+                v-for="category in categories"
+                :key="category.id"
+                :to="`/category/${category.id}`"
+                class="mobile-nav-link text-sm flex items-center"
+                @click="mobileMenuOpen = false"
+              >
+                <span class="mr-2">{{ category.icon }}</span>
+                {{ category.name }}
+              </RouterLink>
+            </div>
+          </div>
+          
           <RouterLink to="/search" class="mobile-nav-link">搜尋</RouterLink>
           
           <template v-if="authStore.isAuthenticated">
