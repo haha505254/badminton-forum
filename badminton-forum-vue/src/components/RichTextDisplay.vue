@@ -1,13 +1,93 @@
 <template>
-  <div class="rich-text-display" v-html="content"></div>
+  <div class="rich-text-display">
+    <!-- 如果內容包含戰術圖，則進行特殊處理 -->
+    <div v-if="hasDiagram">
+      <div v-for="(segment, index) in contentSegments" :key="index">
+        <div v-if="segment.type === 'html'" v-html="segment.content"></div>
+        <BadmintonCourtViewer v-else-if="segment.type === 'diagram'" :data="segment.data" />
+      </div>
+    </div>
+    <!-- 否則直接顯示HTML內容 -->
+    <div v-else v-html="sanitizedContent"></div>
+  </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import DOMPurify from 'dompurify'
+import BadmintonCourtViewer from './BadmintonCourtViewer.vue'
+
+const props = defineProps({
   content: {
     type: String,
     required: true
   }
+})
+
+// 檢查是否包含戰術圖
+const hasDiagram = computed(() => {
+  return props.content.includes('badminton-diagram-placeholder')
+})
+
+// 解析內容，分離HTML和戰術圖
+const contentSegments = computed(() => {
+  if (!hasDiagram.value) return []
+  
+  const segments = []
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(props.content, 'text/html')
+  const body = doc.body
+  
+  let currentHtml = ''
+  
+  for (const node of body.childNodes) {
+    if (node.nodeType === Node.ELEMENT_NODE && 
+        node.classList?.contains('badminton-diagram-placeholder')) {
+      // 如果有累積的HTML，先推入
+      if (currentHtml) {
+        segments.push({
+          type: 'html',
+          content: DOMPurify.sanitize(currentHtml)
+        })
+        currentHtml = ''
+      }
+      
+      // 解析戰術圖資料
+      try {
+        const diagramData = JSON.parse(node.getAttribute('data-diagram'))
+        segments.push({
+          type: 'diagram',
+          data: diagramData
+        })
+      } catch (e) {
+        console.error('Failed to parse diagram data:', e)
+      }
+    } else {
+      // 累積HTML內容
+      currentHtml += node.outerHTML || node.textContent || ''
+    }
+  }
+  
+  // 推入剩餘的HTML
+  if (currentHtml) {
+    segments.push({
+      type: 'html',
+      content: DOMPurify.sanitize(currentHtml)
+    })
+  }
+  
+  return segments
+})
+
+// 淨化HTML內容
+const sanitizedContent = computed(() => {
+  return DOMPurify.sanitize(props.content, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'hr', 'div', 'span'
+    ],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'style', 'target']
+  })
 })
 </script>
 

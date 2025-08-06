@@ -55,6 +55,15 @@ onMounted(async () => {
 <style scoped>
 .category-view {
   padding: 2rem;
+  /* 預設不設置最小寬度，保持響應式 */
+  width: 100%;
+}
+
+/* 只在大螢幕上設定最小寬度，確保桌面版寬度一致 */
+@media (min-width: 1024px) {
+  .category-view {
+    min-width: 1088px;
+  }
 }
 
 .posts {

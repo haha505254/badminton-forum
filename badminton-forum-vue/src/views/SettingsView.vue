@@ -208,9 +208,16 @@ onMounted(() => {
 
 <style scoped>
 .settings {
-  max-width: 600px;
-  margin: 0 auto;
+  /* 預設不設置寬度限制，保持響應式 */
+  width: 100%;
   padding: 2rem;
+}
+
+/* 只在大螢幕上設定最小寬度，確保桌面版寬度一致 */
+@media (min-width: 1024px) {
+  .settings {
+    min-width: 1088px;
+  }
 }
 
 h1 {
@@ -224,6 +231,9 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .settings-section h2 {

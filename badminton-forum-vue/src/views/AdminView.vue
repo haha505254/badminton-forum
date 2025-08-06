@@ -134,30 +134,48 @@
                           {{ item.username.charAt(0).toUpperCase() }}
                         </span>
                       </div>
-                      <span class="font-medium">{{ item.username }}</span>
+                      <div>
+                        <span class="font-medium">{{ item.username }}</span>
+                        <span v-if="item.isAdmin" class="ml-2 inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                          管理員
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div class="col-span-2 text-sm">{{ item.email }}</div>
                   <div class="col-span-1 text-sm">{{ formatDate(item.createdAt) }}</div>
                   <div class="col-span-1">
-                    <span :class="[
-                      'inline-flex px-2 py-1 text-xs font-medium rounded-full',
-                      item.isActive 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    ]">
-                      {{ item.isActive ? '正常' : '停用' }}
-                    </span>
+                    <div class="flex flex-col gap-1">
+                      <span :class="[
+                        'inline-flex px-2 py-1 text-xs font-medium rounded-full',
+                        item.isActive 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      ]">
+                        {{ item.isActive ? '正常' : '停用' }}
+                      </span>
+                    </div>
                   </div>
-                  <div class="col-span-1 flex space-x-2">
+                  <div class="col-span-2 flex space-x-2">
                     <button 
                       @click="toggleUserActive(item)"
                       :class="[
                         'px-3 py-1 text-sm rounded',
                         item.isActive ? 'btn-outline' : 'btn-primary'
                       ]"
+                      :title="item.isActive ? '停用此使用者' : '啟用此使用者'"
                     >
                       {{ item.isActive ? '停用' : '啟用' }}
+                    </button>
+                    <button 
+                      @click="toggleUserAdmin(item)"
+                      :class="[
+                        'px-3 py-1 text-sm rounded',
+                        item.isAdmin ? 'btn-outline text-purple-600' : 'btn-outline'
+                      ]"
+                      :title="item.isAdmin ? '移除管理員權限' : '設為管理員'"
+                    >
+                      {{ item.isAdmin ? '移除管理' : '設為管理' }}
                     </button>
                   </div>
                 </template>
@@ -218,6 +236,12 @@
           <div class="flex justify-between items-center">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">文章管理</h1>
             <div class="flex space-x-4">
+              <input 
+                type="text" 
+                v-model="postSearch" 
+                placeholder="搜尋文章標題..."
+                class="form-input"
+              />
               <select v-model="postFilter" class="form-input">
                 <option value="all">全部文章</option>
                 <option value="pinned">置頂文章</option>
@@ -226,7 +250,65 @@
             </div>
           </div>
           
-          <!-- Posts implementation similar to above but with Tailwind classes -->
+          <div class="card-dark overflow-hidden">
+            <div class="overflow-x-auto">
+              <DataTable
+                title=""
+                :headers="postHeaders"
+                :items="filteredPosts"
+              >
+                <template #row="{ item }">
+                  <div class="col-span-1">{{ item.id }}</div>
+                  <div class="col-span-3">
+                    <div>
+                      <RouterLink 
+                        :to="`/post/${item.id}`" 
+                        class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                      >
+                        {{ item.title }}
+                      </RouterLink>
+                      <div class="flex items-center gap-2 mt-1">
+                        <span v-if="item.isPinned" class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                          置頂
+                        </span>
+                        <span v-if="item.isLocked" class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                          鎖定
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-span-1 text-sm">{{ item.authorName }}</div>
+                  <div class="col-span-1 text-sm">{{ item.categoryName }}</div>
+                  <div class="col-span-1 text-sm text-center">{{ item.viewCount }}</div>
+                  <div class="col-span-1 text-sm text-center">{{ item.replyCount }}</div>
+                  <div class="col-span-1 text-sm">{{ formatDate(item.createdAt) }}</div>
+                  <div class="col-span-2 flex space-x-2">
+                    <button 
+                      @click="togglePostPin(item)"
+                      class="btn-outline text-xs"
+                      :title="item.isPinned ? '取消置頂' : '置頂'"
+                    >
+                      📌
+                    </button>
+                    <button 
+                      @click="togglePostLock(item)"
+                      class="btn-outline text-xs"
+                      :title="item.isLocked ? '解鎖' : '鎖定'"
+                    >
+                      🔒
+                    </button>
+                    <button 
+                      @click="deletePost(item)"
+                      class="btn-outline text-xs text-red-600 hover:text-red-700"
+                      title="刪除文章"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </template>
+              </DataTable>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -283,7 +365,7 @@ const userHeaders = [
   { text: '電子郵件', value: 'email', class: 'col-span-2' },
   { text: '註冊日期', value: 'createdAt', class: 'col-span-1' },
   { text: '狀態', value: 'status', class: 'col-span-1' },
-  { text: '操作', value: 'actions', class: 'col-span-1' }
+  { text: '操作', value: 'actions', class: 'col-span-2' }
 ]
 
 const filteredUsers = computed(() => {
@@ -302,6 +384,37 @@ const editingCategory = ref(null)
 // Posts management
 const posts = ref([])
 const postFilter = ref('all')
+const postSearch = ref('')
+const postHeaders = [
+  { text: 'ID', value: 'id', class: 'col-span-1' },
+  { text: '標題', value: 'title', class: 'col-span-3' },
+  { text: '作者', value: 'authorName', class: 'col-span-1' },
+  { text: '版塊', value: 'categoryName', class: 'col-span-1' },
+  { text: '瀏覽', value: 'viewCount', class: 'col-span-1' },
+  { text: '回覆', value: 'replyCount', class: 'col-span-1' },
+  { text: '發表時間', value: 'createdAt', class: 'col-span-1' },
+  { text: '操作', value: 'actions', class: 'col-span-2' }
+]
+
+const filteredPosts = computed(() => {
+  let result = posts.value
+  
+  // Filter by search
+  if (postSearch.value) {
+    result = result.filter(post => 
+      post.title.toLowerCase().includes(postSearch.value.toLowerCase())
+    )
+  }
+  
+  // Filter by status
+  if (postFilter.value === 'pinned') {
+    result = result.filter(post => post.isPinned)
+  } else if (postFilter.value === 'locked') {
+    result = result.filter(post => post.isLocked)
+  }
+  
+  return result
+})
 
 // Methods
 const formatDate = (date) => {
@@ -314,6 +427,21 @@ const toggleUserActive = async (user) => {
     user.isActive = response.data.isActive
   } catch (error) {
     console.error('Failed to toggle user status:', error)
+    alert(error.response?.data || '操作失敗')
+  }
+}
+
+const toggleUserAdmin = async (user) => {
+  const action = user.isAdmin ? '移除管理員權限' : '授予管理員權限'
+  if (!confirm(`確定要${action}給使用者「${user.username}」嗎？`)) return
+  
+  try {
+    const response = await adminApi.toggleUserAdmin(user.id)
+    user.isAdmin = response.data.isAdmin
+    alert(`已${action}`)
+  } catch (error) {
+    console.error('Failed to toggle admin status:', error)
+    alert(error.response?.data || '操作失敗')
   }
 }
 
@@ -338,6 +466,44 @@ const deleteCategory = async (category) => {
   }
 }
 
+// Posts management methods
+const togglePostPin = async (post) => {
+  try {
+    const response = await adminApi.togglePostPin(post.id)
+    post.isPinned = response.data.isPinned
+  } catch (error) {
+    console.error('Failed to toggle post pin:', error)
+    alert('操作失敗')
+  }
+}
+
+const togglePostLock = async (post) => {
+  try {
+    const response = await adminApi.togglePostLock(post.id)
+    post.isLocked = response.data.isLocked
+  } catch (error) {
+    console.error('Failed to toggle post lock:', error)
+    alert('操作失敗')
+  }
+}
+
+const deletePost = async (post) => {
+  if (!confirm(`確定要刪除文章「${post.title}」嗎？\n此操作無法復原！`)) return
+  
+  try {
+    await adminApi.deletePost(post.id)
+    // 從列表中移除
+    const index = posts.value.findIndex(p => p.id === post.id)
+    if (index > -1) {
+      posts.value.splice(index, 1)
+    }
+    alert('文章已刪除')
+  } catch (error) {
+    console.error('Failed to delete post:', error)
+    alert('刪除文章失敗')
+  }
+}
+
 // Load data
 const loadUsers = async () => {
   try {
@@ -357,8 +523,18 @@ const loadCategories = async () => {
   }
 }
 
+const loadPosts = async () => {
+  try {
+    const response = await adminApi.getPosts(1, 50) // 載入前50篇文章
+    posts.value = response.data
+  } catch (error) {
+    console.error('Failed to load posts:', error)
+  }
+}
+
 onMounted(() => {
   loadUsers()
   loadCategories()
+  loadPosts()
 })
 </script>

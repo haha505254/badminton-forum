@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="categories-view">
     <!-- Page Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white">論壇版塊</h1>
@@ -90,3 +90,17 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+.categories-view {
+  /* 預設不設置最小寬度，保持響應式 */
+  width: 100%;
+}
+
+/* 只在大螢幕上設定最小寬度，確保桌面版寬度一致 */
+@media (min-width: 1024px) {
+  .categories-view {
+    min-width: 1088px;
+  }
+}
+</style>

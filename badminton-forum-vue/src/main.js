@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import VueKonva from 'vue-konva'
 import router from './router'
 import './style.css'
 import './assets/tailwind.css'
@@ -10,5 +11,6 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+app.use(VueKonva)
 
 app.mount('#app')

@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-5xl mx-auto">
+  <div class="post-view">
     <!-- Loading State -->
     <div v-if="loading" class="space-y-4">
       <div class="card-dark animate-pulse">
@@ -231,3 +231,24 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+.post-view {
+  /* 預設不設置最小寬度，保持響應式 */
+  width: 100%;
+}
+
+/* 只在大螢幕上設定最小寬度，確保桌面版寬度一致 */
+@media (min-width: 1024px) {
+  .post-view {
+    min-width: 1088px;
+  }
+}
+
+/* 限制內容區域寬度 */
+.card-dark {
+  max-width: 64rem; /* 1024px */
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>

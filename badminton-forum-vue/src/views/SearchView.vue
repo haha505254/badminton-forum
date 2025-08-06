@@ -154,9 +154,15 @@ const formatDate = (dateString) => {
 
 <style scoped>
 .search-view {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  /* 預設不設置最小寬度，保持響應式 */
+  width: 100%;
+}
+
+/* 只在大螢幕上設定最小寬度，確保桌面版寬度一致 */
+@media (min-width: 1024px) {
+  .search-view {
+    min-width: 1088px;
+  }
 }
 
 .search-header {
