@@ -37,12 +37,6 @@
       <button type="button" @click="clearDiagram" class="clear-btn">
         🗑️ 清除
       </button>
-      <button type="button" @click="loadTemplate('singles-serve')" class="template-btn" v-if="gameMode === 'singles'">
-        📋 發球位置
-      </button>
-      <button type="button" @click="loadTemplate('singles-receive')" class="template-btn" v-if="gameMode === 'singles'">
-        📋 接發球位置
-      </button>
     </div>
 
     <div class="canvas-container">
@@ -528,26 +522,6 @@ const loadTemplate = (templateType) => {
       { id: 4, team: 'B', x: centerX, y: oppFrontY, label: '對手2' }
     ]
     description.value = '雙打進攻站位 - 前後站位'
-  } else if (templateType === 'singles-serve') {
-    // 單打發球位置
-    const serveY = offsetY + courtHeight * 0.9
-    const receiveY = offsetY + courtHeight * 0.3
-    players.value = [
-      { id: 1, team: 'A', x: leftX, y: serveY, label: '我' },
-      { id: 2, team: 'B', x: centerX, y: receiveY, label: '對手' }
-    ]
-    shuttlePosition.value = { x: leftX, y: serveY - 20 }
-    description.value = '單打發球位置 - 正手發球'
-  } else if (templateType === 'singles-receive') {
-    // 單打接發球位置
-    const receiveY = offsetY + courtHeight * 0.7
-    const serveY = offsetY + courtHeight * 0.1
-    players.value = [
-      { id: 1, team: 'A', x: centerX, y: receiveY, label: '我' },
-      { id: 2, team: 'B', x: leftX, y: serveY, label: '對手' }
-    ]
-    shuttlePosition.value = { x: leftX, y: serveY + 20 }
-    description.value = '單打接發球位置 - 準備接發'
   }
   
   // 保存載入模板後的狀態
