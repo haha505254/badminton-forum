@@ -301,6 +301,7 @@ const getTextXOffset = (label) => {
   // 根據不同的標籤計算偏移量
   if (label === '我') return -5
   if (label === '隊友') return -12
+  if (label === '對手') return -12
   if (label === '對手1') return -16
   if (label === '對手2') return -16
   return -8 // 預設值
