@@ -281,33 +281,19 @@
             :config="{
               x: annotation.x,
               y: annotation.y,
-              draggable: mode !== 'eraser'
+              draggable: mode === 'text' && editingTextId !== annotation.id
             }"
             @dragend="handleTextDragEnd($event, annotation)"
-            @dblclick="startEditingText(annotation)"
-            @click="handleTextClick(annotation)"
+            @click="handleTextClick(annotation, $event)"
           >
-            <!-- 背景框 -->
-            <v-rect
-              :config="{
-                x: -5,
-                y: -3,
-                width: annotation.text.length * 16 + 10,
-                height: 26,
-                fill: 'rgba(255, 255, 255, 0.9)',
-                stroke: '#333',
-                strokeWidth: 1,
-                cornerRadius: 3
-              }"
-            />
-            <!-- 文字 -->
+            <!-- 文字（無背景） -->
             <v-text
               :config="{
                 x: 0,
                 y: 0,
                 text: annotation.text,
-                fontSize: 16,
-                fill: '#333',
+                fontSize: 18,
+                fill: 'black',
                 fontStyle: 'normal'
               }"
             />
@@ -601,6 +587,16 @@ const handleMouseDown = (e) => {
     return
   }
   
+  // 檢查是否點擊到了場地背景（而非其他物件）
+  // 如果點擊的是其他物件（如文字標註），則不處理
+  const clickedOnStage = e.target === e.target.getStage() || 
+                         e.target.className === 'Rect' || 
+                         e.target.className === 'Line'
+  
+  if (!clickedOnStage) {
+    return // 點擊到了其他物件，不創建新物件
+  }
+  
   if (mode.value === 'shuttle') {
     // 保存當前狀態
     saveToHistory()
@@ -691,12 +687,18 @@ const handlePlayerDragEnd = (e, player) => {
 
 // 處理文字拖曳
 const handleTextDragEnd = (e, annotation) => {
-  saveToHistory()
-  
-  annotation.x = e.target.x()
-  annotation.y = e.target.y()
+  // 只有在文字模式下才能拖曳
+  if (mode.value !== 'text') return
   
   saveToHistory()
+  
+  // 更新文字標註的位置
+  const index = textAnnotations.value.findIndex(a => a.id === annotation.id)
+  if (index !== -1) {
+    textAnnotations.value[index].x = e.target.x()
+    textAnnotations.value[index].y = e.target.y()
+  }
+  
   emitUpdate()
 }
 
@@ -830,7 +832,12 @@ const handleArrowClick = (index) => {
 }
 
 // 處理文字點擊（橡皮擦模式或編輯）
-const handleTextClick = (annotation) => {
+const handleTextClick = (annotation, e) => {
+  // 停止事件冒泡，避免觸發 handleMouseDown
+  if (e && e.cancelBubble !== undefined) {
+    e.cancelBubble = true
+  }
+  
   if (mode.value === 'eraser') {
     saveToHistory()
     const index = textAnnotations.value.findIndex(a => a.id === annotation.id)

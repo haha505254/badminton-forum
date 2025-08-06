@@ -214,27 +214,14 @@
               draggable: false
             }"
           >
-            <!-- 背景框 -->
-            <v-rect
-              :config="{
-                x: -5,
-                y: -3,
-                width: annotation.text.length * 16 + 10,
-                height: 26,
-                fill: 'rgba(255, 255, 255, 0.9)',
-                stroke: '#333',
-                strokeWidth: 1,
-                cornerRadius: 3
-              }"
-            />
-            <!-- 文字 -->
+            <!-- 文字（無背景） -->
             <v-text
               :config="{
                 x: 0,
                 y: 0,
                 text: annotation.text,
-                fontSize: 16,
-                fill: '#333',
+                fontSize: 18,
+                fill: 'black',
                 fontStyle: 'normal'
               }"
             />
