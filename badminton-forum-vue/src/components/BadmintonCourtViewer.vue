@@ -10,66 +10,114 @@
             :config="{
               x: 0,
               y: 0,
-              width: courtWidth,
-              height: courtHeight,
-              fill: '#4a7c59',
+              width: canvasWidth,
+              height: canvasHeight,
+              fill: '#4a7c59'
+            }"
+          />
+          
+          <!-- 場地線條（與編輯器相同） -->
+          <!-- 1-4. 外部框架（雙打場地） -->
+          <!-- 底部端線 -->
+          <v-line
+            :config="{
+              points: [offsetX, offsetY + courtHeight, offsetX + courtWidth, offsetY + courtHeight],
+              stroke: 'white',
+              strokeWidth: 3
+            }"
+          />
+          <!-- 頂部端線 -->
+          <v-line
+            :config="{
+              points: [offsetX, offsetY, offsetX + courtWidth, offsetY],
+              stroke: 'white',
+              strokeWidth: 3
+            }"
+          />
+          <!-- 左側雙打邊線 -->
+          <v-line
+            :config="{
+              points: [offsetX, offsetY, offsetX, offsetY + courtHeight],
+              stroke: 'white',
+              strokeWidth: 3
+            }"
+          />
+          <!-- 右側雙打邊線 -->
+          <v-line
+            :config="{
+              points: [offsetX + courtWidth, offsetY, offsetX + courtWidth, offsetY + courtHeight],
+              stroke: 'white',
+              strokeWidth: 3
+            }"
+          />
+          
+          <!-- 5-6. 單打邊線 -->
+          <!-- 左側單打邊線 -->
+          <v-line
+            :config="{
+              points: [offsetX + singlesLineLeft, offsetY, offsetX + singlesLineLeft, offsetY + courtHeight],
+              stroke: 'white',
+              strokeWidth: 2
+            }"
+          />
+          <!-- 右側單打邊線 -->
+          <v-line
+            :config="{
+              points: [offsetX + singlesLineRight, offsetY, offsetX + singlesLineRight, offsetY + courtHeight],
               stroke: 'white',
               strokeWidth: 2
             }"
           />
           
-          <!-- 場地線條 -->
-          <!-- 外框線 -->
+          <!-- 7-8. 前發球線 -->
+          <!-- 下半場前發球線 -->
           <v-line
             :config="{
-              points: [margin, margin, courtWidth - margin, margin],
-              stroke: 'white',
-              strokeWidth: 3
-            }"
-          />
-          <v-line
-            :config="{
-              points: [margin, courtHeight - margin, courtWidth - margin, courtHeight - margin],
-              stroke: 'white',
-              strokeWidth: 3
-            }"
-          />
-          <v-line
-            :config="{
-              points: [margin, margin, margin, courtHeight - margin],
-              stroke: 'white',
-              strokeWidth: 3
-            }"
-          />
-          <v-line
-            :config="{
-              points: [courtWidth - margin, margin, courtWidth - margin, courtHeight - margin],
-              stroke: 'white',
-              strokeWidth: 3
-            }"
-          />
-          
-          <!-- 中線 -->
-          <v-line
-            :config="{
-              points: [courtWidth / 2, margin, courtWidth / 2, courtHeight - margin],
-              stroke: 'white',
-              strokeWidth: 2,
-              dash: [10, 5]
-            }"
-          />
-          
-          <!-- 發球線 -->
-          <v-line
-            :config="{
-              points: [margin, serviceLineY, courtWidth - margin, serviceLineY],
+              points: [offsetX, offsetY + courtHeight - frontServiceLine1, offsetX + courtWidth, offsetY + courtHeight - frontServiceLine1],
               stroke: 'white',
               strokeWidth: 2
             }"
           />
+          <!-- 上半場前發球線 -->
           <v-line
             :config="{
-              points: [margin, courtHeight - serviceLineY, courtWidth - margin, courtHeight - serviceLineY],
+              points: [offsetX, offsetY + courtHeight - frontServiceLine2, offsetX + courtWidth, offsetY + courtHeight - frontServiceLine2],
+              stroke: 'white',
+              strokeWidth: 2
+            }"
+          />
+          
+          <!-- 9-10. 雙打後發球線 -->
+          <!-- 下半場雙打後發球線 -->
+          <v-line
+            :config="{
+              points: [offsetX, offsetY + courtHeight - doubleServiceLine1, offsetX + courtWidth, offsetY + courtHeight - doubleServiceLine1],
+              stroke: 'white',
+              strokeWidth: 2
+            }"
+          />
+          <!-- 上半場雙打後發球線 -->
+          <v-line
+            :config="{
+              points: [offsetX, offsetY + courtHeight - doubleServiceLine2, offsetX + courtWidth, offsetY + courtHeight - doubleServiceLine2],
+              stroke: 'white',
+              strokeWidth: 2
+            }"
+          />
+          
+          <!-- 11-12. 中線 -->
+          <!-- 下半場中線 -->
+          <v-line
+            :config="{
+              points: [offsetX + centerLineX, offsetY + courtHeight, offsetX + centerLineX, offsetY + courtHeight - frontServiceLine1],
+              stroke: 'white',
+              strokeWidth: 2
+            }"
+          />
+          <!-- 上半場中線 -->
+          <v-line
+            :config="{
+              points: [offsetX + centerLineX, offsetY + courtHeight - frontServiceLine2, offsetX + centerLineX, offsetY],
               stroke: 'white',
               strokeWidth: 2
             }"
@@ -79,8 +127,8 @@
           <v-rect
             :config="{
               x: 0,
-              y: courtHeight / 2 - 2,
-              width: courtWidth,
+              y: offsetY + courtHeight - netY - 2,
+              width: canvasWidth,
               height: 4,
               fill: '#333',
               opacity: 0.8
@@ -93,11 +141,12 @@
             :key="`arrow-${index}`"
             :config="{
               points: [arrow.from.x, arrow.from.y, arrow.to.x, arrow.to.y],
-              pointerLength: 15,
-              pointerWidth: 15,
-              fill: arrow.type === 'attack' ? '#ff6b6b' : '#4ecdc4',
-              stroke: arrow.type === 'attack' ? '#ff6b6b' : '#4ecdc4',
-              strokeWidth: 3
+              pointerLength: arrow.type === 'shuttle' ? 20 : 15,
+              pointerWidth: arrow.type === 'shuttle' ? 20 : 15,
+              fill: arrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
+              stroke: arrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
+              strokeWidth: arrow.type === 'shuttle' ? 4 : 3,
+              dash: arrow.type === 'shuttle' ? [8, 4] : []
             }"
           />
 
@@ -137,7 +186,7 @@
               :config="{
                 x: 0,
                 y: 0,
-                radius: 20,
+                radius: 18,
                 fill: player.team === 'A' ? '#3498db' : '#e74c3c',
                 stroke: 'white',
                 strokeWidth: 2
@@ -145,12 +194,48 @@
             />
             <v-text
               :config="{
-                x: -10,
-                y: -8,
+                x: getTextXOffset(player.label),
+                y: -7,
                 text: player.label,
-                fontSize: 16,
+                fontSize: player.label.length > 2 ? 13 : 14,
                 fill: 'white',
                 fontStyle: 'bold'
+              }"
+            />
+          </v-group>
+          
+          <!-- 文字標註 -->
+          <v-group
+            v-for="annotation in data.textAnnotations || []"
+            :key="annotation.id"
+            :config="{
+              x: annotation.x,
+              y: annotation.y,
+              draggable: false
+            }"
+          >
+            <!-- 背景框 -->
+            <v-rect
+              :config="{
+                x: -5,
+                y: -3,
+                width: annotation.text.length * 16 + 10,
+                height: 26,
+                fill: 'rgba(255, 255, 255, 0.9)',
+                stroke: '#333',
+                strokeWidth: 1,
+                cornerRadius: 3
+              }"
+            />
+            <!-- 文字 -->
+            <v-text
+              :config="{
+                x: 0,
+                y: 0,
+                text: annotation.text,
+                fontSize: 16,
+                fill: '#333',
+                fontStyle: 'normal'
               }"
             />
           </v-group>
@@ -161,19 +246,23 @@
     <div class="legend">
       <div class="legend-item">
         <span class="legend-color team-a"></span>
-        <span>A隊</span>
+        <span>我方</span>
       </div>
       <div class="legend-item">
         <span class="legend-color team-b"></span>
-        <span>B隊</span>
+        <span>對手</span>
       </div>
       <div class="legend-item" v-if="data.shuttle">
         <span>🏸</span>
         <span>羽球位置</span>
       </div>
-      <div class="legend-item" v-if="data.arrows?.length > 0">
-        <span class="legend-arrow"></span>
-        <span>移動路徑</span>
+      <div class="legend-item" v-if="hasPlayerArrows">
+        <span class="legend-arrow player-arrow"></span>
+        <span>人員移動</span>
+      </div>
+      <div class="legend-item" v-if="hasShuttleArrows">
+        <span class="legend-arrow shuttle-arrow"></span>
+        <span>球路軌跡</span>
       </div>
     </div>
   </div>
@@ -195,16 +284,50 @@ const props = defineProps({
   }
 })
 
-// 場地尺寸設定
-const courtWidth = 600
-const courtHeight = 800
-const margin = 40
-const serviceLineY = 200
+// 場地尺寸設定 (與編輯器相同的規格)
+const scale = 50
+const widthScale = 1.5
+const courtWidth = 6.1 * scale * widthScale
+const courtHeight = 13.4 * scale
+const canvasWidth = courtWidth + 80
+const canvasHeight = courtHeight + 80
+const offsetX = 40
+const offsetY = 40
+
+// 關鍵座標
+const netY = 6.7 * scale
+const frontServiceLine1 = 4.72 * scale
+const frontServiceLine2 = 8.68 * scale
+const doubleServiceLine1 = 0.76 * scale
+const doubleServiceLine2 = 12.64 * scale
+const centerLineX = 3.05 * scale * widthScale
+const singlesLineLeft = 0.46 * scale * widthScale
+const singlesLineRight = 5.64 * scale * widthScale
 
 const stageConfig = {
-  width: courtWidth,
-  height: courtHeight
+  width: canvasWidth,
+  height: canvasHeight
 }
+
+// 計算文字 X 偏移量以達到置中對齊
+const getTextXOffset = (label) => {
+  // 根據不同的標籤計算偏移量
+  if (label === '我') return -5
+  if (label === '隊友') return -12
+  if (label === '對手1') return -16
+  if (label === '對手2') return -16
+  return -8 // 預設值
+}
+
+// 計算屬性：是否有人員移動箭頭
+const hasPlayerArrows = computed(() => {
+  return props.data.arrows?.some(arrow => arrow.type === 'player') || false
+})
+
+// 計算屬性：是否有球路軌跡箭頭
+const hasShuttleArrows = computed(() => {
+  return props.data.arrows?.some(arrow => arrow.type === 'shuttle') || false
+})
 </script>
 
 <style scoped>
@@ -268,18 +391,38 @@ const stageConfig = {
 .legend-arrow {
   width: 30px;
   height: 2px;
-  background: #ff6b6b;
   position: relative;
 }
 
-.legend-arrow::after {
+.legend-arrow.player-arrow {
+  background: #4ecdc4;
+}
+
+.legend-arrow.player-arrow::after {
   content: '';
   position: absolute;
   right: 0;
   top: -3px;
   width: 0;
   height: 0;
-  border-left: 8px solid #ff6b6b;
+  border-left: 8px solid #4ecdc4;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+.legend-arrow.shuttle-arrow {
+  background: linear-gradient(90deg, #FFD700 0%, #FFD700 25%, transparent 25%, transparent 50%, #FFD700 50%, #FFD700 75%, transparent 75%);
+  background-size: 8px 100%;
+}
+
+.legend-arrow.shuttle-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -3px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #FFD700;
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;
 }
