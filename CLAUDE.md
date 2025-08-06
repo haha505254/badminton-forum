@@ -7,21 +7,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Full-stack badminton forum application:
 - **Backend**: ASP.NET Core 8.0 Web API with MariaDB
 - **Frontend**: Vue 3 SPA with Vite
-- **Architecture**: RESTful API with JWT authentication
+- **Architecture**: RESTful API with JWT authentication + Google OAuth 2.0
 
 ## Quick Start Commands
 
 ```bash
-# Docker (recommended)
+# First time setup (for new machines)
+./scripts/quick-setup.sh
 docker-compose up
 
-# Local development
+# Regular development
+docker-compose up
+
+# Local development (without Docker)
 # Terminal 1: Backend
 cd BadmintonForum.API && dotnet run
 
 # Terminal 2: Frontend  
 cd badminton-forum-vue && npm run dev
 ```
+
+## Environment Setup
+
+### Required Environment Files
+1. **`.env`** - Backend configuration (copy from `.env.example`)
+2. **`badminton-forum-vue/.env.development`** - Frontend config (copy from `.env.development.example`)
+
+### Key Environment Variables
+- `GOOGLE_CLIENT_ID` - For Google OAuth (optional)
+- `JWT_SECRET` - Must change for production (use `openssl rand -base64 48`)
+- `MARIADB_PASSWORD` - Must change for production
 
 ## Essential Development Commands
 

@@ -10,33 +10,56 @@
 - 👤 個人資料管理（含頭像上傳）
 - 🛡️ 管理員後台
 - 🔍 搜尋功能
+- 🔑 Google OAuth 登入（選用）
 
 ## 技術架構
 
 - **後端**: ASP.NET Core 8.0 Web API
 - **前端**: Vue 3 + Vite + Tailwind CSS
 - **資料庫**: MariaDB 11+
-- **認證**: JWT Token
+- **認證**: JWT Token + Google OAuth 2.0
 - **ORM**: Entity Framework Core
 - **狀態管理**: Pinia
 - **容器化**: Docker & Docker Compose
 
-## 🚀 快速開始（推薦）
+## 🚀 快速開始
 
-### 使用 Docker Compose（最簡單）
+### 前置需求
+- Docker 和 Docker Compose
+- Git
 
-只需要安裝 Docker 和 Docker Compose，然後執行：
+### 安裝步驟
 
 ```bash
-# Clone 專案
+# 1. Clone 專案
 git clone https://github.com/haha505254/badminton-forum.git
 cd badminton-forum
 
-# 啟動所有服務
+# 2. 設定環境變數
+cp .env.example .env
+cp badminton-forum-vue/.env.development.example badminton-forum-vue/.env.development
+
+# 3. (選用) 編輯 .env 檔案
+# - 修改資料庫密碼（生產環境必須更改）
+# - 設定 JWT Secret（生產環境必須更改）
+# - 設定 Google OAuth Client ID（如需要 Google 登入功能）
+# nano .env
+
+# 4. 啟動所有服務
 docker-compose up -d
 
-# 查看服務狀態
+# 5. 查看服務狀態
 docker-compose ps
+```
+
+### 快速設定腳本（替代方案）
+
+```bash
+# 使用自動設定腳本
+./scripts/quick-setup.sh
+
+# 然後啟動服務
+docker-compose up -d
 ```
 
 稍等片刻後，即可訪問：
@@ -112,21 +135,17 @@ docker-compose exec db mariadb -u badmintonuser -pBadmintonPass123 badmintonforu
 
 ## 🛠️ 環境變數設定
 
-Docker Compose 使用的環境變數可在 `.env` 檔案中設定：
+專案使用 `.env` 檔案管理設定。請參考 `.env.example` 檔案：
 
-```env
-# 資料庫設定
-MARIADB_DATABASE=badmintonforumdb
-MARIADB_USER=badmintonuser
-MARIADB_PASSWORD=BadmintonPass123
-MARIADB_ROOT_PASSWORD=rootpass123
+### 必要設定
+- **資料庫密碼**: 生產環境必須更改預設密碼
+- **JWT Secret**: 生產環境必須使用強密碼（至少 32 字元）
 
-# JWT 設定
-JWT_SECRET=ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction
+### 選用設定
+- **Google OAuth**: 設定 Client ID 以啟用 Google 登入
+- **Email 服務**: 生產環境設定 SMTP 
 
-# API URL（前端使用）
-VITE_API_URL=http://localhost:5246/api
-```
+詳細說明請查看 `.env.example` 檔案中的註解。
 
 ## 📂 專案結構
 
