@@ -42,6 +42,7 @@ services:
       JwtSettings__ExpirationInDays: ${JWT_EXPIRATION_DAYS:-7}
       Email__UseConsoleEmail: "true"
       Email__BaseUrl: ${EMAIL_BASE_URL:-http://localhost:5173}
+      GoogleAuth__ClientId: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
     ports:
       - "${API_PORT:-5246}:5246"
     volumes:
@@ -66,6 +67,7 @@ services:
     environment:
       NODE_ENV: development
       VITE_API_URL: ${VITE_API_URL:-http://localhost:5246/api}
+      VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
     ports:
       - "${WEB_PORT:-5173}:5173"
     volumes:

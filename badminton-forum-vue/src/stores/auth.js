@@ -54,6 +54,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function googleLogin(idToken) {
+    try {
+      const response = await api.post('/auth/google-login', { idToken })
+      const { token: newToken, user: userData } = response.data
+      
+      token.value = newToken
+      user.value = userData
+      
+      localStorage.setItem('token', newToken)
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      // Set default authorization header
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+      
+      return { success: true }
+    } catch (error) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Google 登入失敗' 
+      }
+    }
+  }
+
   function logout() {
     token.value = null
     user.value = null
@@ -75,6 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     login,
     register,
+    googleLogin,
     logout
   }
 })

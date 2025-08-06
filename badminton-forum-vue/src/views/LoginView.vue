@@ -23,6 +23,26 @@
           {{ error }}
         </div>
         
+        <!-- Google Sign In -->
+        <div class="mb-6">
+          <GoogleSignInButton 
+            button-text="使用 Google 登入"
+            mode="login"
+            @success="handleGoogleSuccess"
+            @error="handleGoogleError"
+          />
+          
+          <!-- Divider -->
+          <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">或使用電子郵件登入</span>
+            </div>
+          </div>
+        </div>
+        
         <!-- Login Form -->
         <form @submit.prevent="handleLogin" class="space-y-6">
           <div>
@@ -105,6 +125,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import GoogleSignInButton from '@/components/GoogleSignInButton.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -131,5 +152,14 @@ const handleLogin = async () => {
   }
   
   loading.value = false
+}
+
+const handleGoogleSuccess = (result) => {
+  const redirect = router.currentRoute.value.query.redirect || '/'
+  router.push(redirect)
+}
+
+const handleGoogleError = (errorMessage) => {
+  error.value = errorMessage
 }
 </script>

@@ -15,6 +15,7 @@ builder.Services.AddControllers();
 // Register application services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
 // Email 服務設定
 var useConsoleEmail = builder.Configuration.GetValue<bool>("Email:UseConsoleEmail");

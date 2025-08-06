@@ -17,19 +17,22 @@ namespace BadmintonForum.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IGoogleAuthService _googleAuthService;
 
         public AuthController(
             ApplicationDbContext context,
             IJwtService jwtService,
             IConfiguration configuration,
             IEmailService emailService,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            IGoogleAuthService googleAuthService)
         {
             _context = context;
             _jwtService = jwtService;
             _configuration = configuration;
             _emailService = emailService;
             _logger = logger;
+            _googleAuthService = googleAuthService;
         }
 
         [HttpPost("register")]
@@ -98,7 +101,12 @@ namespace BadmintonForum.API.Controllers
                 return Unauthorized(new { message = "帳號或密碼錯誤" });
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+            if (user.Provider == "Google" && string.IsNullOrEmpty(user.PasswordHash))
+            {
+                return Unauthorized(new { message = "此帳號使用 Google 登入，請使用 Google 登入" });
+            }
+
+            if (!string.IsNullOrEmpty(user.PasswordHash) && !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
                 return Unauthorized(new { message = "密碼錯誤" });
             }
@@ -204,6 +212,108 @@ namespace BadmintonForum.API.Controllers
                 .Replace("+", "-")
                 .Replace("/", "_")
                 .Replace("=", "");
+        }
+
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin(GoogleLoginDto googleLoginDto)
+        {
+            try
+            {
+                // 驗證 Google ID Token
+                var googleUserInfo = await _googleAuthService.VerifyGoogleTokenAsync(googleLoginDto.IdToken);
+
+                if (googleUserInfo == null)
+                {
+                    return Unauthorized(new { message = "無效的 Google 認證令牌" });
+                }
+
+                // 檢查使用者是否已存在
+                var existingUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email == googleUserInfo.Email || u.GoogleId == googleUserInfo.Id);
+
+                User user;
+                
+                if (existingUser != null)
+                {
+                    // 使用者已存在，更新 Google 相關資訊
+                    if (string.IsNullOrEmpty(existingUser.GoogleId))
+                    {
+                        existingUser.GoogleId = googleUserInfo.Id;
+                        existingUser.EmailVerified = googleUserInfo.EmailVerified;
+                        if (existingUser.Provider == "Local")
+                        {
+                            existingUser.Provider = "Both";
+                        }
+                    }
+                    
+                    existingUser.LastLoginAt = DateTime.UtcNow;
+                    user = existingUser;
+                }
+                else
+                {
+                    // 建立新使用者
+                    user = new User
+                    {
+                        Username = GenerateUsernameFromEmail(googleUserInfo.Email),
+                        Email = googleUserInfo.Email,
+                        GoogleId = googleUserInfo.Id,
+                        Provider = "Google",
+                        EmailVerified = googleUserInfo.EmailVerified,
+                        Avatar = googleUserInfo.Picture,
+                        CreatedAt = DateTime.UtcNow,
+                        LastLoginAt = DateTime.UtcNow,
+                        IsActive = true
+                    };
+
+                    _context.Users.Add(user);
+                }
+
+                await _context.SaveChangesAsync();
+
+                // 生成 JWT token
+                var token = _jwtService.GenerateToken(user);
+                var expirationDays = Convert.ToDouble(_configuration["JwtSettings:ExpirationInDays"]);
+
+                return Ok(new AuthResponseDto
+                {
+                    Token = token,
+                    ExpiresAt = DateTime.UtcNow.AddDays(expirationDays),
+                    User = new UserDto
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        Email = user.Email,
+                        Avatar = user.Avatar,
+                        Bio = user.Bio,
+                        CreatedAt = user.CreatedAt,
+                        IsAdmin = user.IsAdmin,
+                        PlayingStyle = user.PlayingStyle,
+                        YearsOfExperience = user.YearsOfExperience,
+                        Signature = user.Signature
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during Google login");
+                return StatusCode(500, new { message = "Google 登入過程中發生錯誤" });
+            }
+        }
+
+        private string GenerateUsernameFromEmail(string email)
+        {
+            var username = email.Split('@')[0];
+            var baseUsername = username;
+            var counter = 1;
+
+            // 確保使用者名稱唯一
+            while (_context.Users.Any(u => u.Username == username))
+            {
+                username = $"{baseUsername}{counter}";
+                counter++;
+            }
+
+            return username;
         }
     }
 }

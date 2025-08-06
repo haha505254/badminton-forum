@@ -13,6 +13,7 @@
     "test:e2e:report": "echo 'E2E tests are disabled'"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.12.2",
     "@tiptap/pm": "^3.0.7",
     "@tiptap/starter-kit": "^3.0.7",
     "@tiptap/vue-3": "^3.0.7",
@@ -24,7 +25,8 @@
     "vite": "^4.5.3",
     "vue": "^3.5.17",
     "vue-konva": "^3.2.2",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vue3-google-signin": "^2.1.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.1",

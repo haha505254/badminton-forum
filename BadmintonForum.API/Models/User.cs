@@ -14,8 +14,7 @@ namespace BadmintonForum.API.Models
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        public string PasswordHash { get; set; } = string.Empty;
+        public string? PasswordHash { get; set; } = string.Empty;
 
         public string? Avatar { get; set; }
 
@@ -28,6 +27,13 @@ namespace BadmintonForum.API.Models
         public bool IsActive { get; set; } = true;
 
         public bool IsAdmin { get; set; } = false;
+
+        // OAuth Properties
+        public string? GoogleId { get; set; }
+        
+        public string? Provider { get; set; } = "Local";
+        
+        public bool EmailVerified { get; set; } = false;
 
         // Badminton-specific fields
         public string? PlayingStyle { get; set; } // 攻擊型、防守型、全能型

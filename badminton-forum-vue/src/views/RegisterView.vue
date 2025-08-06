@@ -7,6 +7,21 @@
         {{ error }}
       </div>
       
+      <!-- Google Sign Up -->
+      <div class="google-signin-section">
+        <GoogleSignInButton 
+          button-text="使用 Google 註冊"
+          mode="register"
+          @success="handleGoogleSuccess"
+          @error="handleGoogleError"
+        />
+        
+        <!-- Divider -->
+        <div class="divider">
+          <span>或使用電子郵件註冊</span>
+        </div>
+      </div>
+      
       <div class="form-group">
         <label for="email">電子郵件 (帳號)</label>
         <input
@@ -58,6 +73,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import GoogleSignInButton from '@/components/GoogleSignInButton.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -91,6 +107,14 @@ const handleRegister = async () => {
   }
   
   loading.value = false
+}
+
+const handleGoogleSuccess = (result) => {
+  router.push('/')
+}
+
+const handleGoogleError = (errorMessage) => {
+  error.value = errorMessage
 }
 </script>
 
@@ -176,6 +200,34 @@ input:focus {
   text-align: center;
   margin-top: 1rem;
   color: #666;
+}
+
+.google-signin-section {
+  margin-bottom: 1.5rem;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background-color: #ddd;
+}
+
+.divider span {
+  position: relative;
+  padding: 0 1rem;
+  background-color: white;
+  color: #666;
+  font-size: 0.875rem;
 }
 
 .login-link a {
