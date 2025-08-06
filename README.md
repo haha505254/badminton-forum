@@ -22,7 +22,7 @@
 - **狀態管理**: Pinia
 - **容器化**: Docker & Docker Compose
 
-## 🚀 快速開始
+## 🚀 快速開始（超簡單！）
 
 ### 前置需求
 - Docker 和 Docker Compose
@@ -35,32 +35,17 @@
 git clone https://github.com/haha505254/badminton-forum.git
 cd badminton-forum
 
-# 2. 設定環境變數
-cp .env.example .env
-cp badminton-forum-vue/.env.development.example badminton-forum-vue/.env.development
+# 2. 複製預設環境設定
+cp .env.defaults .env
 
-# 3. (選用) 編輯 .env 檔案
-# - 修改資料庫密碼（生產環境必須更改）
-# - 設定 JWT Secret（生產環境必須更改）
-# - 設定 Google OAuth Client ID（如需要 Google 登入功能）
+# 3. (選用) 如需 Google 登入功能，編輯 .env 設定你的 Google Client ID
 # nano .env
 
 # 4. 啟動所有服務
 docker-compose up -d
-
-# 5. 查看服務狀態
-docker-compose ps
 ```
 
-### 快速設定腳本（替代方案）
-
-```bash
-# 使用自動設定腳本
-./scripts/quick-setup.sh
-
-# 然後啟動服務
-docker-compose up -d
-```
+就這麼簡單！
 
 稍等片刻後，即可訪問：
 - 🌐 **前端**: http://localhost:5173

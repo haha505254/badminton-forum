@@ -12,8 +12,8 @@ Full-stack badminton forum application:
 ## Quick Start Commands
 
 ```bash
-# First time setup (for new machines)
-./scripts/quick-setup.sh
+# First time setup (超簡單！)
+cp .env.defaults .env
 docker-compose up
 
 # Regular development
@@ -29,14 +29,14 @@ cd badminton-forum-vue && npm run dev
 
 ## Environment Setup
 
-### Required Environment Files
-1. **`.env`** - Backend configuration (copy from `.env.example`)
-2. **`badminton-forum-vue/.env.development`** - Frontend config (copy from `.env.development.example`)
+### Environment Files
+- **`.env`** - Main configuration (copy from `.env.defaults`)
+- **`badminton-forum-vue/.env.development`** - Frontend config (已包含預設值)
 
 ### Key Environment Variables
-- `GOOGLE_CLIENT_ID` - For Google OAuth (optional)
-- `JWT_SECRET` - Must change for production (use `openssl rand -base64 48`)
-- `MARIADB_PASSWORD` - Must change for production
+- `GOOGLE_CLIENT_ID` - 需自行設定以啟用 Google OAuth (optional)
+- `JWT_SECRET` - 生產環境必須更改
+- `MARIADB_PASSWORD` - 生產環境必須更改
 
 ## Essential Development Commands
 

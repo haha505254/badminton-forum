@@ -99,9 +99,9 @@ dist-ssr/
 .env.local
 .env.production
 .env.production.local
-.env.development
 .env.development.local
-badminton-forum-vue/.env.development
+!.env.defaults
+!badminton-forum-vue/.env.development
 
 # Vue.js
 .DS_Store
