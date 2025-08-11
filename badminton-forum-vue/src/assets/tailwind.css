@@ -4,6 +4,10 @@
 
 /* Custom utility classes */
 @layer components {
+  .container-max {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
   .btn {
     @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
@@ -34,5 +38,9 @@
   
   .form-label {
     @apply mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300;
+  }
+
+  .glass {
+    @apply bg-white/70 dark:bg-gray-900/50 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/40 border border-gray-200/60 dark:border-gray-700/60;
   }
 }

@@ -1,11 +1,11 @@
 <template>
   <div>
     <!-- Hero Section -->
-    <div class="text-center mb-8">
-      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+    <div class="text-center mb-10">
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-3">
         歡迎來到羽毛球論壇
       </h1>
-      <p class="text-xl text-gray-600 dark:text-gray-300">
+      <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300">
         分享您的羽毛球經驗，與球友交流技術！
       </p>
     </div>
@@ -13,12 +13,12 @@
     <!-- Categories Section -->
     <div class="mb-12">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">論壇板塊</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <RouterLink
           v-for="category in categories"
           :key="category.id"
           :to="`/category/${category.id}`"
-          class="card-dark hover:shadow-lg transition-all duration-300 group block"
+          class="card-dark hover:shadow-xl transition-all duration-300 group block"
         >
           <div class="flex items-start space-x-4">
             <div class="flex-shrink-0 text-3xl">{{ category.icon }}</div>
@@ -39,7 +39,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mb-8">
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4 2xl:gap-7.5 mb-10">
       <StatsCard 
         title="總文章數" 
         :total="stats.totalPosts" 
@@ -92,8 +92,8 @@
     </div>
     
     <!-- Features Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="card-dark hover:shadow-lg transition-shadow cursor-pointer">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div class="card-dark hover:shadow-xl transition-shadow cursor-pointer">
         <div class="flex items-center mb-4">
           <span class="text-3xl mr-3">🏸</span>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">技術討論</h3>
@@ -103,7 +103,7 @@
         </p>
       </div>
       
-      <div class="card-dark hover:shadow-lg transition-shadow cursor-pointer">
+      <div class="card-dark hover:shadow-xl transition-shadow cursor-pointer">
         <div class="flex items-center mb-4">
           <span class="text-3xl mr-3">🎾</span>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">裝備推薦</h3>
@@ -113,7 +113,7 @@
         </p>
       </div>
       
-      <div class="card-dark hover:shadow-lg transition-shadow cursor-pointer">
+      <div class="card-dark hover:shadow-xl transition-shadow cursor-pointer">
         <div class="flex items-center mb-4">
           <span class="text-3xl mr-3">📅</span>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">活動公告</h3>
@@ -123,7 +123,7 @@
         </p>
       </div>
       
-      <div class="card-dark hover:shadow-lg transition-shadow cursor-pointer">
+      <div class="card-dark hover:shadow-xl transition-shadow cursor-pointer">
         <div class="flex items-center mb-4">
           <span class="text-3xl mr-3">👥</span>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">球友交流</h3>

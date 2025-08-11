@@ -10,6 +10,21 @@ const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
 const categoriesDropdownOpen = ref(false)
 const categories = ref([])
+const isDark = ref(false)
+
+const loadTheme = () => {
+  const stored = localStorage.getItem('theme')
+  const preferDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const useDark = stored ? stored === 'dark' : preferDark
+  isDark.value = useDark
+  document.documentElement.classList.toggle('dark', useDark)
+}
+
+const toggleTheme = () => {
+  isDark.value = !isDark.value
+  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
 
 const handleLogout = () => {
   authStore.logout()
@@ -18,6 +33,7 @@ const handleLogout = () => {
 
 // 加載板塊數據
 onMounted(async () => {
+  loadTheme()
   try {
     const response = await categoriesApi.getCategories()
     categories.value = response.data.map(apiCategory => {
@@ -38,8 +54,8 @@ onMounted(async () => {
 <template>
   <div id="app" class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
     <!-- Navigation Bar -->
-    <nav class="sticky top-0 z-50 bg-white shadow-md dark:bg-gray-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-gray-900/60 border-b border-gray-200/60 dark:border-gray-700/60">
+      <div class="container-max">
         <div class="flex justify-between h-16">
           <!-- Logo -->
           <div class="flex items-center">
@@ -51,6 +67,15 @@ onMounted(async () => {
           
           <!-- Navigation Links -->
           <div class="hidden md:flex items-center space-x-8">
+            <!-- Theme Toggle -->
+            <button @click="toggleTheme" class="mobile-menu-button" :aria-label="isDark ? '切換為淺色模式' : '切換為深色模式'">
+              <svg v-if="!isDark" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+              </svg>
+              <svg v-else class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M8.05 8.05L6.636 6.636m10.728 0l-1.414 1.414M8.05 15.95l-1.414 1.414" />
+              </svg>
+            </button>
             <!-- Categories Dropdown -->
             <div class="relative" @mouseenter="categoriesDropdownOpen = true" @mouseleave="categoriesDropdownOpen = false">
               <RouterLink to="/categories" class="nav-link flex items-center">
@@ -164,14 +189,14 @@ onMounted(async () => {
     </nav>
     
     <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <main class="flex-1 container-max py-8 w-full">
       <RouterView />
     </main>
     
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 mt-auto">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p>&copy; 2024 羽毛球論壇. All rights reserved.</p>
+    <footer class="mt-auto border-t border-gray-200 dark:border-gray-700">
+      <div class="container-max py-8 text-center text-sm text-gray-600 dark:text-gray-400">
+        <p>&copy; 2024 羽毛球論壇</p>
       </div>
     </footer>
   </div>

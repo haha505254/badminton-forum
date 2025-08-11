@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import VueKonva from 'vue-konva'
 import router from './router'
-import './style.css'
 import './assets/tailwind.css'
 import App from './App.vue'
 
