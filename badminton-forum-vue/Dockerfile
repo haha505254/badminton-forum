@@ -6,17 +6,23 @@ WORKDIR /app
 # 安裝 pnpm (更快的套件管理器，選用)
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# 複製 package.json 和 lock 檔案
-COPY package*.json ./
-COPY pnpm-lock.yaml* ./
+# 重要：將 /app 目錄的擁有者改為 node
+RUN chown -R node:node /app
+
+# 複製 package.json 和 lock 檔案，並設定權限給 node 使用者
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node pnpm-lock.yaml* ./
+
+# 切換到 node 使用者（UID 1000）
+USER node
 
 # 安裝相依套件（包含開發依賴）
 RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
     elif [ -f package-lock.json ]; then npm ci; \
     else npm install; fi
 
-# 複製所有檔案
-COPY . .
+# 複製所有檔案並設定權限
+COPY --chown=node:node . .
 
 # 開發模式
 EXPOSE 5173
