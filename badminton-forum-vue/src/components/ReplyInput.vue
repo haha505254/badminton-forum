@@ -9,29 +9,45 @@
     
     <!-- 輸入區域 -->
     <div class="input-wrapper">
-      <!-- 切換按鈕 -->
+      <!-- 文字編輯器（始終顯示） -->
+      <div class="input-content">
+        <RichTextEditor 
+          v-model="content" 
+          :placeholder="placeholder"
+          ref="editorRef"
+          class="mini-editor"
+        />
+      </div>
+      
+      <!-- 戰術圖切換按鈕 -->
       <div class="input-toolbar">
         <button
           type="button"
           @click="toggleDiagramMode"
           class="toolbar-btn"
           :class="{ active: showDiagram }"
-          title="插入戰術圖"
+          :title="showDiagram ? '隱藏戰術圖' : '添加戰術圖'"
         >
-          🏸
+          🏸 {{ showDiagram ? '隱藏戰術圖' : '添加戰術圖' }}
         </button>
+        <span v-if="hasDiagram" class="diagram-status">
+          ✓ {{ props.parentDiagramData ? '已引用並編輯戰術圖' : '已添加戰術圖' }}
+        </span>
       </div>
       
-      <!-- 文字編輯器或戰術圖 -->
-      <div class="input-content">
-        <RichTextEditor 
-          v-if="!showDiagram"
-          v-model="content" 
-          :placeholder="placeholder"
-          ref="editorRef"
-          class="mini-editor"
-        />
-        <div v-else class="diagram-container">
+      <!-- 戰術圖編輯器（可選顯示） -->
+      <div v-if="showDiagram" class="diagram-section">
+        <div class="diagram-header">
+          <span class="diagram-title">編輯戰術圖</span>
+          <button 
+            @click="clearDiagram"
+            class="clear-btn"
+            title="清除戰術圖"
+          >
+            清除
+          </button>
+        </div>
+        <div class="diagram-container">
           <BadmintonCourtDiagram
             v-model="diagramData"
             class="mini-diagram"
@@ -82,6 +98,10 @@ const props = defineProps({
   parentAuthor: {
     type: String,
     default: null
+  },
+  parentDiagramData: {
+    type: Object,
+    default: null
   }
 })
 
@@ -95,14 +115,16 @@ const showDiagram = ref(false)
 const submitting = ref(false)
 const editorRef = ref(null)
 
-// 戰術圖資料
-const diagramData = ref({
-  players: [],
-  shuttle: null,
-  arrows: [],
-  textAnnotations: [],
-  description: ''
-})
+// 戰術圖資料 - 如果有父回覆的戰術圖，就使用它作為初始值
+const diagramData = ref(
+  props.parentDiagramData ? { ...props.parentDiagramData } : {
+    players: [],
+    shuttle: null,
+    arrows: [],
+    textAnnotations: [],
+    description: ''
+  }
+)
 
 // 計算屬性
 const placeholder = computed(() => {
@@ -112,8 +134,19 @@ const placeholder = computed(() => {
 })
 
 const canSubmit = computed(() => {
-  const hasContent = content.value && content.value.replace(/<[^>]*>/g, '').trim().length > 0
-  return hasContent && !submitting.value && authStore.isAuthenticated
+  const hasTextContent = content.value && content.value.replace(/<[^>]*>/g, '').trim().length > 0
+  const hasValidDiagram = hasDiagram.value
+  return (hasTextContent || hasValidDiagram) && !submitting.value && authStore.isAuthenticated
+})
+
+// 檢查是否有有效的戰術圖資料
+const hasDiagram = computed(() => {
+  return diagramData.value && (
+    diagramData.value.players?.length > 0 ||
+    diagramData.value.shuttle ||
+    diagramData.value.arrows?.length > 0 ||
+    diagramData.value.textAnnotations?.length > 0
+  )
 })
 
 // 切換戰術圖模式
@@ -121,25 +154,17 @@ const toggleDiagramMode = () => {
   showDiagram.value = !showDiagram.value
 }
 
-// 當戰術圖資料更新時，將其嵌入到內容中
-watch(diagramData, (newData) => {
-  if (showDiagram.value && newData) {
-    const diagramHtml = `
-      <div class="badminton-diagram-placeholder" data-diagram='${JSON.stringify(newData)}'>
-        <p>[羽球戰術圖: ${newData.description || '戰術示意圖'}]</p>
-      </div>
-    `
-    
-    if (!content.value.includes('badminton-diagram-placeholder')) {
-      content.value += diagramHtml
-    } else {
-      content.value = content.value.replace(
-        /<div class="badminton-diagram-placeholder".*?<\/div>/s,
-        diagramHtml
-      )
-    }
+// 清除戰術圖
+const clearDiagram = () => {
+  diagramData.value = {
+    players: [],
+    shuttle: null,
+    arrows: [],
+    textAnnotations: [],
+    description: ''
   }
-}, { deep: true })
+  showDiagram.value = false
+}
 
 // 提交回覆
 const submitReply = async () => {
@@ -147,8 +172,22 @@ const submitReply = async () => {
   
   submitting.value = true
   try {
+    // 組合最終內容
+    let finalContent = content.value || ''
+    
+    // 如果有戰術圖，添加到內容中
+    if (hasDiagram.value) {
+      const diagramHtml = `
+        <div class="badminton-diagram-placeholder" data-diagram='${JSON.stringify(diagramData.value)}'>
+          <p>[羽球戰術圖: ${diagramData.value.description || '戰術示意圖'}]</p>
+        </div>
+      `
+      // 如果有文字內容，在後面添加戰術圖；否則只有戰術圖
+      finalContent = finalContent ? `${finalContent}\n${diagramHtml}` : diagramHtml
+    }
+    
     const replyData = {
-      content: content.value,
+      content: finalContent,
       parentReplyId: props.parentReplyId
     }
     
@@ -175,8 +214,13 @@ const submitReply = async () => {
   }
 }
 
-// 自動聚焦
+// 自動聚焦和初始化父回覆戰術圖
 onMounted(() => {
+  // 如果有父回覆的戰術圖，自動顯示戰術圖編輯器
+  if (props.parentDiagramData) {
+    showDiagram.value = true
+  }
+  
   nextTick(() => {
     if (editorRef.value?.editor) {
       editorRef.value.editor.commands.focus()
@@ -214,8 +258,15 @@ onMounted(() => {
 
 .input-toolbar {
   display: flex;
-  gap: 0.25rem;
-  margin-bottom: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+:root.dark .input-toolbar {
+  border-color: #374151;
 }
 
 .toolbar-btn {
@@ -249,6 +300,75 @@ onMounted(() => {
 
 .input-content {
   min-height: 80px;
+}
+
+/* 戰術圖狀態指示 */
+.diagram-status {
+  font-size: 0.875rem;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+:root.dark .diagram-status {
+  color: #34d399;
+}
+
+/* 戰術圖區塊 */
+.diagram-section {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
+
+:root.dark .diagram-section {
+  background: #111827;
+  border-color: #374151;
+}
+
+.diagram-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.diagram-title {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+:root.dark .diagram-title {
+  color: #d1d5db;
+}
+
+.clear-btn {
+  padding: 0.25rem 0.5rem;
+  background: white;
+  color: #ef4444;
+  border: 1px solid #fca5a5;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+:root.dark .clear-btn {
+  background: #7f1d1d;
+  color: #fca5a5;
+  border-color: #991b1b;
+}
+
+.clear-btn:hover {
+  background: #fee2e2;
+}
+
+:root.dark .clear-btn:hover {
+  background: #991b1b;
 }
 
 /* 戰術圖容器 */
