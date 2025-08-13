@@ -80,35 +80,16 @@
         回覆 ({{ replies.length }})
       </h2>
       
-      <!-- Reply List -->
-      <div v-if="replies.length > 0" class="space-y-4">
-        <div 
-          v-for="reply in replies" 
-          :key="reply.id" 
-          class="border-l-4 border-primary-200 dark:border-primary-800 pl-4 py-4"
-        >
-          <!-- Reply Header -->
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                <span class="text-sm font-medium text-primary-600 dark:text-primary-400">
-                  {{ reply.authorName.charAt(0).toUpperCase() }}
-                </span>
-              </div>
-              <span class="font-medium text-gray-900 dark:text-white">
-                {{ reply.authorName }}
-              </span>
-            </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ formatDate(reply.createdAt) }}
-            </span>
-          </div>
-          
-          <!-- Reply Content -->
-          <div class="prose prose-sm max-w-none dark:prose-invert">
-            <RichTextDisplay :content="reply.content" />
-          </div>
-        </div>
+      <!-- Reply List (Nested) -->
+      <div v-if="replyTree.length > 0" class="space-y-2">
+        <ReplyThread
+          v-for="reply in replyTree"
+          :key="reply.id"
+          :reply="reply"
+          :post-id="post.id"
+          :all-replies="replies"
+          @reply-added="handleReplyAdded"
+        />
       </div>
       
       <!-- Empty State -->
@@ -208,6 +189,7 @@ import { repliesApi } from '../api/replies'
 import RichTextEditor from '../components/RichTextEditor.vue'
 import RichTextDisplay from '../components/RichTextDisplay.vue'
 import BadmintonCourtDiagram from '../components/BadmintonCourtDiagram.vue'
+import ReplyThread from '../components/ReplyThread.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -230,6 +212,7 @@ const isAuthor = computed(() => {
 })
 
 const replies = ref([])
+const replyTree = ref([])
 const newReply = ref('')
 const loading = ref(true)
 const submitting = ref(false)
@@ -305,15 +288,59 @@ watch(diagramData, (newData) => {
   }
 }, { deep: true })
 
+// 建立回覆樹狀結構
+const buildReplyTree = (flatReplies) => {
+  const replyMap = {}
+  const rootReplies = []
+  
+  // 先建立所有回覆的映射
+  flatReplies.forEach(reply => {
+    replyMap[reply.id] = { ...reply, children: [] }
+  })
+  
+  // 建立樹狀結構
+  flatReplies.forEach(reply => {
+    if (reply.parentReplyId && replyMap[reply.parentReplyId]) {
+      replyMap[reply.parentReplyId].children.push(replyMap[reply.id])
+    } else if (!reply.parentReplyId) {
+      rootReplies.push(replyMap[reply.id])
+    }
+  })
+  
+  return rootReplies
+}
+
+// 處理新增回覆
+const handleReplyAdded = async (newReplyData) => {
+  // 重新載入回覆以獲取最新資料
+  await loadReplies()
+}
+
+// 載入回覆
+const loadReplies = async () => {
+  try {
+    const repliesResponse = await repliesApi.getReplies(post.value.id)
+    replies.value = repliesResponse.data
+    replyTree.value = buildReplyTree(replies.value)
+  } catch (error) {
+    console.error('Failed to fetch replies:', error)
+  }
+}
+
 const submitReply = async () => {
   if (!newReply.value.trim()) return
   
   submitting.value = true
   try {
     const response = await repliesApi.createReply(post.value.id, {
-      content: newReply.value
+      content: newReply.value,
+      parentReplyId: null // 頂層回覆
     })
+    
+    // 新增到回覆列表並重建樹狀結構
     replies.value.push(response.data)
+    replyTree.value = buildReplyTree(replies.value)
+    
     newReply.value = ''
     showDiagram.value = false
     diagramData.value = {
@@ -339,9 +366,8 @@ onMounted(async () => {
     const postResponse = await postsApi.getPost(postId)
     post.value = postResponse.data
     
-    // Fetch replies
-    const repliesResponse = await repliesApi.getReplies(postId)
-    replies.value = repliesResponse.data
+    // Fetch replies and build tree
+    await loadReplies()
   } catch (error) {
     console.error('Failed to fetch post data:', error)
   } finally {
