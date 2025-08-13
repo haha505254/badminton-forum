@@ -106,7 +106,8 @@
 <script setup>
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import { watch, onBeforeUnmount } from 'vue'
+import { watch, onBeforeUnmount, computed } from 'vue'
+import BadmintonDiagramExtension from './BadmintonDiagramExtension'
 
 const props = defineProps({
   modelValue: {
@@ -119,13 +120,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'edit-diagram'])
 
 const editor = useEditor({
   extensions: [
     StarterKit.configure({
       heading: false // 關閉標題功能
-    })
+    }),
+    BadmintonDiagramExtension
   ],
   content: props.modelValue,
   editorProps: {
@@ -136,6 +138,12 @@ const editor = useEditor({
   },
   onUpdate: ({ editor }) => {
     emit('update:modelValue', editor.getHTML())
+  },
+  onCreate: ({ editor }) => {
+    // 監聽戰術圖編輯事件
+    editor.on('edit-diagram', (data) => {
+      emit('edit-diagram', data)
+    })
   }
 })
 
@@ -144,6 +152,69 @@ watch(() => props.modelValue, (value) => {
   if (editor.value && value !== editor.value.getHTML()) {
     editor.value.commands.setContent(value, false)
   }
+})
+
+// 暴露方法給父組件
+const insertDiagram = (diagramData) => {
+  if (!editor.value) return
+  
+  editor.value
+    .chain()
+    .focus()
+    .insertContent({
+      type: 'badmintonDiagram',
+      attrs: { data: diagramData }
+    })
+    .run()
+}
+
+const updateDiagram = (pos, diagramData) => {
+  if (!editor.value) {
+    console.error('Editor not available')
+    return false
+  }
+  
+  try {
+    // 使用 chain 命令來確保更新被正確追蹤
+    editor.value
+      .chain()
+      .focus()
+      .command(({ tr, state }) => {
+        const node = state.doc.nodeAt(pos)
+        if (node && node.type.name === 'badmintonDiagram') {
+          tr.setNodeMarkup(pos, null, { data: diagramData })
+          return true
+        }
+        return false
+      })
+      .run()
+    
+    return true
+  } catch (error) {
+    console.error('Error updating diagram:', error)
+    return false
+  }
+}
+
+const hasDiagram = computed(() => {
+  if (!editor.value) return false
+  
+  let hasIt = false
+  editor.value.state.doc.descendants((node) => {
+    if (node.type.name === 'badmintonDiagram') {
+      hasIt = true
+      return false // stop iteration
+    }
+  })
+  return hasIt
+})
+
+// 暴露給父組件
+defineExpose({
+  insertDiagram,
+  updateDiagram,
+  hasDiagram,
+  editor
 })
 
 onBeforeUnmount(() => {

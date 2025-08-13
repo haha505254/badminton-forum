@@ -114,7 +114,14 @@
       </h3>
       
       <div class="space-y-4">
-        <!-- 戰術圖切換按鈕 -->
+        <!-- 文字編輯器（始終顯示） -->
+        <RichTextEditor 
+          v-model="newReply" 
+          placeholder="寫下您的回覆..." 
+          class="min-h-[150px]"
+        />
+        
+        <!-- 戰術圖工具列 -->
         <div class="editor-toolbar-custom">
           <button
             type="button"
@@ -122,7 +129,7 @@
             class="diagram-btn"
             :class="{ active: showDiagram }"
           >
-            🏸 插入戰術圖
+            🏸 {{ showDiagram ? '隱藏戰術圖' : '添加戰術圖' }}
           </button>
           <button
             v-if="post.content.includes('badminton-diagram-placeholder')"
@@ -132,23 +139,32 @@
           >
             📋 引用原文戰術圖
           </button>
+          <span v-if="hasDiagram" class="diagram-indicator">
+            ✓ 已添加戰術圖
+          </span>
         </div>
         
-        <RichTextEditor 
-          v-if="!showDiagram"
-          v-model="newReply" 
-          placeholder="寫下您的回覆..." 
-          class="min-h-[150px]"
-        />
-        <BadmintonCourtDiagram
-          v-else
-          v-model="diagramData"
-        />
+        <!-- 戰術圖編輯器（可選顯示） -->
+        <div v-if="showDiagram" class="diagram-editor-section">
+          <div class="diagram-editor-header">
+            <span class="diagram-editor-title">編輯戰術圖</span>
+            <button 
+              @click="clearDiagram"
+              class="clear-diagram-btn"
+              title="清除戰術圖"
+            >
+              清除
+            </button>
+          </div>
+          <BadmintonCourtDiagram
+            v-model="diagramData"
+          />
+        </div>
         
         <div class="flex justify-end">
           <button 
             @click="submitReply" 
-            :disabled="submitting || !newReply.trim()" 
+            :disabled="submitting || (!newReply.trim() && !hasDiagram)" 
             class="btn-primary"
           >
             <span v-if="submitting" class="flex items-center">
@@ -239,8 +255,30 @@ const formatDate = (date) => {
   })
 }
 
+// 檢查是否有有效的戰術圖資料
+const hasDiagram = computed(() => {
+  return diagramData.value && (
+    diagramData.value.players?.length > 0 ||
+    diagramData.value.shuttle ||
+    diagramData.value.arrows?.length > 0 ||
+    diagramData.value.textAnnotations?.length > 0
+  )
+})
+
 const toggleDiagramMode = () => {
   showDiagram.value = !showDiagram.value
+}
+
+// 清除戰術圖
+const clearDiagram = () => {
+  diagramData.value = {
+    players: [],
+    shuttle: null,
+    arrows: [],
+    textAnnotations: [],
+    description: ''
+  }
+  showDiagram.value = false
 }
 
 // 載入原文的戰術圖
@@ -253,7 +291,7 @@ const loadOriginalDiagram = () => {
     
     if (diagramElement) {
       const originalData = JSON.parse(diagramElement.getAttribute('data-diagram'))
-      // 深拷貝原始資料
+      // 深拷貝原始資料（資料已經是相對座標格式，直接使用）
       diagramData.value = {
         players: [...(originalData.players || [])],
         shuttle: originalData.shuttle ? { ...originalData.shuttle } : null,
@@ -268,29 +306,6 @@ const loadOriginalDiagram = () => {
     alert('載入原文戰術圖失敗')
   }
 }
-
-// 當戰術圖資料更新時，將其嵌入到內容中
-watch(diagramData, (newData) => {
-  if (showDiagram.value && newData) {
-    // 將戰術圖資料以特殊格式嵌入到內容中
-    const diagramHtml = `
-      <div class="badminton-diagram-placeholder" data-diagram='${JSON.stringify(newData)}'>
-        <p>[羽球戰術圖: ${newData.description || '戰術示意圖'}]</p>
-      </div>
-    `
-    
-    // 保留原有內容並添加戰術圖
-    if (!newReply.value.includes('badminton-diagram-placeholder')) {
-      newReply.value += diagramHtml
-    } else {
-      // 更新現有的戰術圖
-      newReply.value = newReply.value.replace(
-        /<div class="badminton-diagram-placeholder".*?<\/div>/s,
-        diagramHtml
-      )
-    }
-  }
-}, { deep: true })
 
 // 建立回覆樹狀結構
 const buildReplyTree = (flatReplies) => {
@@ -332,12 +347,27 @@ const loadReplies = async () => {
 }
 
 const submitReply = async () => {
-  if (!newReply.value.trim()) return
+  // 檢查是否有內容可以提交
+  if (!newReply.value.trim() && !hasDiagram.value) return
   
   submitting.value = true
   try {
+    // 組合最終內容
+    let finalContent = newReply.value || ''
+    
+    // 如果有戰術圖，添加到內容中
+    if (hasDiagram.value) {
+      const diagramHtml = `
+        <div class="badminton-diagram-placeholder" data-diagram='${JSON.stringify(diagramData.value)}'>
+          <p>[羽球戰術圖: ${diagramData.value.description || '戰術示意圖'}]</p>
+        </div>
+      `
+      // 如果有文字內容，在後面添加戰術圖；否則只有戰術圖
+      finalContent = finalContent ? `${finalContent}\n${diagramHtml}` : diagramHtml
+    }
+    
     const response = await repliesApi.createReply(post.value.id, {
-      content: newReply.value,
+      content: finalContent,
       parentReplyId: null // 頂層回覆
     })
     
@@ -345,6 +375,7 @@ const submitReply = async () => {
     replies.value.push(response.data)
     replyTree.value = buildReplyTree(replies.value)
     
+    // 清空表單
     newReply.value = ''
     showDiagram.value = false
     diagramData.value = {
@@ -402,8 +433,14 @@ onMounted(async () => {
 
 .editor-toolbar-custom {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+:root.dark .editor-toolbar-custom {
+  border-color: #374151;
 }
 
 .diagram-btn {
@@ -416,13 +453,90 @@ onMounted(async () => {
   font-size: 0.95rem;
 }
 
+:root.dark .diagram-btn {
+  background: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
 .diagram-btn:hover {
   background: #f0f0f0;
+}
+
+:root.dark .diagram-btn:hover {
+  background: #4b5563;
 }
 
 .diagram-btn.active {
   background: #27ae60;
   color: white;
   border-color: #27ae60;
+}
+
+.diagram-indicator {
+  font-size: 0.875rem;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+:root.dark .diagram-indicator {
+  color: #34d399;
+}
+
+/* 戰術圖編輯區 */
+.diagram-editor-section {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+:root.dark .diagram-editor-section {
+  background: #111827;
+  border-color: #374151;
+}
+
+.diagram-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.diagram-editor-title {
+  font-weight: 500;
+  color: #374151;
+}
+
+:root.dark .diagram-editor-title {
+  color: #d1d5db;
+}
+
+.clear-diagram-btn {
+  padding: 0.25rem 0.75rem;
+  background: white;
+  color: #ef4444;
+  border: 1px solid #fca5a5;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+:root.dark .clear-diagram-btn {
+  background: #7f1d1d;
+  color: #fca5a5;
+  border-color: #991b1b;
+}
+
+.clear-diagram-btn:hover {
+  background: #fee2e2;
+}
+
+:root.dark .clear-diagram-btn:hover {
+  background: #991b1b;
 }
 </style>
