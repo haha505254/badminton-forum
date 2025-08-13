@@ -137,7 +137,7 @@
 
           <!-- 移動箭頭 -->
           <v-arrow
-            v-for="(arrow, index) in data.arrows"
+            v-for="(arrow, index) in convertedArrows"
             :key="`arrow-${index}`"
             :config="{
               points: [arrow.from.x, arrow.from.y, arrow.to.x, arrow.to.y],
@@ -151,11 +151,11 @@
           />
 
           <!-- 羽球位置 -->
-          <v-group v-if="data.shuttle">
+          <v-group v-if="convertedShuttle">
             <v-circle
               :config="{
-                x: data.shuttle.x,
-                y: data.shuttle.y,
+                x: convertedShuttle.x,
+                y: convertedShuttle.y,
                 radius: 8,
                 fill: 'white',
                 stroke: '#333',
@@ -164,8 +164,8 @@
             />
             <v-text
               :config="{
-                x: data.shuttle.x - 12,
-                y: data.shuttle.y - 20,
+                x: convertedShuttle.x - 12,
+                y: convertedShuttle.y - 20,
                 text: '🏸',
                 fontSize: 20
               }"
@@ -174,7 +174,7 @@
 
           <!-- 球員位置 -->
           <v-group
-            v-for="player in data.players"
+            v-for="player in convertedPlayers"
             :key="player.id"
             :config="{
               x: player.x,
@@ -206,7 +206,7 @@
           
           <!-- 文字標註 -->
           <v-group
-            v-for="annotation in data.textAnnotations || []"
+            v-for="annotation in convertedTextAnnotations"
             :key="annotation.id"
             :config="{
               x: annotation.x,
@@ -266,6 +266,7 @@ const props = defineProps({
       players: [],
       shuttle: null,
       arrows: [],
+      textAnnotations: [],
       description: ''
     })
   },
@@ -285,6 +286,14 @@ const canvasWidth = courtWidth + 80 * props.scale
 const canvasHeight = courtHeight + 80 * props.scale
 const offsetX = 40 * props.scale
 const offsetY = 40 * props.scale
+
+// 相對座標轉換為絕對座標
+const relativeToAbsolute = (x, y) => {
+  return {
+    x: x * courtWidth + offsetX,
+    y: y * courtHeight + offsetY
+  }
+}
 
 // 關鍵座標
 const netY = 6.7 * scale
@@ -311,6 +320,35 @@ const getTextXOffset = (label) => {
   if (label === '對手2') return -16
   return -8 // 預設值
 }
+
+// 轉換資料（從相對座標到絕對座標）
+const convertedPlayers = computed(() => {
+  return (props.data.players || []).map(p => ({
+    ...p,
+    ...relativeToAbsolute(p.x, p.y)
+  }))
+})
+
+const convertedShuttle = computed(() => {
+  return props.data.shuttle 
+    ? relativeToAbsolute(props.data.shuttle.x, props.data.shuttle.y)
+    : null
+})
+
+const convertedArrows = computed(() => {
+  return (props.data.arrows || []).map(a => ({
+    ...a,
+    from: relativeToAbsolute(a.from.x, a.from.y),
+    to: relativeToAbsolute(a.to.x, a.to.y)
+  }))
+})
+
+const convertedTextAnnotations = computed(() => {
+  return (props.data.textAnnotations || []).map(t => ({
+    ...t,
+    ...relativeToAbsolute(t.x, t.y)
+  }))
+})
 
 // 計算屬性：是否有人員移動箭頭
 const hasPlayerArrows = computed(() => {

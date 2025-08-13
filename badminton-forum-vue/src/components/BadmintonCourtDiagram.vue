@@ -826,15 +826,45 @@ const handleTextClick = (annotation, e) => {
   }
 }
 
+// 座標轉換函數
+// 絕對座標轉換為相對座標（0-1）
+const absoluteToRelative = (x, y) => {
+  return {
+    x: (x - offsetX) / courtWidth,
+    y: (y - offsetY) / courtHeight
+  }
+}
+
+// 相對座標轉換為絕對座標
+const relativeToAbsolute = (x, y) => {
+  return {
+    x: x * courtWidth + offsetX,
+    y: y * courtHeight + offsetY
+  }
+}
+
 // 發送更新事件
 const emitUpdate = () => {
-  emit('update:modelValue', {
-    players: players.value,
-    shuttle: shuttlePosition.value,
-    arrows: arrows.value,
-    textAnnotations: textAnnotations.value,
+  // 將絕對座標轉換為相對座標再儲存
+  const relativeData = {
+    players: players.value.map(p => ({
+      ...p,
+      ...absoluteToRelative(p.x, p.y)
+    })),
+    shuttle: shuttlePosition.value ? absoluteToRelative(shuttlePosition.value.x, shuttlePosition.value.y) : null,
+    arrows: arrows.value.map(a => ({
+      ...a,
+      from: absoluteToRelative(a.from.x, a.from.y),
+      to: absoluteToRelative(a.to.x, a.to.y)
+    })),
+    textAnnotations: textAnnotations.value.map(t => ({
+      ...t,
+      ...absoluteToRelative(t.x, t.y)
+    })),
     description: description.value
-  })
+  }
+  
+  emit('update:modelValue', relativeData)
 }
 
 // 監聽 description 變化
@@ -875,12 +905,32 @@ watch(gameMode, (newMode) => {
 // 初始化
 initPlayers()
 
-// 如果有初始值，載入它
+// 如果有初始值，載入它（從相對座標轉換為絕對座標）
 if (props.modelValue && props.modelValue.players?.length > 0) {
-  players.value = [...props.modelValue.players]
-  shuttlePosition.value = props.modelValue.shuttle
-  arrows.value = [...(props.modelValue.arrows || [])]
-  textAnnotations.value = [...(props.modelValue.textAnnotations || [])]
+  // 轉換球員座標
+  players.value = props.modelValue.players.map(p => ({
+    ...p,
+    ...relativeToAbsolute(p.x, p.y)
+  }))
+  
+  // 轉換羽球座標
+  shuttlePosition.value = props.modelValue.shuttle 
+    ? relativeToAbsolute(props.modelValue.shuttle.x, props.modelValue.shuttle.y)
+    : null
+  
+  // 轉換箭頭座標
+  arrows.value = (props.modelValue.arrows || []).map(a => ({
+    ...a,
+    from: relativeToAbsolute(a.from.x, a.from.y),
+    to: relativeToAbsolute(a.to.x, a.to.y)
+  }))
+  
+  // 轉換文字標註座標
+  textAnnotations.value = (props.modelValue.textAnnotations || []).map(t => ({
+    ...t,
+    ...relativeToAbsolute(t.x, t.y)
+  }))
+  
   description.value = props.modelValue.description || ''
 }
 </script>
