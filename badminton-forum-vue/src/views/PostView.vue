@@ -67,7 +67,11 @@
       
       <!-- Post Content -->
       <div class="prose prose-lg max-w-none dark:prose-invert">
-        <RichTextDisplay :content="post.content" />
+        <RichTextDisplay 
+          :content="post.content" 
+          display-context="post"
+          :default-expanded="true"
+        />
       </div>
     </article>
     

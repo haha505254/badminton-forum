@@ -68,7 +68,11 @@
         <div v-show="!isCollapsed" class="reply-body">
           <!-- 文字內容 -->
           <div class="prose prose-sm max-w-none dark:prose-invert mt-2">
-            <RichTextDisplay :content="reply.content" />
+            <RichTextDisplay 
+              :content="reply.content" 
+              display-context="reply"
+              :default-expanded="false"
+            />
           </div>
           
           <!-- 內嵌回覆表單 -->

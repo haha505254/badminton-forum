@@ -4,7 +4,12 @@
     <div v-if="hasDiagram">
       <div v-for="(segment, index) in contentSegments" :key="index">
         <div v-if="segment.type === 'html'" v-html="segment.content"></div>
-        <BadmintonCourtViewer v-else-if="segment.type === 'diagram'" :data="segment.data" />
+        <BadmintonDiagramWrapper 
+          v-else-if="segment.type === 'diagram'" 
+          :data="segment.data"
+          :context="displayContext"
+          :default-expanded="defaultExpanded"
+        />
       </div>
     </div>
     <!-- 否則直接顯示HTML內容 -->
@@ -15,12 +20,20 @@
 <script setup>
 import { computed } from 'vue'
 import DOMPurify from 'dompurify'
-import BadmintonCourtViewer from './BadmintonCourtViewer.vue'
+import BadmintonDiagramWrapper from './BadmintonDiagramWrapper.vue'
 
 const props = defineProps({
   content: {
     type: String,
     required: true
+  },
+  displayContext: {
+    type: String,
+    default: 'reply' // 'post' | 'reply'
+  },
+  defaultExpanded: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -29,53 +42,51 @@ const hasDiagram = computed(() => {
   return props.content.includes('badminton-diagram-placeholder')
 })
 
-// 解析內容，分離HTML和戰術圖
+// 解析內容，分離HTML和戰術圖（支援任意層級的 placeholder）
 const contentSegments = computed(() => {
   if (!hasDiagram.value) return []
-  
-  const segments = []
+
   const parser = new DOMParser()
   const doc = parser.parseFromString(props.content, 'text/html')
   const body = doc.body
-  
-  let currentHtml = ''
-  
-  for (const node of body.childNodes) {
-    if (node.nodeType === Node.ELEMENT_NODE && 
-        node.classList?.contains('badminton-diagram-placeholder')) {
-      // 如果有累積的HTML，先推入
-      if (currentHtml) {
-        segments.push({
-          type: 'html',
-          content: DOMPurify.sanitize(currentHtml)
-        })
-        currentHtml = ''
-      }
-      
-      // 解析戰術圖資料
-      try {
-        const diagramData = JSON.parse(node.getAttribute('data-diagram'))
-        segments.push({
-          type: 'diagram',
-          data: diagramData
-        })
-      } catch (e) {
-        console.error('Failed to parse diagram data:', e)
+
+  // 收集佔位元素，並以順序替換為唯一標記
+  const placeholders = Array.from(body.querySelectorAll('.badminton-diagram-placeholder'))
+  const diagramList = []
+  placeholders.forEach((el, index) => {
+    try {
+      const dataAttr = el.getAttribute('data-diagram') || '{}'
+      const diagramData = JSON.parse(dataAttr)
+      diagramList.push(diagramData)
+    } catch (e) {
+      console.error('Failed to parse diagram data:', e)
+      diagramList.push(null)
+    }
+    const token = `[[DIAGRAM_PLACEHOLDER_${index}]]`
+    const tokenNode = doc.createTextNode(token)
+    el.parentNode?.replaceChild(tokenNode, el)
+  })
+
+  // 將替換後的 HTML 依標記拆分為段落
+  const combinedHtml = body.innerHTML
+  const segments = []
+  const parts = combinedHtml.split(/\[\[DIAGRAM_PLACEHOLDER_(\d+)\]\]/g)
+  // parts 結構: [html, index, html, index, html, ...]
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      const htmlChunk = parts[i]
+      if (htmlChunk) {
+        segments.push({ type: 'html', content: DOMPurify.sanitize(htmlChunk) })
       }
     } else {
-      // 累積HTML內容
-      currentHtml += node.outerHTML || node.textContent || ''
+      const idx = Number(parts[i])
+      const data = diagramList[idx]
+      if (data) {
+        segments.push({ type: 'diagram', data })
+      }
     }
   }
-  
-  // 推入剩餘的HTML
-  if (currentHtml) {
-    segments.push({
-      type: 'html',
-      content: DOMPurify.sanitize(currentHtml)
-    })
-  }
-  
+
   return segments
 })
 
@@ -96,6 +107,9 @@ const sanitizedContent = computed(() => {
   line-height: 1.6;
   color: #333;
 }
+
+/* 萬一 fallback 走原始 HTML 渲染，避免顯示 placeholder 文字 */
+:deep(.badminton-diagram-placeholder) { display: none; }
 
 :deep(p) {
   margin: 0 0 1em 0;

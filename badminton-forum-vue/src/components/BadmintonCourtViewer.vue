@@ -268,18 +268,23 @@ const props = defineProps({
       arrows: [],
       description: ''
     })
+  },
+  scale: {
+    type: Number,
+    default: 1
   }
 })
 
-// 場地尺寸設定 (與編輯器相同的規格)
-const scale = 50
+// 場地尺寸設定 (與編輯器相同的規格，但支援縮放)
+const baseScale = 50
+const scale = baseScale * props.scale
 const widthScale = 1.5
 const courtWidth = 6.1 * scale * widthScale
 const courtHeight = 13.4 * scale
-const canvasWidth = courtWidth + 80
-const canvasHeight = courtHeight + 80
-const offsetX = 40
-const offsetY = 40
+const canvasWidth = courtWidth + 80 * props.scale
+const canvasHeight = courtHeight + 80 * props.scale
+const offsetX = 40 * props.scale
+const offsetY = 40 * props.scale
 
 // 關鍵座標
 const netY = 6.7 * scale
