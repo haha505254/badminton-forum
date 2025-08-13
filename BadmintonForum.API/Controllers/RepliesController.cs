@@ -22,6 +22,7 @@ namespace BadmintonForum.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReplyDto>>> GetReplies(int postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
         {
+            // 包含已刪除的回覆（為了保持樹狀結構）
             var query = _context.Replies
                 .Where(r => r.PostId == postId)
                 .OrderBy(r => r.CreatedAt);
@@ -35,14 +36,16 @@ namespace BadmintonForum.API.Controllers
                 .Select(r => new ReplyDto
                 {
                     Id = r.Id,
-                    Content = r.Content,
+                    Content = r.IsDeleted ? "[此留言已被刪除]" : r.Content,
                     PostId = r.PostId,
-                    AuthorId = r.AuthorId,
-                    AuthorName = r.Author.Username,
+                    AuthorId = r.IsDeleted ? 0 : r.AuthorId,
+                    AuthorName = r.IsDeleted ? "[已刪除]" : r.Author.Username,
                     ParentReplyId = r.ParentReplyId,
                     LikeCount = r.LikeCount,
                     CreatedAt = r.CreatedAt,
-                    UpdatedAt = r.UpdatedAt
+                    UpdatedAt = r.UpdatedAt,
+                    IsDeleted = r.IsDeleted,
+                    DeletedAt = r.DeletedAt
                 })
                 .ToListAsync();
 
@@ -93,7 +96,9 @@ namespace BadmintonForum.API.Controllers
                     ParentReplyId = r.ParentReplyId,
                     LikeCount = r.LikeCount,
                     CreatedAt = r.CreatedAt,
-                    UpdatedAt = r.UpdatedAt
+                    UpdatedAt = r.UpdatedAt,
+                    IsDeleted = false,
+                    DeletedAt = null
                 })
                 .FirstAsync();
 
@@ -102,7 +107,7 @@ namespace BadmintonForum.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateReply(int postId, int id, [FromBody] string content)
+        public async Task<IActionResult> UpdateReply(int postId, int id, [FromBody] UpdateReplyDto updateReplyDto)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
@@ -118,8 +123,13 @@ namespace BadmintonForum.API.Controllers
             {
                 return Forbid();
             }
+            
+            if (reply.IsDeleted)
+            {
+                return BadRequest("無法編輯已刪除的回覆");
+            }
 
-            reply.Content = content;
+            reply.Content = updateReplyDto.Content;
             reply.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -134,6 +144,7 @@ namespace BadmintonForum.API.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
             var reply = await _context.Replies
+                .Include(r => r.ChildReplies)
                 .FirstOrDefaultAsync(r => r.Id == id && r.PostId == postId);
 
             if (reply == null)
@@ -145,8 +156,17 @@ namespace BadmintonForum.API.Controllers
             {
                 return Forbid();
             }
+            
+            if (reply.IsDeleted)
+            {
+                return BadRequest("此回覆已經被刪除");
+            }
 
-            _context.Replies.Remove(reply);
+            // 軟刪除：標記為已刪除而非真的刪除
+            reply.IsDeleted = true;
+            reply.DeletedAt = DateTime.UtcNow;
+            reply.Content = "[此留言已被刪除]";  // 清空內容
+            
             await _context.SaveChangesAsync();
 
             return NoContent();

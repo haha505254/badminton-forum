@@ -15,7 +15,7 @@ export const repliesApi = {
 
   // 更新回覆
   updateReply(postId, replyId, content) {
-    return api.put(`/posts/${postId}/replies/${replyId}`, content)
+    return api.put(`/posts/${postId}/replies/${replyId}`, { content })
   },
 
   // 刪除回覆
