@@ -21,9 +21,23 @@
     <article v-else class="card-dark mb-6">
       <!-- Post Header -->
       <div class="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ post.title }}
-        </h1>
+        <div class="flex items-start justify-between mb-4">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            {{ post.title }}
+          </h1>
+          
+          <!-- Edit Button (only for post author) -->
+          <RouterLink 
+            v-if="isAuthor"
+            :to="`/post/${post.id}/edit`"
+            class="btn-primary flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            編輯文章
+          </RouterLink>
+        </div>
         
         <!-- Post Meta -->
         <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -186,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { postsApi } from '../api/posts'
@@ -199,11 +213,20 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const post = ref({
+  id: null,
   title: '',
+  authorId: null,
   authorName: '',
   content: '',
   createdAt: new Date(),
   viewCount: 0
+})
+
+// 檢查當前使用者是否為文章作者
+const isAuthor = computed(() => {
+  return authStore.isAuthenticated && 
+         authStore.user?.id && 
+         post.value.authorId === authStore.user.id
 })
 
 const replies = ref([])

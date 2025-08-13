@@ -41,6 +41,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/post/:id/edit',
+    name: 'edit-post',
+    component: () => import('../views/EditPostView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/profile/:id(\\d+)',  // 只接受數字 ID
     name: 'profile',
     component: () => import('../views/ProfileView.vue')
