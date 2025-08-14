@@ -1,5 +1,5 @@
 <template>
-  <div class="diagram-wrapper">
+  <div class="diagram-wrapper" :data-context="context">
     <!-- 標題欄 -->
     <div class="diagram-header" @click="toggleExpanded">
       <div class="diagram-info">
@@ -130,7 +130,7 @@ const toggleExpanded = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.875rem;
   background: #f9fafb;
   cursor: pointer;
   user-select: none;
@@ -152,16 +152,17 @@ const toggleExpanded = () => {
 .diagram-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   flex: 1;
 }
 
 .diagram-icon {
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 .diagram-title {
   font-weight: 500;
+  font-size: 0.875rem;
   color: #111827;
 }
 
@@ -340,10 +341,36 @@ const toggleExpanded = () => {
   padding: 0;
 }
 
+/* 回覆中的戰術圖使用更緊湊的樣式 */
+.diagram-wrapper[data-context="reply"] .diagram-header {
+  padding: 0.375rem 0.75rem;
+  background: #f3f4f6;
+}
+
+:root.dark .diagram-wrapper[data-context="reply"] .diagram-header {
+  background: #1f2937;
+}
+
+.diagram-wrapper[data-context="reply"] .diagram-icon {
+  font-size: 0.875rem;
+}
+
+.diagram-wrapper[data-context="reply"] .diagram-title {
+  font-size: 0.8125rem;
+}
+
+.diagram-wrapper[data-context="reply"] .diagram-hint {
+  font-size: 0.75rem;
+}
+
+.diagram-wrapper[data-context="reply"] {
+  margin: 0.75rem 0;
+}
+
 /* 響應式設計 */
 @media (max-width: 640px) {
   .diagram-header {
-    padding: 0.5rem 0.75rem;
+    padding: 0.375rem 0.625rem;
   }
   
   .diagram-title {
