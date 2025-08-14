@@ -30,8 +30,17 @@
         >
           🏸 {{ showDiagram ? '隱藏戰術圖' : '添加戰術圖' }}
         </button>
+        <button
+          v-if="props.parentDiagramData && !hasDiagram"
+          type="button"
+          @click="loadParentDiagram"
+          class="toolbar-btn"
+          title="引用父回覆的戰術圖"
+        >
+          📋 引用戰術圖
+        </button>
         <span v-if="hasDiagram" class="diagram-status">
-          ✓ {{ props.parentDiagramData ? '已引用並編輯戰術圖' : '已添加戰術圖' }}
+          ✓ 已添加戰術圖
         </span>
       </div>
       
@@ -115,16 +124,14 @@ const showDiagram = ref(false)
 const submitting = ref(false)
 const editorRef = ref(null)
 
-// 戰術圖資料 - 如果有父回覆的戰術圖，就使用它作為初始值
-const diagramData = ref(
-  props.parentDiagramData ? { ...props.parentDiagramData } : {
-    players: [],
-    shuttle: null,
-    arrows: [],
-    textAnnotations: [],
-    description: ''
-  }
-)
+// 戰術圖資料 - 預設為空白，使用者可選擇是否載入父回覆戰術圖
+const diagramData = ref({
+  players: [],
+  shuttle: null,
+  arrows: [],
+  textAnnotations: [],
+  description: ''
+})
 
 // 計算屬性
 const placeholder = computed(() => {
@@ -164,6 +171,18 @@ const clearDiagram = () => {
     description: ''
   }
   showDiagram.value = false
+}
+
+// 載入父回覆的戰術圖
+const loadParentDiagram = () => {
+  if (props.parentDiagramData) {
+    diagramData.value = { ...props.parentDiagramData }
+    // 修改描述以表示這是回應
+    diagramData.value.description = props.parentDiagramData.description 
+      ? `回應：${props.parentDiagramData.description}` 
+      : '回應戰術圖'
+    showDiagram.value = true
+  }
 }
 
 // 提交回覆
@@ -214,13 +233,9 @@ const submitReply = async () => {
   }
 }
 
-// 自動聚焦和初始化父回覆戰術圖
+// 自動聚焦編輯器
 onMounted(() => {
-  // 如果有父回覆的戰術圖，自動顯示戰術圖編輯器
-  if (props.parentDiagramData) {
-    showDiagram.value = true
-  }
-  
+  // 不再自動顯示戰術圖編輯器，讓使用者自行選擇
   nextTick(() => {
     if (editorRef.value?.editor) {
       editorRef.value.editor.commands.focus()
