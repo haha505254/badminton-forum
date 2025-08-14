@@ -406,14 +406,14 @@ const initPlayers = () => {
   if (gameMode.value === 'singles') {
     players.value = [
       { id: 1, team: 'A', x: centerX, y: bottomY, label: '我' },
-      { id: 2, team: 'B', x: centerX, y: topY, label: '對手' }
+      { id: 2, team: 'B', x: centerX, y: topY, label: 'O' }
     ]
   } else {
     players.value = [
       { id: 1, team: 'A', x: leftX, y: bottomY, label: '我' },
-      { id: 2, team: 'A', x: rightX, y: bottomY, label: '隊友' },
-      { id: 3, team: 'B', x: leftX, y: topY, label: '對手1' },
-      { id: 4, team: 'B', x: rightX, y: topY, label: '對手2' }
+      { id: 2, team: 'A', x: rightX, y: bottomY, label: 'P' },
+      { id: 3, team: 'B', x: leftX, y: topY, label: 'O1' },
+      { id: 4, team: 'B', x: rightX, y: topY, label: 'O2' }
     ]
   }
 }
@@ -508,18 +508,18 @@ const loadTemplate = (templateType) => {
     // 雙打防守站位
     players.value = [
       { id: 1, team: 'A', x: leftX, y: backY, label: '我' },
-      { id: 2, team: 'A', x: rightX, y: backY, label: '隊友' },
-      { id: 3, team: 'B', x: leftX, y: oppBackY, label: '對手1' },
-      { id: 4, team: 'B', x: rightX, y: oppBackY, label: '對手2' }
+      { id: 2, team: 'A', x: rightX, y: backY, label: 'P' },
+      { id: 3, team: 'B', x: leftX, y: oppBackY, label: 'O1' },
+      { id: 4, team: 'B', x: rightX, y: oppBackY, label: 'O2' }
     ]
     description.value = '雙打防守站位 - 左右並排站位'
   } else if (templateType === 'attack') {
     // 雙打進攻站位
     players.value = [
       { id: 1, team: 'A', x: centerX, y: frontY, label: '我' },
-      { id: 2, team: 'A', x: centerX, y: backY, label: '隊友' },
-      { id: 3, team: 'B', x: centerX, y: oppBackY, label: '對手1' },
-      { id: 4, team: 'B', x: centerX, y: oppFrontY, label: '對手2' }
+      { id: 2, team: 'A', x: centerX, y: backY, label: 'P' },
+      { id: 3, team: 'B', x: centerX, y: oppBackY, label: 'O1' },
+      { id: 4, team: 'B', x: centerX, y: oppFrontY, label: 'O2' }
     ]
     description.value = '雙打進攻站位 - 前後站位'
   }
@@ -769,11 +769,11 @@ const cancelTextEdit = () => {
 const getTextXOffset = (label) => {
   // 根據不同的標籤計算偏移量
   if (label === '我') return -5
-  if (label === '隊友') return -12
-  if (label === '對手') return -12
-  if (label === '對手1') return -16
-  if (label === '對手2') return -16
-  return -8 // 預設值
+  if (label === 'P') return -5   // Partner
+  if (label === 'O') return -6   // Opponent (單打)
+  if (label === 'O1') return -8  // Opponent 1
+  if (label === 'O2') return -8  // Opponent 2
+  return -6 // 預設值
 }
 
 // 處理球員點擊（橡皮擦模式）

@@ -25,6 +25,10 @@ namespace BadmintonForum.API.Models
 
         public bool IsLocked { get; set; } = false;
 
+        public bool IsDeleted { get; set; } = false;
+
+        public DateTime? DeletedAt { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }

@@ -141,11 +141,11 @@
             :key="`arrow-${index}`"
             :config="{
               points: [arrow.from.x, arrow.from.y, arrow.to.x, arrow.to.y],
-              pointerLength: arrow.type === 'shuttle' ? 20 : 15,
-              pointerWidth: arrow.type === 'shuttle' ? 20 : 15,
+              pointerLength: props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 15 : 12) : (arrow.type === 'shuttle' ? 20 : 15),
+              pointerWidth: props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 15 : 12) : (arrow.type === 'shuttle' ? 20 : 15),
               fill: arrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
               stroke: arrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
-              strokeWidth: arrow.type === 'shuttle' ? 4 : 3,
+              strokeWidth: props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 3 : 2) : (arrow.type === 'shuttle' ? 4 : 3),
               dash: arrow.type === 'shuttle' ? [8, 4] : []
             }"
           />
@@ -156,7 +156,7 @@
               :config="{
                 x: convertedShuttle.x,
                 y: convertedShuttle.y,
-                radius: 8,
+                radius: props.scale <= 0.6 ? 6 : 8,
                 fill: 'white',
                 stroke: '#333',
                 strokeWidth: 2
@@ -167,7 +167,7 @@
                 x: convertedShuttle.x - 12,
                 y: convertedShuttle.y - 20,
                 text: '🏸',
-                fontSize: 20
+                fontSize: props.scale <= 0.6 ? 16 : 20
               }"
             />
           </v-group>
@@ -186,18 +186,18 @@
               :config="{
                 x: 0,
                 y: 0,
-                radius: 18,
+                radius: playerRadius,
                 fill: player.team === 'A' ? '#3498db' : '#e74c3c',
                 stroke: 'white',
-                strokeWidth: 2
+                strokeWidth: playerStrokeWidth
               }"
             />
             <v-text
               :config="{
                 x: getTextXOffset(player.label),
-                y: -7,
+                y: textYOffset,
                 text: player.label,
-                fontSize: player.label.length > 2 ? 13 : 14,
+                fontSize: playerFontSize(player.label),
                 fill: 'white',
                 fontStyle: 'bold'
               }"
@@ -220,7 +220,7 @@
                 x: 0,
                 y: 0,
                 text: annotation.text,
-                fontSize: 18,
+                fontSize: props.scale <= 0.6 ? 14 : 18,
                 fill: 'black',
                 fontStyle: 'normal'
               }"
@@ -287,6 +287,28 @@ const canvasHeight = courtHeight + 80 * props.scale
 const offsetX = 40 * props.scale
 const offsetY = 40 * props.scale
 
+// 根據縮放比例調整球員圓圈和文字大小
+const playerRadius = computed(() => {
+  // 縮圖時圓圈要小一點
+  return props.scale <= 0.6 ? 12 : 18
+})
+
+const playerStrokeWidth = computed(() => {
+  return props.scale <= 0.6 ? 1.5 : 2
+})
+
+const textYOffset = computed(() => {
+  return props.scale <= 0.6 ? -4 : -7  // 縮圖時文字更貼近中心
+})
+
+const playerFontSize = (label) => {
+  // 縮圖時字體要小一點
+  if (props.scale <= 0.6) {
+    return label.length > 2 ? 10 : 11  // 保持小一點以避免重疊
+  }
+  return label.length > 2 ? 13 : 14
+}
+
 // 相對座標轉換為絕對座標
 const relativeToAbsolute = (x, y) => {
   return {
@@ -312,13 +334,23 @@ const stageConfig = {
 
 // 計算文字 X 偏移量以達到置中對齊
 const getTextXOffset = (label) => {
-  // 根據不同的標籤計算偏移量
+  // 根據不同的標籤和縮放比例計算偏移量
+  if (props.scale <= 0.6) {
+    // 縮圖時的偏移量
+    if (label === '我') return -5
+    if (label === 'P') return -4   // Partner
+    if (label === 'O') return -5   // Opponent (單打)
+    if (label === 'O1') return -7  // Opponent 1
+    if (label === 'O2') return -7  // Opponent 2
+    return -5
+  }
+  // 正常尺寸的偏移量
   if (label === '我') return -5
-  if (label === '隊友') return -12
-  if (label === '對手') return -12
-  if (label === '對手1') return -16
-  if (label === '對手2') return -16
-  return -8 // 預設值
+  if (label === 'P') return -5   // Partner
+  if (label === 'O') return -6   // Opponent (單打)
+  if (label === 'O1') return -8  // Opponent 1
+  if (label === 'O2') return -8  // Opponent 2
+  return -6 // 預設值
 }
 
 // 轉換資料（從相對座標到絕對座標）

@@ -34,7 +34,7 @@
           <div class="preview-container" @click="showFull = true">
             <BadmintonCourtViewer 
               :data="data" 
-              :scale="0.5"
+              :scale="0.6"
               class="preview-diagram"
             />
             <div class="preview-overlay">
@@ -89,13 +89,13 @@ const props = defineProps({
   },
   defaultExpanded: {
     type: Boolean,
-    default: false
+    default: true  // 預設展開戰術圖
   }
 })
 
 // 狀態
 const isExpanded = ref(props.defaultExpanded)
-const showFull = ref(false)
+const showFull = ref(false)  // 預設顯示縮圖，不顯示完整尺寸
 
 // 計算屬性
 const title = computed(() => {

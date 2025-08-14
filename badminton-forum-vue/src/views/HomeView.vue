@@ -54,14 +54,16 @@
           <div class="flex items-center justify-between">
             <RouterLink 
               :to="`/post/${item.id}`" 
-              class="text-base font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+              class="text-base font-medium"
+              :class="item.isDeleted ? 'text-gray-500 line-through' : 'text-primary-600 hover:text-primary-700 dark:text-primary-400'"
             >
               {{ item.title }}
+              <span v-if="item.isDeleted" class="text-xs text-red-500 ml-2">[已刪除]</span>
             </RouterLink>
             <span class="text-xs text-gray-500 dark:text-gray-400">回覆 {{ item.replyCount }}</span>
           </div>
           <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {{ item.authorName }} · {{ formatDate(item.createdAt) }}
+            {{ item.isDeleted ? '[已刪除]' : item.authorName }} · {{ formatDate(item.createdAt) }}
           </div>
         </li>
       </ul>

@@ -39,6 +39,8 @@ namespace BadmintonForum.API.Services
                     ReplyCount = p.Replies.Count,
                     IsPinned = p.IsPinned,
                     IsLocked = p.IsLocked,
+                    IsDeleted = p.IsDeleted,
+                    DeletedAt = p.DeletedAt,
                     IsLiked = userId.HasValue && userId > 0 && p.PostLikes.Any(pl => pl.UserId == userId),
                     CreatedAt = p.CreatedAt,
                     UpdatedAt = p.UpdatedAt
@@ -73,6 +75,8 @@ namespace BadmintonForum.API.Services
                     ReplyCount = p.Replies.Count,
                     IsPinned = p.IsPinned,
                     IsLocked = p.IsLocked,
+                    IsDeleted = p.IsDeleted,
+                    DeletedAt = p.DeletedAt,
                     IsLiked = userId.HasValue && userId > 0 && p.PostLikes.Any(pl => pl.UserId == userId),
                     CreatedAt = p.CreatedAt,
                     UpdatedAt = p.UpdatedAt
@@ -100,6 +104,8 @@ namespace BadmintonForum.API.Services
                     ReplyCount = p.Replies.Count,
                     IsPinned = p.IsPinned,
                     IsLocked = p.IsLocked,
+                    IsDeleted = p.IsDeleted,
+                    DeletedAt = p.DeletedAt,
                     IsLiked = userId.HasValue && userId > 0 && p.PostLikes.Any(pl => pl.UserId == userId),
                     CreatedAt = p.CreatedAt,
                     UpdatedAt = p.UpdatedAt
@@ -134,6 +140,12 @@ namespace BadmintonForum.API.Services
                 return false;
             }
 
+            // 防止編輯已刪除的文章
+            if (post.IsDeleted)
+            {
+                return false;
+            }
+
             if (!string.IsNullOrWhiteSpace(updatePostDto.Title))
             {
                 post.Title = updatePostDto.Title;
@@ -158,7 +170,16 @@ namespace BadmintonForum.API.Services
                 return false;
             }
 
-            _context.Posts.Remove(post);
+            // 軟刪除：標記為已刪除而非真正刪除
+            post.IsDeleted = true;
+            post.DeletedAt = DateTime.UtcNow;
+            
+            // 清空內容但保留結構
+            post.Content = "[此文章已被作者刪除]";
+            // 保留標題以維持討論脈絡
+            // post.Title = "[已刪除]";  // 可選：也可以保留原標題
+            
+            _context.Posts.Update(post);
             await _context.SaveChangesAsync();
 
             return true;
