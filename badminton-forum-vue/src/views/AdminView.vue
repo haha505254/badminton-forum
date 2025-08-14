@@ -124,6 +124,11 @@
                 title=""
                 :headers="userHeaders"
                 :items="filteredUsers"
+                :loading="loading"
+                :emptyText="'目前沒有使用者資料'"
+                :zebra="true"
+                :stickyHeader="true"
+                :dense="true"
               >
                 <template #row="{ item }">
                   <div class="col-span-1">{{ item.id }}</div>
@@ -256,6 +261,11 @@
                 title=""
                 :headers="postHeaders"
                 :items="filteredPosts"
+                :loading="loading"
+                :emptyText="'目前沒有文章資料'"
+                :zebra="true"
+                :stickyHeader="true"
+                :dense="true"
               >
                 <template #row="{ item }">
                   <div class="col-span-1">{{ item.id }}</div>
@@ -533,8 +543,19 @@ const loadPosts = async () => {
 }
 
 onMounted(() => {
-  loadUsers()
-  loadCategories()
-  loadPosts()
+  loadAll()
 })
+
+const loadAll = async () => {
+  loading.value = true
+  try {
+    await Promise.all([
+      loadUsers(),
+      loadCategories(),
+      loadPosts()
+    ])
+  } finally {
+    loading.value = false
+  }
+}
 </script>
