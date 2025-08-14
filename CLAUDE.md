@@ -168,6 +168,28 @@ GitHub Actions workflows:
 3. Review generated migration
 4. Run `dotnet ef database update`
 
+### ⚠️ 資料庫修改嚴格規則 (CRITICAL - MUST FOLLOW)
+
+**絕對禁止事項：**
+1. ❌ **絕對不可以直接在 Docker 容器內手動修改資料庫**
+2. ❌ **絕對不可以用 SQL 直接 ALTER TABLE**
+3. ❌ **絕對不可以跳過 Migration 流程**
+
+**唯一正確流程：**
+1. 修改 Model class (Models/*.cs)
+2. 執行 `dotnet ef migrations add [DescriptiveName]`
+3. 生成 idempotent SQL: `dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
+4. 測試 SQL 執行
+5. 確認無誤後更新: `dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
+
+**為什麼這很重要：**
+- MariaDB DDL 操作無法回滾
+- 手動修改會造成 Migration 歷史不一致
+- 其他開發者無法重現你的修改
+- 部署到生產環境會失敗
+
+**記住：如果你發現需要加欄位，停下來，走 Migration 流程！**
+
 ### Add new frontend page
 1. Create component in `views/`
 2. Add route in `router/index.js`
@@ -176,6 +198,7 @@ GitHub Actions workflows:
 
 ## Important Notes
 
+- ⚠️ **Database changes MUST use EF Core Migrations - NEVER modify database directly**
 - Database uses UTC timestamps by default
 - Frontend displays in Traditional Chinese (zh-TW)
 - Categories are predefined: 技術討論, 裝備評測, 比賽資訊, 找球友

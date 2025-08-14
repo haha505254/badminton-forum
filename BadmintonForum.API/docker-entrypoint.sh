@@ -15,8 +15,14 @@ echo "資料庫已就緒！"
 echo "啟動 API 服務..."
 if [ "$ASPNETCORE_ENVIRONMENT" = "Development" ]; then
   echo "以開發模式啟動 (支援熱重載)..."
-  # 執行資料庫遷移 (開發環境有 ef 工具)
-  dotnet ef database update
+  # 使用 idempotent SQL 執行資料庫遷移（更安全）
+  echo "生成 idempotent migration SQL..."
+  dotnet ef migrations script --idempotent -o /tmp/migrations.sql
+  
+  echo "執行資料庫遷移..."
+  mariadb -h db -P 3306 -u badmintonuser -pBadmintonPass123 badmintonforumdb < /tmp/migrations.sql
+  
+  echo "資料庫遷移完成！"
   dotnet watch run --no-launch-profile --urls http://+:5246
 else
   echo "以生產模式啟動..."
