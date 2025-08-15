@@ -13,92 +13,42 @@ export default {
   routes: [
     {
       name: 'dashboard',
-      displayName: 'menu.dashboard',
+      displayName: '儀表板',
       meta: {
         icon: 'vuestic-iconset-dashboard',
       },
     },
     {
       name: 'users',
-      displayName: 'menu.users',
+      displayName: '用戶管理',
       meta: {
         icon: 'group',
       },
     },
     {
-      name: 'projects',
-      displayName: 'menu.projects',
+      name: 'posts',
+      displayName: '貼文管理',
       meta: {
-        icon: 'folder_shared',
+        icon: 'article',
       },
     },
     {
-      name: 'payments',
-      displayName: 'menu.payments',
+      name: 'categories',
+      displayName: '分類管理',
       meta: {
-        icon: 'credit_card',
-      },
-      children: [
-        {
-          name: 'payment-methods',
-          displayName: 'menu.payment-methods',
-        },
-        {
-          name: 'pricing-plans',
-          displayName: 'menu.pricing-plans',
-        },
-        {
-          name: 'billing',
-          displayName: 'menu.billing',
-        },
-      ],
-    },
-    {
-      name: 'auth',
-      displayName: 'menu.auth',
-      meta: {
-        icon: 'login',
-      },
-      children: [
-        {
-          name: 'login',
-          displayName: 'menu.login',
-        },
-        {
-          name: 'signup',
-          displayName: 'menu.signup',
-        },
-        {
-          name: 'recover-password',
-          displayName: 'menu.recover-password',
-        },
-      ],
-    },
-
-    {
-      name: 'faq',
-      displayName: 'menu.faq',
-      meta: {
-        icon: 'quiz',
-      },
-    },
-    {
-      name: '404',
-      displayName: 'menu.404',
-      meta: {
-        icon: 'vuestic-iconset-files',
+        icon: 'folder',
       },
     },
     {
       name: 'preferences',
-      displayName: 'menu.preferences',
+      displayName: '個人設定',
       meta: {
         icon: 'manage_accounts',
       },
     },
     {
       name: 'settings',
-      displayName: 'menu.settings',
+      displayName: '系統設定',
       meta: {
         icon: 'settings',
       },

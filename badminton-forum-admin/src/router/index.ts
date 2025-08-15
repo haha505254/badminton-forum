@@ -4,6 +4,7 @@ import AuthLayout from '../layouts/AuthLayout.vue'
 import AppLayout from '../layouts/AppLayout.vue'
 
 import RouteViewComponent from '../layouts/RouterBypass.vue'
+import { useAuthStore } from '../stores/auth'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -35,11 +36,19 @@ const routes: Array<RouteRecordRaw> = [
         name: 'users',
         path: 'users',
         component: () => import('../pages/users/UsersPage.vue'),
+        meta: { requiresAdmin: true },
       },
       {
-        name: 'projects',
-        path: 'projects',
-        component: () => import('../pages/projects/ProjectsPage.vue'),
+        name: 'posts',
+        path: 'posts',
+        component: () => import('../pages/posts/PostsPage.vue'),
+        meta: { requiresAdmin: true },
+      },
+      {
+        name: 'categories',
+        path: 'categories',
+        component: () => import('../pages/categories/CategoriesPage.vue'),
+        meta: { requiresAdmin: true },
       },
       {
         name: 'payments',
@@ -121,6 +130,35 @@ const router = createRouter({
     }
   },
   routes,
+})
+
+// 路由守衛
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const isAuthenticated = authStore.isAuthenticated
+  const isAdmin = authStore.user?.isAdmin
+
+  // 如果路由需要管理員權限
+  if (to.meta.requiresAdmin && !isAdmin) {
+    next({ name: 'login' })
+    return
+  }
+
+  // 如果訪問管理後台但未登入
+  if (to.matched.some(record => record.path.startsWith('/') && record.path !== '/auth') && !isAuthenticated) {
+    if (to.name !== 'login') {
+      next({ name: 'login' })
+      return
+    }
+  }
+
+  // 如果已登入訪問登入頁面
+  if (to.name === 'login' && isAuthenticated) {
+    next({ name: 'dashboard' })
+    return
+  }
+
+  next()
 })
 
 export default router
