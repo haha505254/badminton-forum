@@ -75,12 +75,13 @@ docker-compose down -v               # Clean everything
 ### Backend Structure
 ```
 BadmintonForum.API/
-├── Controllers/          # API endpoints (Auth, Posts, Admin, etc.)
-├── Models/              # Entity models (User, Post, Reply, Category)
+├── Controllers/          # API endpoints (Auth, Posts, Admin, Replies, Profile, etc.)
+├── Models/              # Entity models (User, Post, Reply, Category, PostLike)
 ├── DTOs/                # Data transfer objects
 ├── Services/            # Business logic (JwtService, EmailService)
 ├── Data/                # DbContext and configurations
-└── Migrations/          # EF Core migrations
+├── Migrations/          # EF Core migrations
+└── migrations-sql/      # Idempotent SQL scripts for safe re-execution
 ```
 
 **Key patterns**:
@@ -94,12 +95,17 @@ BadmintonForum.API/
 ```
 badminton-forum-vue/
 ├── src/
-│   ├── views/           # Page components
+│   ├── views/           # Page components (Home, Post, Profile, Admin, Settings, etc.)
 │   ├── components/      # Reusable UI components
+│   │   ├── ui/          # UI component library
+│   │   ├── BadmintonCourtDiagram.vue  # Tactical board editor
+│   │   ├── BadmintonCourtViewer.vue   # Tactical board viewer
+│   │   ├── ReplyThread.vue            # Reply thread component
+│   │   └── RichTextEditor.vue         # TipTap rich text editor
 │   ├── api/            # Axios API client modules
 │   ├── stores/         # Pinia state management
 │   └── router/         # Vue Router configuration
-└── e2e/                # Playwright E2E tests
+└── e2e/                # Playwright E2E tests (currently disabled)
 ```
 
 **Key patterns**:
@@ -108,6 +114,8 @@ badminton-forum-vue/
 - Axios interceptors for JWT token handling
 - TipTap for rich text editing
 - Route guards for authentication
+- **Badminton Court Diagram**: Interactive tactical board using Konva.js
+- **Soft Delete**: Posts and Replies support soft deletion (IsDeleted, DeletedAt)
 
 ## Critical Configuration
 
@@ -130,21 +138,21 @@ badminton-forum-vue/
 ## Testing Approach
 
 - **Unit tests**: Currently minimal, would use xUnit for .NET
-- **E2E tests**: Playwright tests in `badminton-forum-vue/e2e/`
-- **API testing**: Use Swagger UI at `/swagger` or the `.http` file
+- **E2E tests**: Playwright tests disabled (package.json shows "E2E tests are disabled")
+- **API testing**: Use Swagger UI at `/swagger` or `BadmintonForum.API.http` file
 
 ## CI/CD Pipeline
 
 GitHub Actions workflows:
-1. **CI** (`ci.yml`): Runs on all PRs
+1. **CI** (`ci-cd.yml`): Runs on all branches
    - .NET format check
-   - API tests with PostgreSQL service
-   - Frontend build and E2E tests
+   - API tests with PostgreSQL service (Note: production uses MariaDB)
+   - Frontend build
    - Docker build verification
 
 2. **Security** (`security.yml`): Weekly CodeQL scans
 
-3. **Deployment**: Automatic to production on main branch merge
+3. **Test** (`test-cicd.yml`): Simple workflow for testing CI/CD
 
 ## Development URLs
 
@@ -165,30 +173,32 @@ GitHub Actions workflows:
 ### Modify database schema
 1. Update model in `Models/`
 2. Run `dotnet ef migrations add [Name]`
-3. Review generated migration
-4. Run `dotnet ef database update`
+3. Generate idempotent SQL: `dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
+4. Test the SQL script locally
+5. If successful, regenerate for all migrations: `dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
+6. Docker will automatically apply migrations on startup using the idempotent SQL
 
-### ⚠️ 資料庫修改嚴格規則 (CRITICAL - MUST FOLLOW)
+### ⚠️ Database Migration Rules (CRITICAL - MUST FOLLOW)
 
-**絕對禁止事項：**
-1. ❌ **絕對不可以直接在 Docker 容器內手動修改資料庫**
-2. ❌ **絕對不可以用 SQL 直接 ALTER TABLE**
-3. ❌ **絕對不可以跳過 Migration 流程**
+**NEVER DO THIS:**
+1. ❌ **NEVER modify database directly in Docker containers**
+2. ❌ **NEVER use raw SQL ALTER TABLE statements**
+3. ❌ **NEVER skip the Migration workflow**
 
-**唯一正確流程：**
-1. 修改 Model class (Models/*.cs)
-2. 執行 `dotnet ef migrations add [DescriptiveName]`
-3. 生成 idempotent SQL: `dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
-4. 測試 SQL 執行
-5. 確認無誤後更新: `dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
+**ALWAYS DO THIS:**
+1. Modify Model class (Models/*.cs)
+2. Run `dotnet ef migrations add [DescriptiveName]`
+3. Generate idempotent SQL: `dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
+4. Test the SQL execution locally
+5. If successful, update: `dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
 
-**為什麼這很重要：**
-- MariaDB DDL 操作無法回滾
-- 手動修改會造成 Migration 歷史不一致
-- 其他開發者無法重現你的修改
-- 部署到生產環境會失敗
+**Why this matters:**
+- MariaDB DDL operations are non-transactional (cannot rollback)
+- Manual changes break Migration history consistency
+- Other developers cannot reproduce your changes
+- Production deployments will fail
 
-**記住：如果你發現需要加欄位，停下來，走 Migration 流程！**
+**REMEMBER: If you need to add a column, STOP and use the Migration workflow!**
 
 ### Add new frontend page
 1. Create component in `views/`
@@ -201,10 +211,13 @@ GitHub Actions workflows:
 - ⚠️ **Database changes MUST use EF Core Migrations - NEVER modify database directly**
 - Database uses UTC timestamps by default
 - Frontend displays in Traditional Chinese (zh-TW)
-- Categories are predefined: 技術討論, 裝備評測, 比賽資訊, 找球友
+- Categories are predefined: 綜合討論區, 技術交流區, 裝備討論區, 賽事專區, 地區球友會
 - Admin panel accessible at `/admin` for users with admin role
 - Profile URLs use numeric user IDs (e.g., `/profile/123`)
 - Password reset tokens expire after 24 hours
+- Posts and Replies support soft deletion (IsDeleted flag)
+- Tactical board diagrams can be embedded in posts and replies
+- Rich text editor supports formatting, images, and embedded diagrams
 
 ## Git Commit Guidelines
 
