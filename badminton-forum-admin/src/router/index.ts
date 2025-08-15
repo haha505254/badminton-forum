@@ -51,6 +51,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAdmin: true },
       },
       {
+        name: 'replies',
+        path: 'replies',
+        component: () => import('../pages/replies/RepliesPage.vue'),
+        meta: { requiresAdmin: true },
+      },
+      {
         name: 'payments',
         path: '/payments',
         component: RouteViewComponent,

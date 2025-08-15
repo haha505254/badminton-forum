@@ -40,6 +40,13 @@ export default {
       },
     },
     {
+      name: 'replies',
+      displayName: '回覆管理',
+      meta: {
+        icon: 'comment',
+      },
+    },
+    {
       name: 'preferences',
       displayName: '個人設定',
       meta: {

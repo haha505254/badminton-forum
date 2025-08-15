@@ -54,6 +54,19 @@ const adminApi = {
   
   togglePostLock(id) {
     return api.put(`/admin/posts/${id}/toggle-lock`)
+  },
+  
+  // 回覆管理
+  getReplies(params = {}) {
+    return api.get('/admin/replies', { params })
+  },
+  
+  deleteReply(id) {
+    return api.delete(`/admin/replies/${id}`)
+  },
+  
+  batchDeleteReplies(ids) {
+    return api.post('/admin/replies/batch-delete', { ids })
   }
 }
 

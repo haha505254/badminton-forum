@@ -184,6 +184,10 @@ PublishProfiles/
 # Webpack
 /wwwroot/dist/
 
+# 上傳的檔案（但保留目錄結構）
+/BadmintonForum.API/wwwroot/uploads/avatars/*
+!/BadmintonForum.API/wwwroot/uploads/avatars/.gitkeep
+
 # Temporary files
 *.tmp
 *.temp

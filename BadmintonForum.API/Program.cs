@@ -81,6 +81,8 @@ builder.Services.AddCors(options =>
             "http://127.0.0.1:5173",
             "http://localhost:5174",  // Admin panel
             "http://127.0.0.1:5174",  // Admin panel
+            "http://localhost:5175",  // Admin panel (alternative port)
+            "http://127.0.0.1:5175",  // Admin panel (alternative port)
             "http://localhost:3000"
         };
 

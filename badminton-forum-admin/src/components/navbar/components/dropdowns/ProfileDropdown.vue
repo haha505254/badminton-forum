@@ -13,7 +13,7 @@
         class="profile-dropdown__content md:w-60 px-0 py-4 w-full"
         :style="{ '--hover-color': hoverColor }"
       >
-        <VaList v-for="group in options" :key="group.name">
+        <VaList v-for="group in computedOptions" :key="group.name">
           <header v-if="group.name" class="uppercase text-[var(--va-secondary)] opacity-80 font-bold text-xs px-4">
             {{ t(`user.${group.name}`) }}
           </header>
@@ -37,17 +37,22 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useColors } from 'vuestic-ui'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../../../../stores/auth'
 
 const { colors, setHSLAColor } = useColors()
 const hoverColor = computed(() => setHSLAColor(colors.focus, { a: 0.1 }))
 
 const { t } = useI18n()
+const router = useRouter()
+const authStore = useAuthStore()
 
 type ProfileListItem = {
   name: string
   to?: string
   href?: string
   icon: string
+  onClick?: () => void
 }
 
 type ProfileOptions = {
@@ -56,72 +61,79 @@ type ProfileOptions = {
   list: ProfileListItem[]
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     options?: ProfileOptions[]
   }>(),
   {
-    options: () => [
-      {
-        name: 'account',
-        separator: true,
-        list: [
-          {
-            name: 'profile',
-            to: 'preferences',
-            icon: 'mso-account_circle',
-          },
-          {
-            name: 'settings',
-            to: 'settings',
-            icon: 'mso-settings',
-          },
-          {
-            name: 'billing',
-            to: 'billing',
-            icon: 'mso-receipt_long',
-          },
-          {
-            name: 'projects',
-            to: 'projects',
-            icon: 'mso-favorite',
-          },
-        ],
-      },
-      {
-        name: 'explore',
-        separator: true,
-        list: [
-          {
-            name: 'faq',
-            to: 'faq',
-            icon: 'mso-quiz',
-          },
-          {
-            name: 'helpAndSupport',
-            href: 'https://discord.gg/u7fQdqQt8c',
-            icon: 'mso-error',
-          },
-        ],
-      },
-      {
-        name: '',
-        separator: false,
-        list: [
-          {
-            name: 'logout',
-            to: 'login',
-            icon: 'mso-logout',
-          },
-        ],
-      },
-    ],
+    options: () => [],
   },
 )
 
+// 使用 computed 來動態生成選項
+const computedOptions = computed(() => {
+  if (props.options.length > 0) {
+    return props.options
+  }
+  
+  return [
+    {
+      name: 'account',
+      separator: true,
+      list: [
+        {
+          name: 'profile',
+          to: 'preferences',
+          icon: 'mso-account_circle',
+        },
+        {
+          name: 'settings',
+          to: 'settings',
+          icon: 'mso-settings',
+        },
+      ],
+    },
+    {
+      name: 'explore',
+      separator: true,
+      list: [
+        {
+          name: 'faq',
+          to: 'faq',
+          icon: 'mso-quiz',
+        },
+        {
+          name: 'helpAndSupport',
+          href: 'https://discord.gg/u7fQdqQt8c',
+          icon: 'mso-error',
+        },
+      ],
+    },
+    {
+      name: '',
+      separator: false,
+      list: [
+        {
+          name: 'logout',
+          icon: 'mso-logout',
+          onClick: () => handleLogout(),
+        },
+      ],
+    },
+  ]
+})
+
 const isShown = ref(false)
 
+const handleLogout = () => {
+  authStore.logout()
+  router.push({ name: 'login' })
+}
+
 const resolveLinkAttribute = (item: ProfileListItem) => {
+  if (item.onClick) {
+    return { onClick: item.onClick }
+  }
   return item.to ? { to: { name: item.to } } : item.href ? { href: item.href, target: '_blank' } : {}
 }
 </script>

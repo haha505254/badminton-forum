@@ -295,5 +295,127 @@ namespace BadmintonForum.API.Controllers
 
             return Ok(new { isLocked = post.IsLocked });
         }
+
+        // Reply Management
+        [HttpGet("replies")]
+        public async Task<ActionResult<IEnumerable<ReplyAdminDto>>> GetRepliesAdmin(
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? search = null,
+            [FromQuery] string? author = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            var query = _context.Replies
+                .Include(r => r.Author)
+                .Include(r => r.Post)
+                .Include(r => r.ParentReply)
+                    .ThenInclude(pr => pr != null ? pr.Author : null)
+                .AsQueryable();
+
+            // Apply search filters
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r => r.Content.Contains(search));
+            }
+
+            if (!string.IsNullOrWhiteSpace(author))
+            {
+                query = query.Where(r => r.Author.Username.Contains(author));
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(r => r.CreatedAt >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(r => r.CreatedAt <= endDate.Value);
+            }
+
+            // Order by creation date (newest first)
+            query = query.OrderByDescending(r => r.CreatedAt);
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var replies = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(r => new ReplyAdminDto
+                {
+                    Id = r.Id,
+                    Content = r.Content,
+                    AuthorId = r.AuthorId,
+                    AuthorName = r.Author.Username,
+                    PostId = r.PostId,
+                    PostTitle = r.Post.Title,
+                    CreatedAt = r.CreatedAt,
+                    UpdatedAt = r.UpdatedAt,
+                    IsDeleted = r.IsDeleted,
+                    DeletedAt = r.DeletedAt,
+                    // Parent reply information
+                    ParentReplyId = r.ParentReplyId,
+                    ParentReplyContent = r.ParentReply != null ? r.ParentReply.Content : null,
+                    ParentReplyAuthorName = r.ParentReply != null ? r.ParentReply.Author.Username : null,
+                    ParentReplyAuthorId = r.ParentReply != null ? r.ParentReply.AuthorId : null,
+                    ParentReplyIsDeleted = r.ParentReply != null ? r.ParentReply.IsDeleted : null,
+                    ParentReplyDeletedAt = r.ParentReply != null ? r.ParentReply.DeletedAt : null
+                })
+                .ToListAsync();
+
+            Response.Headers.Append("X-Total-Count", totalItems.ToString());
+            Response.Headers.Append("X-Total-Pages", totalPages.ToString());
+
+            return Ok(replies);
+        }
+
+        [HttpDelete("replies/{id}")]
+        public async Task<IActionResult> DeleteReplyAdmin(int id)
+        {
+            var reply = await _context.Replies.FindAsync(id);
+            
+            if (reply == null)
+            {
+                return NotFound();
+            }
+
+            // Soft delete
+            reply.IsDeleted = true;
+            reply.DeletedAt = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPost("replies/batch-delete")]
+        public async Task<IActionResult> BatchDeleteReplies([FromBody] BatchDeleteDto dto)
+        {
+            if (dto.Ids == null || !dto.Ids.Any())
+            {
+                return BadRequest("請提供要刪除的回覆 ID");
+            }
+
+            var replies = await _context.Replies
+                .Where(r => dto.Ids.Contains(r.Id))
+                .ToListAsync();
+
+            if (!replies.Any())
+            {
+                return NotFound("找不到指定的回覆");
+            }
+
+            foreach (var reply in replies)
+            {
+                reply.IsDeleted = true;
+                reply.DeletedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { deletedCount = replies.Count });
+        }
     }
 }

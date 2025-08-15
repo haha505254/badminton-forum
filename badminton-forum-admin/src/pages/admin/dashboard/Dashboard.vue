@@ -190,6 +190,32 @@ import VaChart from '../../../components/va-charts/VaChart.vue'
 import adminApi from '../../../api/admin'
 import postsApi from '../../../api/posts'
 
+// 註冊 Chart.js 必要模組
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
+
 // 統計數據
 const stats = ref({
   users: 0,

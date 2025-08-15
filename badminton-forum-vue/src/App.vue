@@ -111,9 +111,12 @@ onMounted(async () => {
                 {{ authStore.user.username }}
               </RouterLink>
               <RouterLink to="/settings" class="nav-link">設置</RouterLink>
-              <RouterLink v-if="authStore.user?.isAdmin" to="/admin" class="nav-link text-primary-600">
-                管理
-              </RouterLink>
+              <a v-if="authStore.user?.isAdmin" 
+                 href="http://localhost:5174" 
+                 target="_blank"
+                 class="nav-link text-primary-600">
+                管理後台
+              </a>
               <button @click="handleLogout" class="btn-outline">
                 登出
               </button>
@@ -172,9 +175,12 @@ onMounted(async () => {
               {{ authStore.user.username }}
             </RouterLink>
             <RouterLink to="/settings" class="mobile-nav-link">設置</RouterLink>
-            <RouterLink v-if="authStore.user?.isAdmin" to="/admin" class="mobile-nav-link text-primary-600">
-              管理
-            </RouterLink>
+            <a v-if="authStore.user?.isAdmin" 
+               href="http://localhost:5174" 
+               target="_blank"
+               class="mobile-nav-link text-primary-600">
+              管理後台
+            </a>
             <button @click="handleLogout" class="mobile-nav-link text-left w-full">
               登出
             </button>
