@@ -77,6 +77,29 @@ services:
     networks:
       - badminton-network
 
+  # Vuestic Admin 後台管理系統
+  admin:
+    build:
+      context: ./badminton-forum-admin
+      dockerfile: Dockerfile
+      target: development
+    container_name: badminton-forum-admin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:5246/api}
+      VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
+      VITE_APP_NAME: ${ADMIN_APP_NAME:-羽球論壇管理後台}
+    ports:
+      - "${ADMIN_PORT:-5174}:5174"
+    volumes:
+      - ./badminton-forum-admin:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - badminton-network
+
   # Adminer (資料庫管理介面，選用)
   adminer:
     image: adminer:latest
