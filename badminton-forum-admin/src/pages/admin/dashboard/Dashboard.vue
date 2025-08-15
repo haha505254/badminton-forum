@@ -186,9 +186,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { VaChart } from '../../components/va-charts/VaChart.vue'
-import adminApi from '../../api/admin'
-import postsApi from '../../api/posts'
+import VaChart from '../../../components/va-charts/VaChart.vue'
+import adminApi from '../../../api/admin'
+import postsApi from '../../../api/posts'
 
 // 統計數據
 const stats = ref({

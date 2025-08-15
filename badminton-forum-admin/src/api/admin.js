@@ -1,6 +1,6 @@
 import api from './index'
 
-export const adminApi = {
+const adminApi = {
   // 使用者管理
   getUsers(page = 1, pageSize = 20) {
     return api.get('/admin/users', {
@@ -56,3 +56,5 @@ export const adminApi = {
     return api.put(`/admin/posts/${id}/toggle-lock`)
   }
 }
+
+export default adminApi
