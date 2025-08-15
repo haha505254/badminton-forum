@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Documentation Language Policy
+
+**All documentation and code comments in this repository should be written in English for consistency and international collaboration.**
+
 ## Project Overview
 
 Full-stack badminton forum application:
@@ -9,10 +13,60 @@ Full-stack badminton forum application:
 - **Frontend**: Vue 3 SPA with Vite
 - **Architecture**: RESTful API with JWT authentication + Google OAuth 2.0
 
+## ⚠️ IMPORTANT: Docker Development Environment
+
+**The developer usually has Docker Compose already running! Check before executing any operations:**
+
+```bash
+# Check Docker container status
+docker-compose ps
+
+# Check if specific ports are in use
+lsof -i :5173  # Frontend
+lsof -i :5246  # API
+lsof -i :5174  # Admin Panel
+```
+
+### Running Service Endpoints
+When Docker Compose is running, these services are available:
+- **Frontend**: http://localhost:5173
+- **API**: http://localhost:5246 (Swagger UI: /swagger)
+- **Admin Panel**: http://localhost:5174  
+- **MariaDB**: localhost:3306
+- **Adminer** (optional): http://localhost:8080 (requires `--profile tools`)
+
+### ❌ DO NOT
+- **DO NOT** run `docker-compose up` again - causes port conflicts
+- **DO NOT** run `dotnet run` or `npm run dev` inside containers
+- **DO NOT** attempt to recreate existing containers
+
+### ✅ Correct Operations
+```bash
+# To restart services
+docker-compose restart [service-name]
+
+# View logs
+docker-compose logs -f [service-name]
+
+# Enter running containers
+docker-compose exec api bash
+docker-compose exec web sh
+docker-compose exec admin sh
+
+# If you really need to restart everything
+docker-compose down && docker-compose up
+```
+
+### Development Workflow
+1. **Assume Docker Compose is already running**
+2. Edit code locally (hot-reload will apply changes automatically)
+3. For .NET commands, use `docker-compose exec api dotnet [command]`
+4. For npm commands, use `docker-compose exec web npm [command]` or `docker-compose exec admin npm [command]`
+
 ## Quick Start Commands
 
 ```bash
-# First time setup (超簡單！)
+# First time setup
 cp .env.defaults .env
 docker-compose up
 
@@ -31,12 +85,12 @@ cd badminton-forum-vue && npm run dev
 
 ### Environment Files
 - **`.env`** - Main configuration (copy from `.env.defaults`)
-- **`badminton-forum-vue/.env.development`** - Frontend config (已包含預設值)
+- **`badminton-forum-vue/.env.development`** - Frontend config (includes defaults)
 
 ### Key Environment Variables
-- `GOOGLE_CLIENT_ID` - 需自行設定以啟用 Google OAuth (optional)
-- `JWT_SECRET` - 生產環境必須更改
-- `MARIADB_PASSWORD` - 生產環境必須更改
+- `GOOGLE_CLIENT_ID` - Set this to enable Google OAuth (optional)
+- `JWT_SECRET` - Must change for production
+- `MARIADB_PASSWORD` - Must change for production
 
 ## Essential Development Commands
 
@@ -211,7 +265,7 @@ GitHub Actions workflows:
 - ⚠️ **Database changes MUST use EF Core Migrations - NEVER modify database directly**
 - Database uses UTC timestamps by default
 - Frontend displays in Traditional Chinese (zh-TW)
-- Categories are predefined: 綜合討論區, 技術交流區, 裝備討論區, 賽事專區, 地區球友會
+- Categories are predefined: General Discussion, Technical Exchange, Equipment Discussion, Tournament Zone, Regional Players Club
 - Admin panel accessible at `/admin` for users with admin role
 - Profile URLs use numeric user IDs (e.g., `/profile/123`)
 - Password reset tokens expire after 24 hours
