@@ -1,0 +1,131 @@
+# Dokploy deployment configuration
+# This file is specifically for Dokploy deployment
+# Local development should use docker-compose.yml
+
+services:
+  # MariaDB database
+  db:
+    image: mariadb:11
+    container_name: badminton-forum-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-badmintonforumdb}
+      MARIADB_USER: ${MARIADB_USER:-badmintonuser}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-BadmintonPass123}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-rootpass123}
+      MARIADB_CHARACTER_SET: utf8mb4
+      MARIADB_COLLATION: utf8mb4_unicode_ci
+    volumes:
+      # Use ../files/ prefix for Dokploy persistent storage
+      - ../files/mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dokploy-network
+
+  # .NET Core API
+  api:
+    build:
+      context: ./BadmintonForum.API
+      dockerfile: Dockerfile
+      target: production
+    container_name: badminton-forum-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5246
+      ConnectionStrings__DefaultConnection: "Server=db;Database=${MARIADB_DATABASE:-badmintonforumdb};User=${MARIADB_USER:-badmintonuser};Password=${MARIADB_PASSWORD:-BadmintonPass123};"
+      JwtSettings__Secret: ${JWT_SECRET:-ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction}
+      JwtSettings__Issuer: ${JWT_ISSUER:-BadmintonForumAPI}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-BadmintonForumClient}
+      JwtSettings__ExpirationInDays: ${JWT_EXPIRATION_DAYS:-7}
+      Email__UseConsoleEmail: "false"
+      Email__BaseUrl: ${EMAIL_BASE_URL:-http://56.155.38.231}
+      GoogleAuth__ClientId: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
+      # CORS settings for production
+      FRONTEND_URL: ${FRONTEND_URL:-http://56.155.38.231}
+    expose:
+      - 5246
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`${API_DOMAIN:-56.155.38.231}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.services.api.loadbalancer.server.port=5246"
+      # Optional: Enable HTTPS with Let's Encrypt when domain is configured
+      # - "traefik.http.routers.api-secure.rule=Host(`${API_DOMAIN}`) && PathPrefix(`/api`)"
+      # - "traefik.http.routers.api-secure.entrypoints=websecure"
+      # - "traefik.http.routers.api-secure.tls.certresolver=letsencrypt"
+
+  # Vue.js frontend
+  web:
+    build:
+      context: ./badminton-forum-vue
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://56.155.38.231/api}
+    container_name: badminton-forum-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    expose:
+      - 80
+    depends_on:
+      - api
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`${WEB_DOMAIN:-56.155.38.231}`)"
+      - "traefik.http.routers.web.entrypoints=web"
+      - "traefik.http.services.web.loadbalancer.server.port=80"
+      # Optional: Enable HTTPS with Let's Encrypt when domain is configured
+      # - "traefik.http.routers.web-secure.rule=Host(`${WEB_DOMAIN}`)"
+      # - "traefik.http.routers.web-secure.entrypoints=websecure"
+      # - "traefik.http.routers.web-secure.tls.certresolver=letsencrypt"
+
+  # Vuestic Admin panel
+  admin:
+    build:
+      context: ./badminton-forum-admin
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://56.155.38.231/api}
+    container_name: badminton-forum-admin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      VITE_APP_NAME: ${ADMIN_APP_NAME:-羽球論壇管理後台}
+    expose:
+      - 80
+    depends_on:
+      - api
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.rule=Host(`${ADMIN_DOMAIN:-56.155.38.231}`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.admin.entrypoints=web"
+      - "traefik.http.services.admin.loadbalancer.server.port=80"
+      # Strip /admin prefix when forwarding to container
+      - "traefik.http.middlewares.admin-stripprefix.stripprefix.prefixes=/admin"
+      - "traefik.http.routers.admin.middlewares=admin-stripprefix"
+      # Optional: Enable HTTPS with Let's Encrypt when domain is configured
+      # - "traefik.http.routers.admin-secure.rule=Host(`${ADMIN_DOMAIN}`) && PathPrefix(`/admin`)"
+      # - "traefik.http.routers.admin-secure.entrypoints=websecure"
+      # - "traefik.http.routers.admin-secure.tls.certresolver=letsencrypt"
+      # - "traefik.http.routers.admin-secure.middlewares=admin-stripprefix"
+
+networks:
+  dokploy-network:
+    external: true
