@@ -113,7 +113,7 @@
 
           <template #cell(postTitle)="{ value, rowData }">
             <a 
-              :href="`http://localhost:5173/post/${rowData.postId}`"
+              :href="`http://localhost:5173/posts/${rowData.postId}`"
               target="_blank"
               class="text-primary hover:underline"
             >
@@ -207,7 +207,7 @@
             <div>
               <strong>所屬文章：</strong>
               <a 
-                :href="`http://localhost:5173/post/${currentReply.postId}`"
+                :href="`http://localhost:5173/posts/${currentReply.postId}`"
                 target="_blank"
                 class="text-primary hover:underline"
               >

@@ -31,7 +31,7 @@
         <div class="posts-list">
           <div v-for="post in posts" :key="post.id" class="post-item">
             <div class="post-header">
-              <router-link :to="`/post/${post.id}`" class="post-title">
+              <router-link :to="`/posts/${post.id}`" class="post-title">
                 {{ post.title }}
               </router-link>
               <span class="post-category">{{ post.categoryName }}</span>

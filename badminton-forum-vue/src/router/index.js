@@ -30,7 +30,7 @@ const routes = [
     component: () => import('../views/CategoryView.vue')
   },
   {
-    path: '/post/:id',
+    path: '/posts/:id',
     name: 'post',
     component: () => import('../views/PostView.vue')
   },
@@ -41,7 +41,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/post/:id/edit',
+    path: '/posts/:id/edit',
     name: 'edit-post',
     component: () => import('../views/EditPostView.vue'),
     meta: { requiresAuth: true }

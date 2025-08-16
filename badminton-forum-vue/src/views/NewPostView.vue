@@ -193,7 +193,7 @@ const submitPost = async () => {
       title: formData.title.trim(),
       content: formData.content
     })
-    router.push(`/post/${response.data.id}`)
+    router.push(`/posts/${response.data.id}`)
   } catch (error) {
     console.error('Failed to create post:', error)
     alert('發表文章失敗，請重試')

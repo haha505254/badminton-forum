@@ -49,7 +49,6 @@ services:
       - ./BadmintonForum.API:/app
       - ~/.nuget/packages:/root/.nuget/packages:ro
       - dotnet_tools:/root/.dotnet/tools
-      - ./BadmintonForum.API/wwwroot/uploads:/app/wwwroot/uploads
     depends_on:
       db:
         condition: service_healthy

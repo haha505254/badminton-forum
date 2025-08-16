@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">編輯文章</h1>
-        <RouterLink :to="`/post/${postId}`" class="btn-outline">返回文章</RouterLink>
+        <RouterLink :to="`/posts/${postId}`" class="btn-outline">返回文章</RouterLink>
       </div>
 
       <!-- Loading State -->
@@ -90,7 +90,7 @@
             上次更新：{{ formData.updatedAt ? formatDate(formData.updatedAt) : '從未更新' }}
           </div>
           <div class="flex items-center gap-3">
-            <RouterLink :to="`/post/${postId}`" class="btn-outline">取消</RouterLink>
+            <RouterLink :to="`/posts/${postId}`" class="btn-outline">取消</RouterLink>
             <button type="submit" class="btn-primary" :disabled="!canSubmit">
               <span v-if="submitting" class="flex items-center">
                 <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
@@ -216,7 +216,7 @@ const submitPost = async () => {
       title: formData.title.trim(),
       content: formData.content
     })
-    router.push(`/post/${postId.value}`)
+    router.push(`/posts/${postId.value}`)
   } catch (error) {
     console.error('Failed to update post:', error)
     if (error.response?.status === 403) {
@@ -239,7 +239,7 @@ const loadPost = async () => {
     // 檢查權限：只有作者可以編輯
     if (post.authorId !== authStore.user?.id) {
       alert('您沒有權限編輯此文章')
-      router.push(`/post/${postId.value}`)
+      router.push(`/posts/${postId.value}`)
       return
     }
     
@@ -253,7 +253,7 @@ const loadPost = async () => {
   } catch (error) {
     console.error('Failed to fetch post:', error)
     alert('載入文章失敗')
-    router.push(`/post/${postId.value}`)
+    router.push(`/posts/${postId.value}`)
   } finally {
     loading.value = false
   }

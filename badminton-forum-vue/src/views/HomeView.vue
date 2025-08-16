@@ -53,7 +53,7 @@
         <li v-for="item in latestPosts" :key="item.id" class="py-3">
           <div class="flex items-center justify-between">
             <RouterLink 
-              :to="`/post/${item.id}`" 
+              :to="`/posts/${item.id}`" 
               class="text-base font-medium"
               :class="item.isDeleted ? 'text-gray-500 line-through' : 'text-primary-600 hover:text-primary-700 dark:text-primary-400'"
             >

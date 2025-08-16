@@ -29,7 +29,7 @@
           <!-- Edit/Delete Buttons (only for post author) -->
           <div v-if="isAuthor && !post.isDeleted" class="flex gap-2">
             <RouterLink 
-              :to="`/post/${post.id}/edit`"
+              :to="`/posts/${post.id}/edit`"
               class="btn-primary flex items-center gap-2"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -8,9 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Full-stack badminton forum application:
+Full-stack badminton forum application with dual frontend architecture:
 - **Backend**: ASP.NET Core 8.0 Web API with MariaDB
-- **Frontend**: Vue 3 SPA with Vite
+- **Main Frontend**: Vue 3 SPA with Vite (Public forum)
+- **Admin Panel**: Vuestic Admin with Vue 3 + TypeScript (Management dashboard)
 - **Architecture**: RESTful API with JWT authentication + Google OAuth 2.0
 
 ## ⚠️ IMPORTANT: Docker Development Environment
@@ -77,20 +78,60 @@ docker-compose up
 # Terminal 1: Backend
 cd BadmintonForum.API && dotnet run
 
-# Terminal 2: Frontend  
+# Terminal 2: Main Frontend  
 cd badminton-forum-vue && npm run dev
+
+# Terminal 3: Admin Panel
+cd badminton-forum-admin && npm run dev
 ```
 
 ## Environment Setup
 
 ### Environment Files
 - **`.env`** - Main configuration (copy from `.env.defaults`)
-- **`badminton-forum-vue/.env.development`** - Frontend config (includes defaults)
+- **`badminton-forum-vue/.env.development`** - Main frontend config (includes defaults)
+- **`badminton-forum-admin/.env.development`** - Admin panel config
 
 ### Key Environment Variables
 - `GOOGLE_CLIENT_ID` - Set this to enable Google OAuth (optional)
 - `JWT_SECRET` - Must change for production
 - `MARIADB_PASSWORD` - Must change for production
+- `ADMIN_PORT` - Admin panel port (default: 5174)
+- `ADMIN_APP_NAME` - Admin panel title (default: 羽球論壇管理後台)
+
+## Development Credentials
+
+### Database Access
+```
+MariaDB Connection:
+- Host: localhost (or 'db' in Docker)
+- Port: 3306
+- Database: badmintonforumdb
+- Username: badmintonuser
+- Password: BadmintonPass123
+- Root Password: rootpass123
+
+Quick connect via Docker:
+docker-compose exec db mysql -u badmintonuser -pBadmintonPass123 badmintonforumdb
+
+Adminer Web UI:
+- URL: http://localhost:8080
+- Server: db
+- Username: badmintonuser
+- Password: BadmintonPass123
+- Database: badmintonforumdb
+```
+
+### Test Accounts
+```
+Admin Account:
+- Email: 123@gmail.com
+- Password: 123456
+- Role: Administrator
+- Use for: Testing admin panel at http://localhost:5174
+
+Regular test users can be created via registration
+```
 
 ## Essential Development Commands
 
@@ -145,11 +186,11 @@ BadmintonForum.API/
 - DTOs for API responses
 - Async/await throughout
 
-### Frontend Structure
+### Main Frontend Structure
 ```
 badminton-forum-vue/
 ├── src/
-│   ├── views/           # Page components (Home, Post, Profile, Admin, Settings, etc.)
+│   ├── views/           # Page components (Home, Post, Profile, Settings, etc.)
 │   ├── components/      # Reusable UI components
 │   │   ├── ui/          # UI component library
 │   │   ├── BadmintonCourtDiagram.vue  # Tactical board editor
@@ -162,12 +203,35 @@ badminton-forum-vue/
 └── e2e/                # Playwright E2E tests (currently disabled)
 ```
 
+### Admin Panel Structure
+```
+badminton-forum-admin/
+├── src/
+│   ├── pages/           # Admin pages
+│   │   ├── admin/dashboard/    # Dashboard with statistics
+│   │   ├── users/              # User management
+│   │   ├── posts/              # Post management
+│   │   ├── categories/         # Category management
+│   │   ├── replies/            # Reply management
+│   │   └── auth/               # Admin login
+│   ├── components/      # Vuestic UI components
+│   │   ├── navbar/      # Navigation bar
+│   │   ├── sidebar/     # Side navigation
+│   │   └── custom/      # Shared components from main app
+│   ├── api/            # API client modules
+│   ├── stores/         # Pinia stores (auth, user)
+│   ├── router/         # Vue Router with auth guards
+│   └── layouts/        # App and Auth layouts
+└── public/             # Static assets
+```
+
 **Key patterns**:
-- Composition API with Vue 3
-- Pinia for state management (auth, posts stores)
+- Composition API with Vue 3 + TypeScript
+- Vuestic UI component framework
+- Pinia for state management
 - Axios interceptors for JWT token handling
 - TipTap for rich text editing
-- Route guards for authentication
+- Route guards for admin authentication
 - **Badminton Court Diagram**: Interactive tactical board using Konva.js
 - **Soft Delete**: Posts and Replies support soft deletion (IsDeleted, DeletedAt)
 
@@ -210,10 +274,11 @@ GitHub Actions workflows:
 
 ## Development URLs
 
-- Frontend: http://localhost:5173
+- Main Frontend: http://localhost:5173 (Public forum)
+- Admin Panel: http://localhost:5174 (Management dashboard)
 - API: http://localhost:5246
 - Swagger: http://localhost:5246/swagger
-- Adminer (Docker): http://localhost:8080
+- Adminer (Docker): http://localhost:8080 (requires `--profile tools`)
 
 ## Common Tasks
 
@@ -223,6 +288,7 @@ GitHub Actions workflows:
 3. Add service logic in `Services/`
 4. Update Swagger annotations
 5. Add frontend API client in `badminton-forum-vue/src/api/`
+6. If admin-related, also add to `badminton-forum-admin/src/api/`
 
 ### Modify database schema
 1. Update model in `Models/`
@@ -255,10 +321,17 @@ GitHub Actions workflows:
 **REMEMBER: If you need to add a column, STOP and use the Migration workflow!**
 
 ### Add new frontend page
-1. Create component in `views/`
-2. Add route in `router/index.js`
-3. Add API calls in `api/`
+**For main frontend:**
+1. Create component in `badminton-forum-vue/src/views/`
+2. Add route in `badminton-forum-vue/src/router/index.js`
+3. Add API calls in `badminton-forum-vue/src/api/`
 4. Update navigation if needed
+
+**For admin panel:**
+1. Create component in `badminton-forum-admin/src/pages/`
+2. Add route in `badminton-forum-admin/src/router/index.ts`
+3. Add API calls in `badminton-forum-admin/src/api/`
+4. Update sidebar navigation in `NavigationRoutes.ts`
 
 ## Important Notes
 
@@ -266,12 +339,58 @@ GitHub Actions workflows:
 - Database uses UTC timestamps by default
 - Frontend displays in Traditional Chinese (zh-TW)
 - Categories are predefined: General Discussion, Technical Exchange, Equipment Discussion, Tournament Zone, Regional Players Club
-- Admin panel accessible at `/admin` for users with admin role
+- Admin panel is a separate application at http://localhost:5174 (not a route)
+- Main app shows external link to admin panel for admin users
 - Profile URLs use numeric user IDs (e.g., `/profile/123`)
 - Password reset tokens expire after 24 hours
 - Posts and Replies support soft deletion (IsDeleted flag)
 - Tactical board diagrams can be embedded in posts and replies
 - Rich text editor supports formatting, images, and embedded diagrams
+
+## Admin Panel Features
+
+The Vuestic Admin panel provides comprehensive management capabilities:
+
+### Dashboard (儀表板)
+- Real-time statistics (users, posts, replies, views)
+- Interactive charts and data visualization
+- Daily activity trends
+- Category distribution analysis
+
+### User Management (用戶管理)
+- View all users with pagination and search
+- Toggle user active/inactive status
+- Grant/revoke admin privileges
+- Filter by provider (local, Google)
+- View user profiles (links to main app)
+
+### Post Management (貼文管理)
+- View all posts with search and filters
+- Pin/unpin posts
+- Lock/unlock posts for replies
+- Soft delete posts
+- Filter by category and author
+
+### Category Management (分類管理)
+- Create, edit, delete categories
+- Set display order
+- Manage category icons
+- View post count per category
+- Protected deletion (prevents deleting categories with posts)
+
+### Reply Management (回覆管理)
+- Advanced search (content, author, date range)
+- View nested reply threads
+- Soft delete individual replies
+- Batch delete multiple replies
+- Track parent-child reply relationships
+
+### Authentication
+- Separate admin login system
+- JWT token authentication
+- Admin role verification
+- Automatic session management
+
 
 ## Git Commit Guidelines
 

@@ -52,7 +52,7 @@
         </div>
         <div v-else class="post-list">
           <div v-for="post in posts" :key="post.id" class="post-item">
-            <RouterLink :to="`/post/${post.id}`">
+            <RouterLink :to="`/posts/${post.id}`">
               <h3>{{ post.title }}</h3>
             </RouterLink>
             <div class="post-meta">
