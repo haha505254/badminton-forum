@@ -2,12 +2,7 @@
   <div class="posts-page">
     <div class="row align-center mb-4">
       <h1 class="flex">貼文管理</h1>
-      <VaInput
-        v-model="filter"
-        placeholder="搜尋貼文..."
-        class="mr-3"
-        style="max-width: 300px"
-      >
+      <VaInput v-model="filter" placeholder="搜尋貼文..." class="mr-3" style="max-width: 300px">
         <template #prepend>
           <VaIcon name="search" />
         </template>
@@ -60,11 +55,7 @@
 
             <template #cell(actions)="{ rowData }">
               <div class="flex gap-2">
-                <VaButton
-                  preset="plain"
-                  icon="visibility"
-                  @click="viewPost(rowData)"
-                />
+                <VaButton preset="plain" icon="visibility" @click="viewPost(rowData)" />
                 <VaButton
                   v-if="!rowData.isPinned"
                   preset="plain"
@@ -72,13 +63,7 @@
                   color="warning"
                   @click="togglePin(rowData)"
                 />
-                <VaButton
-                  v-else
-                  preset="plain"
-                  icon="push_pin"
-                  color="secondary"
-                  @click="togglePin(rowData)"
-                />
+                <VaButton v-else preset="plain" icon="push_pin" color="secondary" @click="togglePin(rowData)" />
                 <VaButton
                   v-if="!rowData.isLocked"
                   preset="plain"
@@ -86,13 +71,7 @@
                   color="info"
                   @click="toggleLock(rowData)"
                 />
-                <VaButton
-                  v-else
-                  preset="plain"
-                  icon="lock"
-                  color="danger"
-                  @click="toggleLock(rowData)"
-                />
+                <VaButton v-else preset="plain" icon="lock" color="danger" @click="toggleLock(rowData)" />
                 <VaButton
                   v-if="!rowData.isDeleted"
                   preset="plain"
@@ -130,24 +109,16 @@ const columns = [
   { key: 'viewCount', label: '瀏覽數', sortable: true },
   { key: 'status', label: '狀態' },
   { key: 'createdAt', label: '發布時間', sortable: true },
-  { key: 'actions', label: '操作', width: '150px' }
+  { key: 'actions', label: '操作', width: '150px' },
 ]
 
 const pagination = computed(() => ({
   page: currentPage.value,
   perPage: perPage.value,
-  total: total.value
+  total: total.value,
 }))
 
-const filteredPosts = computed(() => {
-  if (!filter.value) return posts.value
-  const searchTerm = filter.value.toLowerCase()
-  return posts.value.filter(post => 
-    post.title?.toLowerCase().includes(searchTerm) ||
-    post.author?.username?.toLowerCase().includes(searchTerm) ||
-    post.category?.name?.toLowerCase().includes(searchTerm)
-  )
-})
+// 已移除未使用的 filteredPosts - 使用 filteredItem 代替
 
 async function fetchPosts() {
   loading.value = true
@@ -158,7 +129,7 @@ async function fetchPosts() {
   } catch (error) {
     notify({
       message: '載入貼文失敗',
-      color: 'danger'
+      color: 'danger',
     })
   } finally {
     loading.value = false
@@ -171,12 +142,12 @@ async function togglePin(post) {
     post.isPinned = !post.isPinned
     notify({
       message: post.isPinned ? '已置頂貼文' : '已取消置頂',
-      color: 'success'
+      color: 'success',
     })
   } catch (error) {
     notify({
       message: '操作失敗',
-      color: 'danger'
+      color: 'danger',
     })
   }
 }
@@ -187,30 +158,30 @@ async function toggleLock(post) {
     post.isLocked = !post.isLocked
     notify({
       message: post.isLocked ? '已鎖定貼文' : '已解鎖貼文',
-      color: 'success'
+      color: 'success',
     })
   } catch (error) {
     notify({
       message: '操作失敗',
-      color: 'danger'
+      color: 'danger',
     })
   }
 }
 
 async function deletePost(post) {
   if (!confirm('確定要刪除這篇貼文嗎？')) return
-  
+
   try {
     await adminApi.deletePost(post.id)
     post.isDeleted = true
     notify({
       message: '貼文已刪除',
-      color: 'success'
+      color: 'success',
     })
   } catch (error) {
     notify({
       message: '刪除失敗',
-      color: 'danger'
+      color: 'danger',
     })
   }
 }
@@ -231,7 +202,7 @@ function formatDate(dateString) {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 

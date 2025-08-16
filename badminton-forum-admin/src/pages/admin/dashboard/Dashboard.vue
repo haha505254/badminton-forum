@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <h1 class="page-title">羽球論壇管理儀表板</h1>
-    
+
     <!-- 統計卡片 -->
     <div class="row">
       <div class="flex xs12 sm6 md3">
@@ -21,7 +21,7 @@
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 sm6 md3">
         <VaCard class="mb-4">
           <VaCardContent>
@@ -39,7 +39,7 @@
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 sm6 md3">
         <VaCard class="mb-4">
           <VaCardContent>
@@ -57,7 +57,7 @@
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 sm6 md3">
         <VaCard class="mb-4">
           <VaCardContent>
@@ -76,7 +76,7 @@
         </VaCard>
       </div>
     </div>
-    
+
     <!-- 圖表區域 -->
     <div class="row">
       <div class="flex xs12 md8">
@@ -85,33 +85,23 @@
             <h3>每日活動趨勢</h3>
           </VaCardTitle>
           <VaCardContent>
-            <VaChart
-              :data="chartData"
-              type="line"
-              :options="chartOptions"
-              style="height: 300px"
-            />
+            <VaChart :data="chartData" type="line" :options="chartOptions" style="height: 300px" />
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 md4">
         <VaCard class="mb-4">
           <VaCardTitle>
             <h3>分類文章分布</h3>
           </VaCardTitle>
           <VaCardContent>
-            <VaChart
-              :data="pieChartData"
-              type="doughnut"
-              :options="pieChartOptions"
-              style="height: 300px"
-            />
+            <VaChart :data="pieChartData" type="doughnut" :options="pieChartOptions" style="height: 300px" />
           </VaCardContent>
         </VaCard>
       </div>
     </div>
-    
+
     <!-- 最新活動 -->
     <div class="row">
       <div class="flex xs12 md6">
@@ -123,11 +113,7 @@
             <VaList>
               <VaListItem v-for="post in recentPosts" :key="post.id">
                 <VaListItemSection avatar>
-                  <VaAvatar
-                    :src="post.author?.avatar"
-                    :fallback-text="post.author?.username?.[0]"
-                    size="small"
-                  />
+                  <VaAvatar :src="post.author?.avatar" :fallback-text="post.author?.username?.[0]" size="small" />
                 </VaListItemSection>
                 <VaListItemSection>
                   <VaListItemLabel>
@@ -145,7 +131,7 @@
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 md6">
         <VaCard>
           <VaCardTitle>
@@ -155,22 +141,16 @@
             <VaList>
               <VaListItem v-for="user in recentUsers" :key="user.id">
                 <VaListItemSection avatar>
-                  <VaAvatar
-                    :src="user.avatar"
-                    :fallback-text="user.username?.[0]"
-                    size="small"
-                  />
+                  <VaAvatar :src="user.avatar" :fallback-text="user.username?.[0]" size="small" />
                 </VaListItemSection>
                 <VaListItemSection>
                   <VaListItemLabel>
                     {{ user.username }}
                   </VaListItemLabel>
-                  <VaListItemLabel caption>
-                    {{ user.email }} · {{ formatTime(user.createdAt) }}
-                  </VaListItemLabel>
+                  <VaListItemLabel caption> {{ user.email }} · {{ formatTime(user.createdAt) }} </VaListItemLabel>
                 </VaListItemSection>
                 <VaListItemSection icon>
-                  <VaBadge 
+                  <VaBadge
                     :text="user.provider || 'Local'"
                     :color="user.provider === 'Google' ? 'warning' : 'success'"
                   />
@@ -188,7 +168,6 @@
 import { ref, onMounted, computed } from 'vue'
 import VaChart from '../../../components/va-charts/VaChart.vue'
 import adminApi from '../../../api/admin'
-import postsApi from '../../../api/posts'
 
 // 註冊 Chart.js 必要模組
 import {
@@ -201,20 +180,10 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 } from 'chart.js'
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler)
 
 // 統計數據
 const stats = ref({
@@ -225,7 +194,7 @@ const stats = ref({
   replies: 0,
   todayReplies: 0,
   views: 0,
-  todayViews: 0
+  todayViews: 0,
 })
 
 // 最新數據
@@ -241,16 +210,16 @@ const chartData = computed(() => ({
       data: [12, 19, 15, 25, 22, 30, 28],
       borderColor: '#4CAF50',
       backgroundColor: 'rgba(76, 175, 80, 0.1)',
-      tension: 0.4
+      tension: 0.4,
     },
     {
       label: '新用戶',
       data: [5, 8, 3, 12, 7, 15, 10],
       borderColor: '#2196F3',
       backgroundColor: 'rgba(33, 150, 243, 0.1)',
-      tension: 0.4
-    }
-  ]
+      tension: 0.4,
+    },
+  ],
 }))
 
 const chartOptions = {
@@ -258,14 +227,14 @@ const chartOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'top'
-    }
+      position: 'top',
+    },
   },
   scales: {
     y: {
-      beginAtZero: true
-    }
-  }
+      beginAtZero: true,
+    },
+  },
 }
 
 const pieChartData = computed(() => ({
@@ -273,15 +242,9 @@ const pieChartData = computed(() => ({
   datasets: [
     {
       data: [30, 25, 20, 15, 10],
-      backgroundColor: [
-        '#4CAF50',
-        '#2196F3',
-        '#FFC107',
-        '#9C27B0',
-        '#FF5722'
-      ]
-    }
-  ]
+      backgroundColor: ['#4CAF50', '#2196F3', '#FFC107', '#9C27B0', '#FF5722'],
+    },
+  ],
 }))
 
 const pieChartOptions = {
@@ -289,9 +252,9 @@ const pieChartOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'right'
-    }
-  }
+      position: 'right',
+    },
+  },
 }
 
 // 載入數據
@@ -301,12 +264,12 @@ async function loadDashboardData() {
     const usersResponse = await adminApi.getUsers(1, 10)
     stats.value.users = parseInt(usersResponse.headers['x-total-count'] || '0')
     recentUsers.value = usersResponse.data.slice(0, 5)
-    
+
     // 載入貼文統計
     const postsResponse = await adminApi.getPosts(1, 10)
     stats.value.posts = parseInt(postsResponse.headers['x-total-count'] || '0')
     recentPosts.value = postsResponse.data.slice(0, 5)
-    
+
     // 模擬其他統計數據
     stats.value.newUsers = Math.floor(Math.random() * 20) + 5
     stats.value.todayPosts = Math.floor(Math.random() * 10) + 1
@@ -324,12 +287,12 @@ function formatTime(dateString) {
   const date = new Date(dateString)
   const now = new Date()
   const diff = now - date
-  
+
   if (diff < 60000) return '剛剛'
   if (diff < 3600000) return `${Math.floor(diff / 60000)} 分鐘前`
   if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小時前`
   if (diff < 604800000) return `${Math.floor(diff / 86400000)} 天前`
-  
+
   return date.toLocaleDateString('zh-TW')
 }
 

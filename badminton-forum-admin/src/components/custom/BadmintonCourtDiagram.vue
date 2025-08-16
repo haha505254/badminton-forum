@@ -1,187 +1,205 @@
 <template>
   <div class="badminton-court-diagram">
     <div class="mode-selector">
-      <button type="button" @click="gameMode = 'singles'" :class="{ active: gameMode === 'singles' }">
+      <button type="button" :class="{ active: gameMode === 'singles' }" @click="gameMode = 'singles'">
         🎾 單打模式
       </button>
-      <button type="button" @click="gameMode = 'doubles'" :class="{ active: gameMode === 'doubles' }">
+      <button type="button" :class="{ active: gameMode === 'doubles' }" @click="gameMode = 'doubles'">
         👥 雙打模式
       </button>
     </div>
-    
+
     <div class="toolbar">
-      <button type="button" @click="mode = 'player'" :class="{ active: mode === 'player' }">
-        👤 球員位置
-      </button>
-      <button type="button" @click="mode = 'shuttle'" :class="{ active: mode === 'shuttle' }">
-        🏸 羽球位置
-      </button>
-      <button type="button" @click="mode = 'playerArrow'" :class="{ active: mode === 'playerArrow' }">
+      <button type="button" :class="{ active: mode === 'player' }" @click="mode = 'player'">👤 球員位置</button>
+      <button type="button" :class="{ active: mode === 'shuttle' }" @click="mode = 'shuttle'">🏸 羽球位置</button>
+      <button type="button" :class="{ active: mode === 'playerArrow' }" @click="mode = 'playerArrow'">
         🏃 人員移動
       </button>
-      <button type="button" @click="mode = 'shuttleArrow'" :class="{ active: mode === 'shuttleArrow' }">
+      <button type="button" :class="{ active: mode === 'shuttleArrow' }" @click="mode = 'shuttleArrow'">
         🏸➡️ 球路軌跡
       </button>
-      <button type="button" @click="mode = 'text'" :class="{ active: mode === 'text' }">
-        📝 文字標註
-      </button>
-      <button type="button" @click="mode = 'eraser'" :class="{ active: mode === 'eraser', 'eraser-btn': true }">
+      <button type="button" :class="{ active: mode === 'text' }" @click="mode = 'text'">📝 文字標註</button>
+      <button type="button" :class="{ active: mode === 'eraser', 'eraser-btn': true }" @click="mode = 'eraser'">
         🧹 橡皮擦
       </button>
-      <button type="button" @click="undo" class="undo-btn" :disabled="!canUndo">
-        ↶ 復原
-      </button>
-      <button type="button" @click="redo" class="redo-btn" :disabled="!canRedo">
-        ↷ 重做
-      </button>
-      <button type="button" @click="clearDiagram" class="clear-btn">
-        🗑️ 清除
-      </button>
+      <button type="button" class="undo-btn" :disabled="!canUndo" @click="undo">↶ 復原</button>
+      <button type="button" class="redo-btn" :disabled="!canRedo" @click="redo">↷ 重做</button>
+      <button type="button" class="clear-btn" @click="clearDiagram">🗑️ 清除</button>
     </div>
 
     <div class="canvas-container">
-      <v-stage
+      <VStage
         ref="stage"
         :config="stageConfig"
         @mousedown="handleMouseDown"
         @mousemove="handleMouseMove"
         @mouseup="handleMouseUp"
       >
-        <v-layer>
+        <VLayer>
           <!-- 羽球場地背景 -->
-          <v-rect
+          <VRect
             :config="{
               x: 0,
               y: 0,
               width: canvasWidth,
               height: canvasHeight,
-              fill: '#4a7c59'
+              fill: '#4a7c59',
             }"
           />
-          
+
           <!-- 場地線條（根據標準規格繪製） -->
           <!-- 轉換座標：Canvas Y軸從上到下，需要反轉 -->
-          
+
           <!-- 1-4. 外部框架（雙打場地） -->
           <!-- 底部端線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX, offsetY + courtHeight, offsetX + courtWidth, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
           <!-- 頂部端線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX, offsetY, offsetX + courtWidth, offsetY],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
           <!-- 左側雙打邊線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX, offsetY, offsetX, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
           <!-- 右側雙打邊線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX + courtWidth, offsetY, offsetX + courtWidth, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
-          
+
           <!-- 5-6. 單打邊線 -->
           <!-- 左側單打邊線 (x=0.46m) -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX + singlesLineLeft, offsetY, offsetX + singlesLineLeft, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 右側單打邊線 (x=5.64m) -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX + singlesLineRight, offsetY, offsetX + singlesLineRight, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 7-8. 前發球線 -->
           <!-- 下半場前發球線 (y=4.72m) -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - frontServiceLine1, offsetX + courtWidth, offsetY + courtHeight - frontServiceLine1],
+              points: [
+                offsetX,
+                offsetY + courtHeight - frontServiceLine1,
+                offsetX + courtWidth,
+                offsetY + courtHeight - frontServiceLine1,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 上半場前發球線 (y=8.68m) -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - frontServiceLine2, offsetX + courtWidth, offsetY + courtHeight - frontServiceLine2],
+              points: [
+                offsetX,
+                offsetY + courtHeight - frontServiceLine2,
+                offsetX + courtWidth,
+                offsetY + courtHeight - frontServiceLine2,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 9-10. 雙打後發球線 -->
           <!-- 下半場雙打後發球線 (y=0.76m) -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - doubleServiceLine1, offsetX + courtWidth, offsetY + courtHeight - doubleServiceLine1],
+              points: [
+                offsetX,
+                offsetY + courtHeight - doubleServiceLine1,
+                offsetX + courtWidth,
+                offsetY + courtHeight - doubleServiceLine1,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 上半場雙打後發球線 (y=12.64m) -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - doubleServiceLine2, offsetX + courtWidth, offsetY + courtHeight - doubleServiceLine2],
+              points: [
+                offsetX,
+                offsetY + courtHeight - doubleServiceLine2,
+                offsetX + courtWidth,
+                offsetY + courtHeight - doubleServiceLine2,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 11-12. 中線 -->
           <!-- 下半場中線：從前發球線到端線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX + centerLineX, offsetY + courtHeight, offsetX + centerLineX, offsetY + courtHeight - frontServiceLine1],
+              points: [
+                offsetX + centerLineX,
+                offsetY + courtHeight,
+                offsetX + centerLineX,
+                offsetY + courtHeight - frontServiceLine1,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 上半場中線：從前發球線到端線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX + centerLineX, offsetY + courtHeight - frontServiceLine2, offsetX + centerLineX, offsetY],
+              points: [
+                offsetX + centerLineX,
+                offsetY + courtHeight - frontServiceLine2,
+                offsetX + centerLineX,
+                offsetY,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 網子 (y=6.7m) -->
-          <v-rect
+          <VRect
             :config="{
               x: 0,
               y: offsetY + courtHeight - netY - 2,
               width: canvasWidth,
               height: 4,
               fill: '#333',
-              opacity: 0.8
+              opacity: 0.8,
             }"
           />
 
           <!-- 移動箭頭 -->
-          <v-arrow
+          <VArrow
             v-for="(arrow, index) in arrows"
             :key="`arrow-${index}`"
             :config="{
@@ -192,69 +210,69 @@
               stroke: arrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
               strokeWidth: arrow.type === 'shuttle' ? 4 : 3,
               dash: arrow.type === 'shuttle' ? [8, 4] : [],
-              hitStrokeWidth: 20
+              hitStrokeWidth: 20,
             }"
             @click="handleArrowClick(index)"
           />
 
           <!-- 羽球位置 -->
-          <v-group v-if="shuttlePosition" @click="handleShuttleClick">
-            <v-circle
+          <VGroup v-if="shuttlePosition" @click="handleShuttleClick">
+            <VCircle
               :config="{
                 x: shuttlePosition.x,
                 y: shuttlePosition.y,
                 radius: 8,
                 fill: 'white',
                 stroke: '#333',
-                strokeWidth: 2
+                strokeWidth: 2,
               }"
             />
-            <v-text
+            <VText
               :config="{
                 x: shuttlePosition.x - 12,
                 y: shuttlePosition.y - 20,
                 text: '🏸',
-                fontSize: 20
+                fontSize: 20,
               }"
             />
-          </v-group>
+          </VGroup>
 
           <!-- 球員位置 -->
-          <v-group
+          <VGroup
             v-for="player in players"
             :key="player.id"
             :config="{
               x: player.x,
               y: player.y,
-              draggable: mode !== 'eraser'
+              draggable: mode !== 'eraser',
             }"
             @dragend="handlePlayerDragEnd($event, player)"
             @click="handlePlayerClick(player)"
           >
-            <v-circle
+            <VCircle
               :config="{
                 x: 0,
                 y: 0,
                 radius: 18,
                 fill: player.team === 'A' ? '#3498db' : '#e74c3c',
                 stroke: 'white',
-                strokeWidth: 2
+                strokeWidth: 2,
               }"
             />
-            <v-text
+            <VText
               :config="{
                 x: getTextXOffset(player.label),
                 y: -7,
                 text: player.label,
                 fontSize: player.label.length > 2 ? 13 : 14,
                 fill: 'white',
-                fontStyle: 'bold'
+                fontStyle: 'bold',
               }"
             />
-          </v-group>
+          </VGroup>
 
           <!-- 繪製中的箭頭 -->
-          <v-arrow
+          <VArrow
             v-if="drawingArrow"
             :config="{
               points: [drawingArrow.from.x, drawingArrow.from.y, drawingArrow.to.x, drawingArrow.to.y],
@@ -264,62 +282,57 @@
               stroke: drawingArrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
               strokeWidth: drawingArrow.type === 'shuttle' ? 4 : 3,
               dash: drawingArrow.type === 'shuttle' ? [8, 4] : [5, 5],
-              opacity: 0.7
+              opacity: 0.7,
             }"
           />
-          
+
           <!-- 文字標註 -->
-          <v-group
+          <VGroup
             v-for="annotation in textAnnotations"
             :key="annotation.id"
             :config="{
               x: annotation.x,
               y: annotation.y,
-              draggable: mode === 'text' && editingTextId !== annotation.id
+              draggable: mode === 'text' && editingTextId !== annotation.id,
             }"
             @dragend="handleTextDragEnd($event, annotation)"
             @click="handleTextClick(annotation, $event)"
           >
             <!-- 文字（無背景） -->
-            <v-text
+            <VText
               :config="{
                 x: 0,
                 y: 0,
                 text: annotation.text,
                 fontSize: 18,
                 fill: 'black',
-                fontStyle: 'normal'
+                fontStyle: 'normal',
               }"
             />
-          </v-group>
-        </v-layer>
-      </v-stage>
+          </VGroup>
+        </VLayer>
+      </VStage>
     </div>
-    
+
     <!-- 文字編輯彈窗 -->
     <div v-if="editingTextId" class="text-edit-modal">
       <input
+        ref="textInput"
         v-model="tempText"
+        placeholder="輸入標註文字"
         @keyup.enter="saveTextEdit"
         @keyup.esc="cancelTextEdit"
-        placeholder="輸入標註文字"
-        ref="textInput"
       />
       <div class="text-edit-buttons">
-        <button type="button" @click="saveTextEdit" class="save-btn">確定</button>
-        <button type="button" @click="deleteText" class="delete-btn">刪除</button>
-        <button type="button" @click="cancelTextEdit" class="cancel-btn">取消</button>
+        <button type="button" class="save-btn" @click="saveTextEdit">確定</button>
+        <button type="button" class="delete-btn" @click="deleteText">刪除</button>
+        <button type="button" class="cancel-btn" @click="cancelTextEdit">取消</button>
       </div>
     </div>
 
     <div class="description-input">
       <label for="description">戰術說明：</label>
-      <input
-        id="description"
-        v-model="description"
-        type="text"
-        placeholder="輸入戰術說明（例如：雙打防守站位）"
-      />
+      <input id="description" v-model="description" type="text" placeholder="輸入戰術說明（例如：雙打防守站位）" />
     </div>
   </div>
 </template>
@@ -334,9 +347,9 @@ const props = defineProps({
       players: [],
       shuttle: null,
       arrows: [],
-      description: ''
-    })
-  }
+      description: '',
+    }),
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -366,7 +379,7 @@ const singlesLineRight = 5.64 * scale * widthScale // 右側單打邊線
 
 const stageConfig = {
   width: canvasWidth,
-  height: canvasHeight
+  height: canvasHeight,
 }
 
 // 狀態管理
@@ -402,18 +415,18 @@ const initPlayers = () => {
   // 注意：Canvas Y軸從上到下，所以底部是較大的Y值
   const bottomY = offsetY + courtHeight * 0.75 // 我方場地
   const topY = offsetY + courtHeight * 0.25 // 對方場地
-  
+
   if (gameMode.value === 'singles') {
     players.value = [
       { id: 1, team: 'A', x: centerX, y: bottomY, label: '我' },
-      { id: 2, team: 'B', x: centerX, y: topY, label: 'O' }
+      { id: 2, team: 'B', x: centerX, y: topY, label: 'O' },
     ]
   } else {
     players.value = [
       { id: 1, team: 'A', x: leftX, y: bottomY, label: '我' },
       { id: 2, team: 'A', x: rightX, y: bottomY, label: 'P' },
       { id: 3, team: 'B', x: leftX, y: topY, label: 'O1' },
-      { id: 4, team: 'B', x: rightX, y: topY, label: 'O2' }
+      { id: 4, team: 'B', x: rightX, y: topY, label: 'O2' },
     ]
   }
 }
@@ -424,18 +437,18 @@ const saveToHistory = () => {
   if (historyIndex.value < history.value.length - 1) {
     history.value = history.value.slice(0, historyIndex.value + 1)
   }
-  
+
   // 保存當前狀態
   const currentState = {
     players: JSON.parse(JSON.stringify(players.value)),
     shuttlePosition: shuttlePosition.value ? { ...shuttlePosition.value } : null,
     arrows: JSON.parse(JSON.stringify(arrows.value)),
     textAnnotations: JSON.parse(JSON.stringify(textAnnotations.value)),
-    description: description.value
+    description: description.value,
   }
-  
+
   history.value.push(currentState)
-  
+
   // 限制歷史大小
   if (history.value.length > maxHistorySize) {
     history.value.shift()
@@ -447,15 +460,15 @@ const saveToHistory = () => {
 // 撤銷操作
 const undo = () => {
   if (!canUndo.value) return
-  
+
   // 如果是第一次撤銷，先保存當前狀態
   if (historyIndex.value === history.value.length - 1) {
     saveToHistory()
     historyIndex.value--
   }
-  
+
   historyIndex.value--
-  
+
   if (historyIndex.value >= 0) {
     const state = history.value[historyIndex.value]
     players.value = JSON.parse(JSON.stringify(state.players))
@@ -471,46 +484,46 @@ const undo = () => {
     textAnnotations.value = []
     description.value = ''
   }
-  
+
   emitUpdate()
 }
 
 // 重做操作
 const redo = () => {
   if (!canRedo.value) return
-  
+
   historyIndex.value++
   const state = history.value[historyIndex.value]
-  
+
   players.value = JSON.parse(JSON.stringify(state.players))
   shuttlePosition.value = state.shuttlePosition ? { ...state.shuttlePosition } : null
   arrows.value = JSON.parse(JSON.stringify(state.arrows))
   textAnnotations.value = state.textAnnotations ? JSON.parse(JSON.stringify(state.textAnnotations)) : []
   description.value = state.description
-  
+
   emitUpdate()
 }
 
-// 載入模板
-const loadTemplate = (templateType) => {
-  // 先保存當前狀態
-  saveToHistory()
-  
-  const centerX = offsetX + centerLineX
-  const leftX = offsetX + courtWidth * 0.3
-  const rightX = offsetX + courtWidth * 0.7
-  const frontY = offsetY + courtHeight * 0.65
-  const backY = offsetY + courtHeight * 0.8
-  const oppFrontY = offsetY + courtHeight * 0.35
-  const oppBackY = offsetY + courtHeight * 0.2
-  
+// 載入模板 - 已註解，保留以供將來使用
+// const loadTemplate = (templateType) => {
+//   // 先保存當前狀態
+//   saveToHistory()
+//
+//   const centerX = offsetX + centerLineX
+//   const leftX = offsetX + courtWidth * 0.3
+//   const rightX = offsetX + courtWidth * 0.7
+//   const frontY = offsetY + courtHeight * 0.65
+//   const backY = offsetY + courtHeight * 0.8
+//   const oppFrontY = offsetY + courtHeight * 0.35
+//   const oppBackY = offsetY + courtHeight * 0.2
+
   if (templateType === 'defense') {
     // 雙打防守站位
     players.value = [
       { id: 1, team: 'A', x: leftX, y: backY, label: '我' },
       { id: 2, team: 'A', x: rightX, y: backY, label: 'P' },
       { id: 3, team: 'B', x: leftX, y: oppBackY, label: 'O1' },
-      { id: 4, team: 'B', x: rightX, y: oppBackY, label: 'O2' }
+      { id: 4, team: 'B', x: rightX, y: oppBackY, label: 'O2' },
     ]
     description.value = '雙打防守站位 - 左右並排站位'
   } else if (templateType === 'attack') {
@@ -519,22 +532,22 @@ const loadTemplate = (templateType) => {
       { id: 1, team: 'A', x: centerX, y: frontY, label: '我' },
       { id: 2, team: 'A', x: centerX, y: backY, label: 'P' },
       { id: 3, team: 'B', x: centerX, y: oppBackY, label: 'O1' },
-      { id: 4, team: 'B', x: centerX, y: oppFrontY, label: 'O2' }
+      { id: 4, team: 'B', x: centerX, y: oppFrontY, label: 'O2' },
     ]
     description.value = '雙打進攻站位 - 前後站位'
   }
-  
-  // 保存載入模板後的狀態
-  saveToHistory()
-  
-  emitUpdate()
-}
+
+//   // 保存載入模板後的狀態
+//   saveToHistory()
+//
+//   emitUpdate()
+// }
 
 // 清除圖表
 const clearDiagram = () => {
   // 先保存當前狀態到歷史
   saveToHistory()
-  
+
   initPlayers()
   shuttlePosition.value = null
   arrows.value = []
@@ -545,41 +558,40 @@ const clearDiagram = () => {
   editingTextId.value = null
   editingTextObject.value = null
   tempText.value = ''
-  
+
   // 保存清除後的狀態
   saveToHistory()
-  
+
   emitUpdate()
 }
 
 // 處理滑鼠事件
 const handleMouseDown = (e) => {
   const pos = e.target.getStage().getPointerPosition()
-  
+
   // 橡皮擦模式下不創建新物件
   if (mode.value === 'eraser') {
     return
   }
-  
+
   // 檢查是否點擊到了場地背景（而非其他物件）
   // 如果點擊的是其他物件（如文字標註），則不處理
-  const clickedOnStage = e.target === e.target.getStage() || 
-                         e.target.className === 'Rect' || 
-                         e.target.className === 'Line'
-  
+  const clickedOnStage =
+    e.target === e.target.getStage() || e.target.className === 'Rect' || e.target.className === 'Line'
+
   if (!clickedOnStage) {
     return // 點擊到了其他物件，不創建新物件
   }
-  
+
   if (mode.value === 'shuttle') {
     // 保存當前狀態
     saveToHistory()
-    
+
     shuttlePosition.value = { x: pos.x, y: pos.y }
-    
+
     // 保存新狀態
     saveToHistory()
-    
+
     emitUpdate()
   } else if (mode.value === 'text') {
     // 添加文字標註 - 建立暫時的標註物件
@@ -588,9 +600,9 @@ const handleMouseDown = (e) => {
       x: pos.x,
       y: pos.y,
       text: '',
-      isNew: true // 標記為新增的
+      isNew: true, // 標記為新增的
     }
-    
+
     // 立即開始編輯（但還不加入陣列）
     startEditingText(newText)
   } else if (mode.value === 'playerArrow' || mode.value === 'shuttleArrow') {
@@ -598,7 +610,7 @@ const handleMouseDown = (e) => {
     drawingArrow.value = {
       from: { x: pos.x, y: pos.y },
       to: { x: pos.x, y: pos.y },
-      type: mode.value === 'shuttleArrow' ? 'shuttle' : 'player'
+      type: mode.value === 'shuttleArrow' ? 'shuttle' : 'player',
     }
   }
 }
@@ -609,7 +621,7 @@ const handleMouseMove = (e) => {
     drawingArrow.value = {
       from: arrowStartPoint.value,
       to: { x: pos.x, y: pos.y },
-      type: mode.value === 'shuttleArrow' ? 'shuttle' : 'player'
+      type: mode.value === 'shuttleArrow' ? 'shuttle' : 'player',
     }
   }
 }
@@ -617,29 +629,28 @@ const handleMouseMove = (e) => {
 const handleMouseUp = (e) => {
   if ((mode.value === 'playerArrow' || mode.value === 'shuttleArrow') && drawingArrow.value && arrowStartPoint.value) {
     const pos = e.target.getStage().getPointerPosition()
-    
+
     // 只有當拖曳距離超過最小值時才創建箭頭
     const distance = Math.sqrt(
-      Math.pow(pos.x - arrowStartPoint.value.x, 2) +
-      Math.pow(pos.y - arrowStartPoint.value.y, 2)
+      Math.pow(pos.x - arrowStartPoint.value.x, 2) + Math.pow(pos.y - arrowStartPoint.value.y, 2),
     )
-    
+
     if (distance > 20) {
       // 保存當前狀態
       saveToHistory()
-      
+
       arrows.value.push({
         from: { ...arrowStartPoint.value },
         to: { x: pos.x, y: pos.y },
-        type: mode.value === 'shuttleArrow' ? 'shuttle' : 'player'
+        type: mode.value === 'shuttleArrow' ? 'shuttle' : 'player',
       })
-      
+
       // 保存新狀態
       saveToHistory()
-      
+
       emitUpdate()
     }
-    
+
     drawingArrow.value = null
     arrowStartPoint.value = null
   }
@@ -649,13 +660,13 @@ const handleMouseUp = (e) => {
 const handlePlayerDragEnd = (e, player) => {
   // 保存拖曳前的狀態
   saveToHistory()
-  
+
   player.x = e.target.x()
   player.y = e.target.y()
-  
+
   // 保存拖曳後的狀態
   saveToHistory()
-  
+
   emitUpdate()
 }
 
@@ -663,16 +674,16 @@ const handlePlayerDragEnd = (e, player) => {
 const handleTextDragEnd = (e, annotation) => {
   // 只有在文字模式下才能拖曳
   if (mode.value !== 'text') return
-  
+
   saveToHistory()
-  
+
   // 更新文字標註的位置
-  const index = textAnnotations.value.findIndex(a => a.id === annotation.id)
+  const index = textAnnotations.value.findIndex((a) => a.id === annotation.id)
   if (index !== -1) {
     textAnnotations.value[index].x = e.target.x()
     textAnnotations.value[index].y = e.target.y()
   }
-  
+
   emitUpdate()
 }
 
@@ -681,7 +692,7 @@ const startEditingText = (annotation) => {
   editingTextId.value = annotation.id
   editingTextObject.value = annotation // 保存正在編輯的物件
   tempText.value = annotation.text || ''
-  
+
   // 等待DOM更新後自動聚焦
   nextTick(() => {
     if (textInput.value) {
@@ -705,7 +716,7 @@ const saveTextEdit = () => {
     deleteText()
     return
   }
-  
+
   // 檢查是新增還是編輯
   if (editingTextObject.value?.isNew) {
     // 新增文字
@@ -714,20 +725,20 @@ const saveTextEdit = () => {
       id: editingTextObject.value.id,
       x: editingTextObject.value.x,
       y: editingTextObject.value.y,
-      text: tempText.value.trim()
+      text: tempText.value.trim(),
     }
     textAnnotations.value.push(newAnnotation)
     emitUpdate()
   } else {
     // 編輯既有文字
-    const annotation = textAnnotations.value.find(a => a.id === editingTextId.value)
+    const annotation = textAnnotations.value.find((a) => a.id === editingTextId.value)
     if (annotation) {
       saveToHistory()
       annotation.text = tempText.value.trim()
       emitUpdate()
     }
   }
-  
+
   editingTextId.value = null
   editingTextObject.value = null
   tempText.value = ''
@@ -742,15 +753,15 @@ const deleteText = () => {
     tempText.value = ''
     return
   }
-  
+
   // 刪除既有的文字
-  const index = textAnnotations.value.findIndex(a => a.id === editingTextId.value)
+  const index = textAnnotations.value.findIndex((a) => a.id === editingTextId.value)
   if (index !== -1) {
     saveToHistory()
     textAnnotations.value.splice(index, 1)
     emitUpdate()
   }
-  
+
   editingTextId.value = null
   editingTextObject.value = null
   tempText.value = ''
@@ -769,10 +780,10 @@ const cancelTextEdit = () => {
 const getTextXOffset = (label) => {
   // 根據不同的標籤計算偏移量
   if (label === '我') return -5
-  if (label === 'P') return -5   // Partner
-  if (label === 'O') return -6   // Opponent (單打)
-  if (label === 'O1') return -8  // Opponent 1
-  if (label === 'O2') return -8  // Opponent 2
+  if (label === 'P') return -5 // Partner
+  if (label === 'O') return -6 // Opponent (單打)
+  if (label === 'O1') return -8 // Opponent 1
+  if (label === 'O2') return -8 // Opponent 2
   return -6 // 預設值
 }
 
@@ -780,7 +791,7 @@ const getTextXOffset = (label) => {
 const handlePlayerClick = (player) => {
   if (mode.value === 'eraser') {
     saveToHistory()
-    const index = players.value.findIndex(p => p.id === player.id)
+    const index = players.value.findIndex((p) => p.id === player.id)
     if (index !== -1) {
       players.value.splice(index, 1)
     }
@@ -812,10 +823,10 @@ const handleTextClick = (annotation, e) => {
   if (e && e.cancelBubble !== undefined) {
     e.cancelBubble = true
   }
-  
+
   if (mode.value === 'eraser') {
     saveToHistory()
-    const index = textAnnotations.value.findIndex(a => a.id === annotation.id)
+    const index = textAnnotations.value.findIndex((a) => a.id === annotation.id)
     if (index !== -1) {
       textAnnotations.value.splice(index, 1)
     }
@@ -831,7 +842,7 @@ const handleTextClick = (annotation, e) => {
 const absoluteToRelative = (x, y) => {
   return {
     x: (x - offsetX) / courtWidth,
-    y: (y - offsetY) / courtHeight
+    y: (y - offsetY) / courtHeight,
   }
 }
 
@@ -839,7 +850,7 @@ const absoluteToRelative = (x, y) => {
 const relativeToAbsolute = (x, y) => {
   return {
     x: x * courtWidth + offsetX,
-    y: y * courtHeight + offsetY
+    y: y * courtHeight + offsetY,
   }
 }
 
@@ -847,23 +858,23 @@ const relativeToAbsolute = (x, y) => {
 const emitUpdate = () => {
   // 將絕對座標轉換為相對座標再儲存
   const relativeData = {
-    players: players.value.map(p => ({
+    players: players.value.map((p) => ({
       ...p,
-      ...absoluteToRelative(p.x, p.y)
+      ...absoluteToRelative(p.x, p.y),
     })),
     shuttle: shuttlePosition.value ? absoluteToRelative(shuttlePosition.value.x, shuttlePosition.value.y) : null,
-    arrows: arrows.value.map(a => ({
+    arrows: arrows.value.map((a) => ({
       ...a,
       from: absoluteToRelative(a.from.x, a.from.y),
-      to: absoluteToRelative(a.to.x, a.to.y)
+      to: absoluteToRelative(a.to.x, a.to.y),
     })),
-    textAnnotations: textAnnotations.value.map(t => ({
+    textAnnotations: textAnnotations.value.map((t) => ({
       ...t,
-      ...absoluteToRelative(t.x, t.y)
+      ...absoluteToRelative(t.x, t.y),
     })),
-    description: description.value
+    description: description.value,
   }
-  
+
   emit('update:modelValue', relativeData)
 }
 
@@ -872,7 +883,7 @@ let descriptionTimer = null
 watch(description, (newVal, oldVal) => {
   // 使用 debounce 避免每次輸入都保存
   if (descriptionTimer) clearTimeout(descriptionTimer)
-  
+
   descriptionTimer = setTimeout(() => {
     if (newVal !== oldVal) {
       saveToHistory()
@@ -885,18 +896,18 @@ watch(description, (newVal, oldVal) => {
 watch(gameMode, (newMode) => {
   // 保存當前狀態
   saveToHistory()
-  
+
   // 重新初始化球員
   initPlayers()
-  
+
   // 清除箭頭和文字（可選）
   arrows.value = []
   textAnnotations.value = []
   shuttlePosition.value = null
-  
+
   // 更新描述
   description.value = newMode === 'singles' ? '單打戰術圖' : '雙打戰術圖'
-  
+
   // 保存新狀態
   saveToHistory()
   emitUpdate()
@@ -908,29 +919,29 @@ initPlayers()
 // 如果有初始值，載入它（從相對座標轉換為絕對座標）
 if (props.modelValue && props.modelValue.players?.length > 0) {
   // 轉換球員座標
-  players.value = props.modelValue.players.map(p => ({
+  players.value = props.modelValue.players.map((p) => ({
     ...p,
-    ...relativeToAbsolute(p.x, p.y)
+    ...relativeToAbsolute(p.x, p.y),
   }))
-  
+
   // 轉換羽球座標
-  shuttlePosition.value = props.modelValue.shuttle 
+  shuttlePosition.value = props.modelValue.shuttle
     ? relativeToAbsolute(props.modelValue.shuttle.x, props.modelValue.shuttle.y)
     : null
-  
+
   // 轉換箭頭座標
-  arrows.value = (props.modelValue.arrows || []).map(a => ({
+  arrows.value = (props.modelValue.arrows || []).map((a) => ({
     ...a,
     from: relativeToAbsolute(a.from.x, a.from.y),
-    to: relativeToAbsolute(a.to.x, a.to.y)
+    to: relativeToAbsolute(a.to.x, a.to.y),
   }))
-  
+
   // 轉換文字標註座標
-  textAnnotations.value = (props.modelValue.textAnnotations || []).map(t => ({
+  textAnnotations.value = (props.modelValue.textAnnotations || []).map((t) => ({
     ...t,
-    ...relativeToAbsolute(t.x, t.y)
+    ...relativeToAbsolute(t.x, t.y),
   }))
-  
+
   description.value = props.modelValue.description || ''
 }
 </script>
