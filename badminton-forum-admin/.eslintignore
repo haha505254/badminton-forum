@@ -20,7 +20,6 @@ yarn-error.log*
 coverage
 
 # vite
-*.config.js
 *.config.ts
 vite.config.ts
 tailwind.config.js
