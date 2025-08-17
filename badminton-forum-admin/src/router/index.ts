@@ -151,7 +151,7 @@ router.beforeEach((to, from, next) => {
   }
 
   // 如果訪問管理後台但未登入
-  if (to.matched.some(record => record.path.startsWith('/') && record.path !== '/auth') && !isAuthenticated) {
+  if (to.matched.some((record) => record.path.startsWith('/') && record.path !== '/auth') && !isAuthenticated) {
     if (to.name !== 'login') {
       next({ name: 'login' })
       return

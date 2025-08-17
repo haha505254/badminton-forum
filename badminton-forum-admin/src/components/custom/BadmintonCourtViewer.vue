@@ -1,233 +1,265 @@
 <template>
   <div class="badminton-court-viewer">
     <h4 v-if="data.description" class="diagram-title">{{ data.description }}</h4>
-    
+
     <div class="canvas-container">
-      <v-stage :config="stageConfig">
-        <v-layer>
+      <VStage :config="stageConfig">
+        <VLayer>
           <!-- 羽球場地背景 -->
-          <v-rect
+          <VRect
             :config="{
               x: 0,
               y: 0,
               width: canvasWidth,
               height: canvasHeight,
-              fill: '#4a7c59'
+              fill: '#4a7c59',
             }"
           />
-          
+
           <!-- 場地線條（與編輯器相同） -->
           <!-- 1-4. 外部框架（雙打場地） -->
           <!-- 底部端線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX, offsetY + courtHeight, offsetX + courtWidth, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
           <!-- 頂部端線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX, offsetY, offsetX + courtWidth, offsetY],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
           <!-- 左側雙打邊線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX, offsetY, offsetX, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
           <!-- 右側雙打邊線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX + courtWidth, offsetY, offsetX + courtWidth, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 3
+              strokeWidth: 3,
             }"
           />
-          
+
           <!-- 5-6. 單打邊線 -->
           <!-- 左側單打邊線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX + singlesLineLeft, offsetY, offsetX + singlesLineLeft, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 右側單打邊線 -->
-          <v-line
+          <VLine
             :config="{
               points: [offsetX + singlesLineRight, offsetY, offsetX + singlesLineRight, offsetY + courtHeight],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 7-8. 前發球線 -->
           <!-- 下半場前發球線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - frontServiceLine1, offsetX + courtWidth, offsetY + courtHeight - frontServiceLine1],
+              points: [
+                offsetX,
+                offsetY + courtHeight - frontServiceLine1,
+                offsetX + courtWidth,
+                offsetY + courtHeight - frontServiceLine1,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 上半場前發球線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - frontServiceLine2, offsetX + courtWidth, offsetY + courtHeight - frontServiceLine2],
+              points: [
+                offsetX,
+                offsetY + courtHeight - frontServiceLine2,
+                offsetX + courtWidth,
+                offsetY + courtHeight - frontServiceLine2,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 9-10. 雙打後發球線 -->
           <!-- 下半場雙打後發球線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - doubleServiceLine1, offsetX + courtWidth, offsetY + courtHeight - doubleServiceLine1],
+              points: [
+                offsetX,
+                offsetY + courtHeight - doubleServiceLine1,
+                offsetX + courtWidth,
+                offsetY + courtHeight - doubleServiceLine1,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 上半場雙打後發球線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX, offsetY + courtHeight - doubleServiceLine2, offsetX + courtWidth, offsetY + courtHeight - doubleServiceLine2],
+              points: [
+                offsetX,
+                offsetY + courtHeight - doubleServiceLine2,
+                offsetX + courtWidth,
+                offsetY + courtHeight - doubleServiceLine2,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 11-12. 中線 -->
           <!-- 下半場中線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX + centerLineX, offsetY + courtHeight, offsetX + centerLineX, offsetY + courtHeight - frontServiceLine1],
+              points: [
+                offsetX + centerLineX,
+                offsetY + courtHeight,
+                offsetX + centerLineX,
+                offsetY + courtHeight - frontServiceLine1,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
           <!-- 上半場中線 -->
-          <v-line
+          <VLine
             :config="{
-              points: [offsetX + centerLineX, offsetY + courtHeight - frontServiceLine2, offsetX + centerLineX, offsetY],
+              points: [
+                offsetX + centerLineX,
+                offsetY + courtHeight - frontServiceLine2,
+                offsetX + centerLineX,
+                offsetY,
+              ],
               stroke: 'white',
-              strokeWidth: 2
+              strokeWidth: 2,
             }"
           />
-          
+
           <!-- 網子 -->
-          <v-rect
+          <VRect
             :config="{
               x: 0,
               y: offsetY + courtHeight - netY - 2,
               width: canvasWidth,
               height: 4,
               fill: '#333',
-              opacity: 0.8
+              opacity: 0.8,
             }"
           />
 
           <!-- 移動箭頭 -->
-          <v-arrow
+          <VArrow
             v-for="(arrow, index) in convertedArrows"
             :key="`arrow-${index}`"
             :config="{
               points: [arrow.from.x, arrow.from.y, arrow.to.x, arrow.to.y],
-              pointerLength: props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 15 : 12) : (arrow.type === 'shuttle' ? 20 : 15),
-              pointerWidth: props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 15 : 12) : (arrow.type === 'shuttle' ? 20 : 15),
+              pointerLength:
+                props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 15 : 12) : arrow.type === 'shuttle' ? 20 : 15,
+              pointerWidth:
+                props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 15 : 12) : arrow.type === 'shuttle' ? 20 : 15,
               fill: arrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
               stroke: arrow.type === 'shuttle' ? '#FFD700' : '#4ecdc4',
-              strokeWidth: props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 3 : 2) : (arrow.type === 'shuttle' ? 4 : 3),
-              dash: arrow.type === 'shuttle' ? [8, 4] : []
+              strokeWidth: props.scale <= 0.6 ? (arrow.type === 'shuttle' ? 3 : 2) : arrow.type === 'shuttle' ? 4 : 3,
+              dash: arrow.type === 'shuttle' ? [8, 4] : [],
             }"
           />
 
           <!-- 羽球位置 -->
-          <v-group v-if="convertedShuttle">
-            <v-circle
+          <VGroup v-if="convertedShuttle">
+            <VCircle
               :config="{
                 x: convertedShuttle.x,
                 y: convertedShuttle.y,
                 radius: props.scale <= 0.6 ? 6 : 8,
                 fill: 'white',
                 stroke: '#333',
-                strokeWidth: 2
+                strokeWidth: 2,
               }"
             />
-            <v-text
+            <VText
               :config="{
                 x: convertedShuttle.x - 12,
                 y: convertedShuttle.y - 20,
                 text: '🏸',
-                fontSize: props.scale <= 0.6 ? 16 : 20
+                fontSize: props.scale <= 0.6 ? 16 : 20,
               }"
             />
-          </v-group>
+          </VGroup>
 
           <!-- 球員位置 -->
-          <v-group
+          <VGroup
             v-for="player in convertedPlayers"
             :key="player.id"
             :config="{
               x: player.x,
               y: player.y,
-              draggable: false
+              draggable: false,
             }"
           >
-            <v-circle
+            <VCircle
               :config="{
                 x: 0,
                 y: 0,
                 radius: playerRadius,
                 fill: player.team === 'A' ? '#3498db' : '#e74c3c',
                 stroke: 'white',
-                strokeWidth: playerStrokeWidth
+                strokeWidth: playerStrokeWidth,
               }"
             />
-            <v-text
+            <VText
               :config="{
                 x: getTextXOffset(player.label),
                 y: textYOffset,
                 text: player.label,
                 fontSize: playerFontSize(player.label),
                 fill: 'white',
-                fontStyle: 'bold'
+                fontStyle: 'bold',
               }"
             />
-          </v-group>
-          
+          </VGroup>
+
           <!-- 文字標註 -->
-          <v-group
+          <VGroup
             v-for="annotation in convertedTextAnnotations"
             :key="annotation.id"
             :config="{
               x: annotation.x,
               y: annotation.y,
-              draggable: false
+              draggable: false,
             }"
           >
             <!-- 文字（無背景） -->
-            <v-text
+            <VText
               :config="{
                 x: 0,
                 y: 0,
                 text: annotation.text,
                 fontSize: props.scale <= 0.6 ? 14 : 18,
                 fill: 'black',
-                fontStyle: 'normal'
+                fontStyle: 'normal',
               }"
             />
-          </v-group>
-        </v-layer>
-      </v-stage>
+          </VGroup>
+        </VLayer>
+      </VStage>
     </div>
 
     <div class="legend">
@@ -239,15 +271,15 @@
         <span class="legend-color team-b"></span>
         <span>對手</span>
       </div>
-      <div class="legend-item" v-if="data.shuttle">
+      <div v-if="data.shuttle" class="legend-item">
         <span>🏸</span>
         <span>羽球位置</span>
       </div>
-      <div class="legend-item" v-if="hasPlayerArrows">
+      <div v-if="hasPlayerArrows" class="legend-item">
         <span class="legend-arrow player-arrow"></span>
         <span>人員移動</span>
       </div>
-      <div class="legend-item" v-if="hasShuttleArrows">
+      <div v-if="hasShuttleArrows" class="legend-item">
         <span class="legend-arrow shuttle-arrow"></span>
         <span>球路軌跡</span>
       </div>
@@ -267,13 +299,13 @@ const props = defineProps({
       shuttle: null,
       arrows: [],
       textAnnotations: [],
-      description: ''
-    })
+      description: '',
+    }),
   },
   scale: {
     type: Number,
-    default: 1
-  }
+    default: 1,
+  },
 })
 
 // 場地尺寸設定 (與編輯器相同的規格，但支援縮放)
@@ -298,13 +330,13 @@ const playerStrokeWidth = computed(() => {
 })
 
 const textYOffset = computed(() => {
-  return props.scale <= 0.6 ? -4 : -7  // 縮圖時文字更貼近中心
+  return props.scale <= 0.6 ? -4 : -7 // 縮圖時文字更貼近中心
 })
 
 const playerFontSize = (label) => {
   // 縮圖時字體要小一點
   if (props.scale <= 0.6) {
-    return label.length > 2 ? 10 : 11  // 保持小一點以避免重疊
+    return label.length > 2 ? 10 : 11 // 保持小一點以避免重疊
   }
   return label.length > 2 ? 13 : 14
 }
@@ -313,7 +345,7 @@ const playerFontSize = (label) => {
 const relativeToAbsolute = (x, y) => {
   return {
     x: x * courtWidth + offsetX,
-    y: y * courtHeight + offsetY
+    y: y * courtHeight + offsetY,
   }
 }
 
@@ -329,7 +361,7 @@ const singlesLineRight = 5.64 * scale * widthScale
 
 const stageConfig = {
   width: canvasWidth,
-  height: canvasHeight
+  height: canvasHeight,
 }
 
 // 計算文字 X 偏移量以達到置中對齊
@@ -338,58 +370,56 @@ const getTextXOffset = (label) => {
   if (props.scale <= 0.6) {
     // 縮圖時的偏移量
     if (label === '我') return -5
-    if (label === 'P') return -4   // Partner
-    if (label === 'O') return -5   // Opponent (單打)
-    if (label === 'O1') return -7  // Opponent 1
-    if (label === 'O2') return -7  // Opponent 2
+    if (label === 'P') return -4 // Partner
+    if (label === 'O') return -5 // Opponent (單打)
+    if (label === 'O1') return -7 // Opponent 1
+    if (label === 'O2') return -7 // Opponent 2
     return -5
   }
   // 正常尺寸的偏移量
   if (label === '我') return -5
-  if (label === 'P') return -5   // Partner
-  if (label === 'O') return -6   // Opponent (單打)
-  if (label === 'O1') return -8  // Opponent 1
-  if (label === 'O2') return -8  // Opponent 2
+  if (label === 'P') return -5 // Partner
+  if (label === 'O') return -6 // Opponent (單打)
+  if (label === 'O1') return -8 // Opponent 1
+  if (label === 'O2') return -8 // Opponent 2
   return -6 // 預設值
 }
 
 // 轉換資料（從相對座標到絕對座標）
 const convertedPlayers = computed(() => {
-  return (props.data.players || []).map(p => ({
+  return (props.data.players || []).map((p) => ({
     ...p,
-    ...relativeToAbsolute(p.x, p.y)
+    ...relativeToAbsolute(p.x, p.y),
   }))
 })
 
 const convertedShuttle = computed(() => {
-  return props.data.shuttle 
-    ? relativeToAbsolute(props.data.shuttle.x, props.data.shuttle.y)
-    : null
+  return props.data.shuttle ? relativeToAbsolute(props.data.shuttle.x, props.data.shuttle.y) : null
 })
 
 const convertedArrows = computed(() => {
-  return (props.data.arrows || []).map(a => ({
+  return (props.data.arrows || []).map((a) => ({
     ...a,
     from: relativeToAbsolute(a.from.x, a.from.y),
-    to: relativeToAbsolute(a.to.x, a.to.y)
+    to: relativeToAbsolute(a.to.x, a.to.y),
   }))
 })
 
 const convertedTextAnnotations = computed(() => {
-  return (props.data.textAnnotations || []).map(t => ({
+  return (props.data.textAnnotations || []).map((t) => ({
     ...t,
-    ...relativeToAbsolute(t.x, t.y)
+    ...relativeToAbsolute(t.x, t.y),
   }))
 })
 
 // 計算屬性：是否有人員移動箭頭
 const hasPlayerArrows = computed(() => {
-  return props.data.arrows?.some(arrow => arrow.type === 'player') || false
+  return props.data.arrows?.some((arrow) => arrow.type === 'player') || false
 })
 
 // 計算屬性：是否有球路軌跡箭頭
 const hasShuttleArrows = computed(() => {
-  return props.data.arrows?.some(arrow => arrow.type === 'shuttle') || false
+  return props.data.arrows?.some((arrow) => arrow.type === 'shuttle') || false
 })
 </script>
 
@@ -474,7 +504,16 @@ const hasShuttleArrows = computed(() => {
 }
 
 .legend-arrow.shuttle-arrow {
-  background: linear-gradient(90deg, #FFD700 0%, #FFD700 25%, transparent 25%, transparent 50%, #FFD700 50%, #FFD700 75%, transparent 75%);
+  background: linear-gradient(
+    90deg,
+    #ffd700 0%,
+    #ffd700 25%,
+    transparent 25%,
+    transparent 50%,
+    #ffd700 50%,
+    #ffd700 75%,
+    transparent 75%
+  );
   background-size: 8px 100%;
 }
 
@@ -485,7 +524,7 @@ const hasShuttleArrows = computed(() => {
   top: -3px;
   width: 0;
   height: 0;
-  border-left: 8px solid #FFD700;
+  border-left: 8px solid #ffd700;
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;
 }
@@ -494,7 +533,7 @@ const hasShuttleArrows = computed(() => {
   .canvas-container {
     overflow-x: auto;
   }
-  
+
   .legend {
     font-size: 0.8rem;
   }

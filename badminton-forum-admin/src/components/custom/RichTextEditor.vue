@@ -1,104 +1,100 @@
 <template>
   <div class="rich-text-editor">
-    <div class="editor-toolbar" v-if="editor">
+    <div v-if="editor" class="editor-toolbar">
       <button
-        @click="editor.chain().focus().toggleBold().run()"
         :class="{ 'is-active': editor.isActive('bold') }"
         class="toolbar-button"
         title="粗體 (Ctrl+B)"
+        @click="editor.chain().focus().toggleBold().run()"
       >
         <strong>B</strong>
       </button>
-      
+
       <button
-        @click="editor.chain().focus().toggleItalic().run()"
         :class="{ 'is-active': editor.isActive('italic') }"
         class="toolbar-button"
         title="斜體 (Ctrl+I)"
+        @click="editor.chain().focus().toggleItalic().run()"
       >
         <em>I</em>
       </button>
-      
+
       <button
-        @click="editor.chain().focus().toggleStrike().run()"
         :class="{ 'is-active': editor.isActive('strike') }"
         class="toolbar-button"
         title="刪除線"
+        @click="editor.chain().focus().toggleStrike().run()"
       >
         <s>S</s>
       </button>
-      
+
       <div class="toolbar-separator"></div>
-      
+
       <button
-        @click="editor.chain().focus().toggleBulletList().run()"
         :class="{ 'is-active': editor.isActive('bulletList') }"
         class="toolbar-button"
         title="項目符號"
+        @click="editor.chain().focus().toggleBulletList().run()"
       >
         • 列表
       </button>
-      
+
       <button
-        @click="editor.chain().focus().toggleOrderedList().run()"
         :class="{ 'is-active': editor.isActive('orderedList') }"
         class="toolbar-button"
         title="編號列表"
+        @click="editor.chain().focus().toggleOrderedList().run()"
       >
         1. 列表
       </button>
-      
+
       <div class="toolbar-separator"></div>
-      
+
       <button
-        @click="editor.chain().focus().toggleBlockquote().run()"
         :class="{ 'is-active': editor.isActive('blockquote') }"
         class="toolbar-button"
         title="引用"
+        @click="editor.chain().focus().toggleBlockquote().run()"
       >
         " 引用
       </button>
-      
+
       <button
-        @click="editor.chain().focus().toggleCodeBlock().run()"
         :class="{ 'is-active': editor.isActive('codeBlock') }"
         class="toolbar-button"
         title="程式碼區塊"
+        @click="editor.chain().focus().toggleCodeBlock().run()"
       >
         &lt;/&gt; 程式碼
       </button>
-      
+
       <div class="toolbar-separator"></div>
-      
-      <button
-        @click="editor.chain().focus().setHorizontalRule().run()"
-        class="toolbar-button"
-        title="水平線"
-      >
+
+      <button class="toolbar-button" title="水平線" @click="editor.chain().focus().setHorizontalRule().run()">
         — 分隔線
       </button>
-      
+
       <button
-        @click="editor.chain().focus().undo().run()"
         :disabled="!editor.can().undo()"
         class="toolbar-button"
         title="復原 (Ctrl+Z)"
+        @click="editor.chain().focus().undo().run()"
       >
         ↶ 復原
       </button>
-      
+
       <button
-        @click="editor.chain().focus().redo().run()"
         :disabled="!editor.can().redo()"
         class="toolbar-button"
         title="重做 (Ctrl+Y)"
+        @click="editor.chain().focus().redo().run()"
       >
         ↷ 重做
       </button>
     </div>
-    
+
     <div class="editor-content">
-      <editor-content :editor="editor" />
+      <EditorContent :editor="editor" />
     </div>
   </div>
 </template>
@@ -112,12 +108,12 @@ import BadmintonDiagramExtension from './BadmintonDiagramExtension'
 const props = defineProps({
   modelValue: {
     type: String,
-    default: ''
+    default: '',
   },
   placeholder: {
     type: String,
-    default: '開始輸入...'
-  }
+    default: '開始輸入...',
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'edit-diagram'])
@@ -125,16 +121,16 @@ const emit = defineEmits(['update:modelValue', 'edit-diagram'])
 const editor = useEditor({
   extensions: [
     StarterKit.configure({
-      heading: false // 關閉標題功能
+      heading: false, // 關閉標題功能
     }),
-    BadmintonDiagramExtension
+    BadmintonDiagramExtension,
   ],
   content: props.modelValue,
   editorProps: {
     attributes: {
       class: 'prose prose-sm focus:outline-none',
-      placeholder: props.placeholder
-    }
+      placeholder: props.placeholder,
+    },
   },
   onUpdate: ({ editor }) => {
     emit('update:modelValue', editor.getHTML())
@@ -144,26 +140,29 @@ const editor = useEditor({
     editor.on('edit-diagram', (data) => {
       emit('edit-diagram', data)
     })
-  }
+  },
 })
 
 // 監聽外部值的改變
-watch(() => props.modelValue, (value) => {
-  if (editor.value && value !== editor.value.getHTML()) {
-    editor.value.commands.setContent(value, false)
-  }
-})
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (editor.value && value !== editor.value.getHTML()) {
+      editor.value.commands.setContent(value, false)
+    }
+  },
+)
 
 // 暴露方法給父組件
 const insertDiagram = (diagramData) => {
   if (!editor.value) return
-  
+
   editor.value
     .chain()
     .focus()
     .insertContent({
       type: 'badmintonDiagram',
-      attrs: { data: diagramData }
+      attrs: { data: diagramData },
     })
     .run()
 }
@@ -173,7 +172,7 @@ const updateDiagram = (pos, diagramData) => {
     console.error('Editor not available')
     return false
   }
-  
+
   try {
     // 使用 chain 命令來確保更新被正確追蹤
     editor.value
@@ -188,7 +187,7 @@ const updateDiagram = (pos, diagramData) => {
         return false
       })
       .run()
-    
+
     return true
   } catch (error) {
     console.error('Error updating diagram:', error)
@@ -198,7 +197,7 @@ const updateDiagram = (pos, diagramData) => {
 
 const hasDiagram = computed(() => {
   if (!editor.value) return false
-  
+
   let hasIt = false
   editor.value.state.doc.descendants((node) => {
     if (node.type.name === 'badmintonDiagram') {
@@ -214,7 +213,7 @@ defineExpose({
   insertDiagram,
   updateDiagram,
   hasDiagram,
-  editor
+  editor,
 })
 
 onBeforeUnmount(() => {
@@ -258,9 +257,9 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-button.is-active {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .toolbar-separator {

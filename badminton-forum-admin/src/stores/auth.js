@@ -12,21 +12,21 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await api.post('/auth/login', credentials)
       const { token: newToken, user: userData } = response.data
-      
+
       token.value = newToken
       user.value = userData
-      
+
       localStorage.setItem('token', newToken)
       localStorage.setItem('user', JSON.stringify(userData))
-      
+
       // Set default authorization header
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
-      
+
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || '登入失敗' 
+      return {
+        success: false,
+        message: error.response?.data?.message || '登入失敗',
       }
     }
   }
@@ -35,21 +35,21 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await api.post('/auth/register', userData)
       const { token: newToken, user: newUser } = response.data
-      
+
       token.value = newToken
       user.value = newUser
-      
+
       localStorage.setItem('token', newToken)
       localStorage.setItem('user', JSON.stringify(newUser))
-      
+
       // Set default authorization header
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
-      
+
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || '註冊失敗' 
+      return {
+        success: false,
+        message: error.response?.data?.message || '註冊失敗',
       }
     }
   }
@@ -58,21 +58,21 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await api.post('/auth/google-login', { idToken })
       const { token: newToken, user: userData } = response.data
-      
+
       token.value = newToken
       user.value = userData
-      
+
       localStorage.setItem('token', newToken)
       localStorage.setItem('user', JSON.stringify(userData))
-      
+
       // Set default authorization header
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
-      
+
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Google 登入失敗' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Google 登入失敗',
       }
     }
   }
@@ -80,10 +80,10 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     token.value = null
     user.value = null
-    
+
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    
+
     delete api.defaults.headers.common['Authorization']
   }
 
@@ -99,6 +99,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     googleLogin,
-    logout
+    logout,
   }
 })

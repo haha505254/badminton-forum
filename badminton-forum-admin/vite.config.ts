@@ -11,8 +11,8 @@ export default defineConfig({
     port: 5174,
     host: true,
     watch: {
-      usePolling: true
-    }
+      usePolling: true,
+    },
   },
   build: {
     sourcemap: true,

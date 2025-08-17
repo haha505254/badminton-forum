@@ -3,21 +3,10 @@
     <div class="flex flex-col md:flex-row gap-4 justify-between items-start mb-4">
       <h1 class="text-3xl font-bold">回覆管理</h1>
       <div class="flex gap-2">
-        <VaButton
-          v-if="selectedReplies.length > 0"
-          preset="danger"
-          @click="handleBatchDelete"
-          :disabled="isLoading"
-        >
+        <VaButton v-if="selectedReplies.length > 0" preset="danger" :disabled="isLoading" @click="handleBatchDelete">
           批量刪除 ({{ selectedReplies.length }})
         </VaButton>
-        <VaButton
-          preset="secondary"
-          @click="loadReplies"
-          :disabled="isLoading"
-        >
-          重新整理
-        </VaButton>
+        <VaButton preset="secondary" :disabled="isLoading" @click="loadReplies"> 重新整理 </VaButton>
       </div>
     </div>
 
@@ -46,20 +35,18 @@
             label="開始日期"
             clearable
             @clear="handleSearch"
-            @update:model-value="handleSearch"
+            @update:modelValue="handleSearch"
           />
           <VaDateInput
             v-model="filters.endDate"
             label="結束日期"
             clearable
             @clear="handleSearch"
-            @update:model-value="handleSearch"
+            @update:modelValue="handleSearch"
           />
         </div>
         <div class="flex justify-end mt-4">
-          <VaButton preset="primary" @click="handleSearch" :disabled="isLoading">
-            搜尋
-          </VaButton>
+          <VaButton preset="primary" :disabled="isLoading" @click="handleSearch"> 搜尋 </VaButton>
         </div>
       </VaCardContent>
     </VaCard>
@@ -68,12 +55,12 @@
     <VaCard>
       <VaCardContent>
         <VaDataTable
+          v-model:selected-items="selectedReplies"
           :items="replies"
           :columns="columns"
           :loading="isLoading"
           selectable
           select-mode="multiple"
-          v-model:selected-items="selectedReplies"
           striped
           sticky-header
           :pagination="pagination"
@@ -86,33 +73,21 @@
           </template>
 
           <template #cell(replyTarget)="{ rowData }">
-            <div v-if="!rowData.parentReplyId" class="text-gray-500">
-              直接回覆
-            </div>
+            <div v-if="!rowData.parentReplyId" class="text-gray-500">直接回覆</div>
             <div v-else>
               <span class="text-primary">@{{ rowData.parentReplyAuthorName }}</span>
-              <VaBadge 
-                v-if="rowData.parentReplyIsDeleted" 
-                color="danger" 
-                size="small"
-                class="ml-1"
-              >
-                已刪除
-              </VaBadge>
+              <VaBadge v-if="rowData.parentReplyIsDeleted" color="danger" size="small" class="ml-1"> 已刪除 </VaBadge>
             </div>
           </template>
 
           <template #cell(authorName)="{ value, rowData }">
-            <RouterLink 
-              :to="`/users?id=${rowData.authorId}`"
-              class="text-primary hover:underline"
-            >
+            <RouterLink :to="`/users?id=${rowData.authorId}`" class="text-primary hover:underline">
               {{ value }}
             </RouterLink>
           </template>
 
           <template #cell(postTitle)="{ value, rowData }">
-            <a 
+            <a
               :href="`http://localhost:5173/posts/${rowData.postId}`"
               target="_blank"
               class="text-primary hover:underline"
@@ -133,19 +108,13 @@
 
           <template #cell(actions)="{ rowData }">
             <div class="flex gap-2">
-              <VaButton
-                preset="plain"
-                size="small"
-                @click="viewReply(rowData)"
-              >
-                查看
-              </VaButton>
+              <VaButton preset="plain" size="small" @click="viewReply(rowData)"> 查看 </VaButton>
               <VaButton
                 preset="plain"
                 size="small"
                 color="danger"
-                @click="deleteReply(rowData)"
                 :disabled="rowData.isDeleted"
+                @click="deleteReply(rowData)"
               >
                 刪除
               </VaButton>
@@ -156,12 +125,7 @@
     </VaCard>
 
     <!-- 查看回覆對話框 -->
-    <VaModal
-      v-model="showViewModal"
-      title="查看回覆內容"
-      size="large"
-      :close-button="true"
-    >
+    <VaModal v-model="showViewModal" title="查看回覆內容" size="large" :close-button="true">
       <div v-if="currentReply" class="space-y-4">
         <!-- 父回覆資訊（如果有） -->
         <div v-if="currentReply.parentReplyId" class="border-l-4 border-warning pl-4 mb-4">
@@ -170,12 +134,7 @@
             <div>
               <strong>作者：</strong>
               <span>{{ currentReply.parentReplyAuthorName }}</span>
-              <VaBadge 
-                v-if="currentReply.parentReplyIsDeleted" 
-                color="danger" 
-                size="small"
-                class="ml-2"
-              >
+              <VaBadge v-if="currentReply.parentReplyIsDeleted" color="danger" size="small" class="ml-2">
                 已刪除
               </VaBadge>
             </div>
@@ -184,9 +143,13 @@
             </div>
             <div>
               <strong>內容：</strong>
-              <div 
+              <div
                 class="mt-2 p-3 rounded"
-                :class="currentReply.parentReplyIsDeleted ? 'bg-red-50 dark:bg-red-900/20 opacity-75' : 'bg-gray-50 dark:bg-gray-800'"
+                :class="
+                  currentReply.parentReplyIsDeleted
+                    ? 'bg-red-50 dark:bg-red-900/20 opacity-75'
+                    : 'bg-gray-50 dark:bg-gray-800'
+                "
               >
                 <div v-if="currentReply.parentReplyIsDeleted" class="text-sm text-danger mb-2">
                   [此內容已被用戶刪除，保留供管理審查]
@@ -201,12 +164,10 @@
         <div class="border-l-4 border-primary pl-4">
           <h4 class="font-bold mb-2 text-primary">當前回覆</h4>
           <div class="space-y-2">
-            <div>
-              <strong>作者：</strong>{{ currentReply.authorName }}
-            </div>
+            <div><strong>作者：</strong>{{ currentReply.authorName }}</div>
             <div>
               <strong>所屬文章：</strong>
-              <a 
+              <a
                 :href="`http://localhost:5173/posts/${currentReply.postId}`"
                 target="_blank"
                 class="text-primary hover:underline"
@@ -214,26 +175,22 @@
                 {{ currentReply.postTitle }}
               </a>
             </div>
-            <div>
-              <strong>發表時間：</strong>{{ formatDate(currentReply.createdAt) }}
-            </div>
-            <div v-if="currentReply.updatedAt">
-              <strong>更新時間：</strong>{{ formatDate(currentReply.updatedAt) }}
-            </div>
+            <div><strong>發表時間：</strong>{{ formatDate(currentReply.createdAt) }}</div>
+            <div v-if="currentReply.updatedAt"><strong>更新時間：</strong>{{ formatDate(currentReply.updatedAt) }}</div>
             <div>
               <strong>狀態：</strong>
               <VaBadge :color="currentReply.isDeleted ? 'danger' : 'success'">
                 {{ currentReply.isDeleted ? '已刪除' : '正常' }}
               </VaBadge>
             </div>
-            <div v-if="currentReply.deletedAt">
-              <strong>刪除時間：</strong>{{ formatDate(currentReply.deletedAt) }}
-            </div>
+            <div v-if="currentReply.deletedAt"><strong>刪除時間：</strong>{{ formatDate(currentReply.deletedAt) }}</div>
             <div>
               <strong>內容：</strong>
-              <div 
+              <div
                 class="mt-2 p-4 rounded"
-                :class="currentReply.isDeleted ? 'bg-red-50 dark:bg-red-900/20 opacity-75' : 'bg-gray-100 dark:bg-gray-800'"
+                :class="
+                  currentReply.isDeleted ? 'bg-red-50 dark:bg-red-900/20 opacity-75' : 'bg-gray-100 dark:bg-gray-800'
+                "
               >
                 <div v-if="currentReply.isDeleted" class="text-sm text-danger mb-2">
                   [此內容已被刪除，保留供管理審查]
@@ -245,16 +202,14 @@
         </div>
       </div>
       <template #footer>
-        <VaButton preset="secondary" @click="showViewModal = false">
-          關閉
-        </VaButton>
+        <VaButton preset="secondary" @click="showViewModal = false"> 關閉 </VaButton>
       </template>
     </VaModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useModal, useToast } from 'vuestic-ui'
 import adminApi from '../../api/admin'
 
@@ -414,7 +369,7 @@ const handleBatchDelete = async () => {
   if (!agreed) return
 
   try {
-    const ids = selectedReplies.value.map(r => r.id)
+    const ids = selectedReplies.value.map((r) => r.id)
     await adminApi.batchDeleteReplies(ids)
     notify({
       title: '成功',

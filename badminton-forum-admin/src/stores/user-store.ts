@@ -13,12 +13,12 @@ export const useUserStore = defineStore('user', {
       const authStore = useAuthStore()
       return authStore.user?.username || authStore.user?.email?.split('@')[0] || '用戶'
     },
-    
+
     email(): string {
       const authStore = useAuthStore()
       return authStore.user?.email || ''
     },
-    
+
     memberSince(): string {
       const authStore = useAuthStore()
       if (authStore.user?.createdAt) {
@@ -26,16 +26,16 @@ export const useUserStore = defineStore('user', {
         return date.toLocaleDateString('en-US', {
           month: 'numeric',
           day: 'numeric',
-          year: 'numeric'
+          year: 'numeric',
         })
       }
       return new Date().toLocaleDateString('en-US')
     },
-    
+
     pfp(): string {
       const authStore = useAuthStore()
       return authStore.user?.avatar || `https://ui-avatars.com/api/?name=${this.userName}&background=random`
-    }
+    },
   },
 
   actions: {

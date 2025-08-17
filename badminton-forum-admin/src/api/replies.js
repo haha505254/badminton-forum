@@ -4,7 +4,7 @@ export const repliesApi = {
   // 獲取文章回覆
   getReplies(postId, page = 1, pageSize = 50) {
     return api.get(`/posts/${postId}/replies`, {
-      params: { page, pageSize }
+      params: { page, pageSize },
     })
   },
 
@@ -26,5 +26,5 @@ export const repliesApi = {
   // 點讚回覆
   likeReply(postId, replyId) {
     return api.post(`/posts/${postId}/replies/${replyId}/like`)
-  }
+  },
 }

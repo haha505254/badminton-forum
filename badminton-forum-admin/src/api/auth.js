@@ -19,7 +19,7 @@ export const authApi = {
   // 重置密碼
   resetPassword: (data) => {
     return api.post('/auth/reset-password', data)
-  }
+  },
 }
 
 export default authApi

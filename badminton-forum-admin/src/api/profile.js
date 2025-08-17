@@ -14,14 +14,14 @@ export const profileApi = {
   // 獲取用戶文章 (透過 ID)
   getUserPostsById(userId, page = 1, pageSize = 20) {
     return api.get(`/profile/by-id/${userId}/posts`, {
-      params: { page, pageSize }
+      params: { page, pageSize },
     })
   },
 
   // 獲取用戶文章 (透過 username - 保留以相容舊版)
   getUserPosts(username, page = 1, pageSize = 20) {
     return api.get(`/profile/${username}/posts`, {
-      params: { page, pageSize }
+      params: { page, pageSize },
     })
   },
 
@@ -41,8 +41,8 @@ export const profileApi = {
     formData.append('file', file)
     return api.post('/profile/upload-avatar', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     })
-  }
+  },
 }

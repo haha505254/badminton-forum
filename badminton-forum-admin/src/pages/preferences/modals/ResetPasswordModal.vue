@@ -64,17 +64,17 @@ const submit = async () => {
       // 呼叫修改密碼 API
       await profileApi.changePassword({
         CurrentPassword: oldPassword.value,
-        NewPassword: newPassword.value
+        NewPassword: newPassword.value,
       })
-      
+
       // 成功
-      init({ message: "密碼已成功更改", color: 'success' })
+      init({ message: '密碼已成功更改', color: 'success' })
       emits('cancel')
     } catch (error: any) {
       // 失敗（可能是舊密碼錯誤）
-      init({ 
-        message: error.response?.data?.message || "密碼更改失敗", 
-        color: 'danger' 
+      init({
+        message: error.response?.data?.message || '密碼更改失敗',
+        color: 'danger',
       })
     }
   }

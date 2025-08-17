@@ -4,7 +4,7 @@ export const postsApi = {
   // 獲取文章列表
   getPosts(page = 1, pageSize = 20) {
     return api.get('/posts', {
-      params: { page, pageSize }
+      params: { page, pageSize },
     })
   },
 
@@ -36,7 +36,7 @@ export const postsApi = {
   // 搜尋文章
   searchPosts(keyword, page = 1, pageSize = 20) {
     return api.get('/posts/search', {
-      params: { keyword, page, pageSize }
+      params: { keyword, page, pageSize },
     })
-  }
+  },
 }

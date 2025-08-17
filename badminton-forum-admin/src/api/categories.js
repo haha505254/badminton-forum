@@ -14,7 +14,7 @@ export const categoriesApi = {
   // 獲取分類下的文章
   getCategoryPosts(id, page = 1, pageSize = 20) {
     return api.get(`/categories/${id}/posts`, {
-      params: { page, pageSize }
+      params: { page, pageSize },
     })
-  }
+  },
 }

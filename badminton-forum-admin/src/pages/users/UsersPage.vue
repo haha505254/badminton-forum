@@ -2,12 +2,7 @@
   <div class="users-page">
     <div class="row align-center mb-4">
       <h1 class="flex">用戶管理</h1>
-      <VaInput
-        v-model="filter"
-        placeholder="搜尋用戶..."
-        class="mr-3"
-        style="max-width: 300px"
-      >
+      <VaInput v-model="filter" placeholder="搜尋用戶..." class="mr-3" style="max-width: 300px">
         <template #prepend>
           <VaIcon name="search" />
         </template>
@@ -26,12 +21,7 @@
           >
             <template #cell(user)="{ rowData }">
               <div class="flex items-center">
-                <VaAvatar
-                  :src="rowData.avatar"
-                  :fallback-text="rowData.username?.[0]"
-                  size="small"
-                  class="mr-2"
-                />
+                <VaAvatar :src="rowData.avatar" :fallback-text="rowData.username?.[0]" size="small" class="mr-2" />
                 <div>
                   <div class="font-semibold">{{ rowData.username }}</div>
                   <div class="text-xs text-gray-500">{{ rowData.email }}</div>
@@ -40,27 +30,16 @@
             </template>
 
             <template #cell(role)="{ rowData }">
-              <VaBadge 
-                :text="rowData.isAdmin ? '管理員' : '一般用戶'"
-                :color="rowData.isAdmin ? 'danger' : 'info'"
-              />
+              <VaBadge :text="rowData.isAdmin ? '管理員' : '一般用戶'" :color="rowData.isAdmin ? 'danger' : 'info'" />
             </template>
 
             <template #cell(status)="{ rowData }">
-              <VaBadge 
-                :text="rowData.isActive ? '啟用' : '停用'"
-                :color="rowData.isActive ? 'success' : 'secondary'"
-              />
+              <VaBadge :text="rowData.isActive ? '啟用' : '停用'" :color="rowData.isActive ? 'success' : 'secondary'" />
             </template>
 
             <template #cell(provider)="{ rowData }">
               <div class="flex items-center">
-                <VaIcon 
-                  v-if="rowData.provider === 'Google'"
-                  name="mdi-google"
-                  class="mr-1"
-                  color="primary"
-                />
+                <VaIcon v-if="rowData.provider === 'Google'" name="mdi-google" class="mr-1" color="primary" />
                 {{ rowData.provider || 'Local' }}
               </div>
             </template>
@@ -80,41 +59,36 @@
                   preset="plain"
                   icon="block"
                   color="warning"
-                  @click="toggleUserActive(rowData)"
                   title="停用用戶"
+                  @click="toggleUserActive(rowData)"
                 />
                 <VaButton
                   v-else
                   preset="plain"
                   icon="check_circle"
                   color="success"
-                  @click="toggleUserActive(rowData)"
                   title="啟用用戶"
+                  @click="toggleUserActive(rowData)"
                 />
-                
+
                 <VaButton
                   v-if="!rowData.isAdmin"
                   preset="plain"
                   icon="admin_panel_settings"
                   color="primary"
-                  @click="toggleUserAdmin(rowData)"
                   title="設為管理員"
+                  @click="toggleUserAdmin(rowData)"
                 />
                 <VaButton
                   v-else
                   preset="plain"
                   icon="remove_moderator"
                   color="secondary"
-                  @click="toggleUserAdmin(rowData)"
                   title="移除管理員"
+                  @click="toggleUserAdmin(rowData)"
                 />
-                
-                <VaButton
-                  preset="plain"
-                  icon="visibility"
-                  @click="viewUserProfile(rowData)"
-                  title="查看個人資料"
-                />
+
+                <VaButton preset="plain" icon="visibility" title="查看個人資料" @click="viewUserProfile(rowData)" />
               </div>
             </template>
           </VaDataTable>
@@ -134,7 +108,7 @@
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 md3">
         <VaCard>
           <VaCardContent>
@@ -145,7 +119,7 @@
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 md3">
         <VaCard>
           <VaCardContent>
@@ -156,7 +130,7 @@
           </VaCardContent>
         </VaCard>
       </div>
-      
+
       <div class="flex xs12 md3">
         <VaCard>
           <VaCardContent>
@@ -192,29 +166,28 @@ const columns = [
   { key: 'provider', label: '登入方式', width: '120px' },
   { key: 'createdAt', label: '註冊時間', sortable: true },
   { key: 'lastLoginAt', label: '最後登入', sortable: true },
-  { key: 'actions', label: '操作', width: '150px' }
+  { key: 'actions', label: '操作', width: '150px' },
 ]
 
 const pagination = computed(() => ({
   page: currentPage.value,
   perPage: perPage.value,
-  total: total.value
+  total: total.value,
 }))
 
 const filteredUsers = computed(() => {
   if (!filter.value) return users.value
   const searchTerm = filter.value.toLowerCase()
-  return users.value.filter(user => 
-    user.username?.toLowerCase().includes(searchTerm) ||
-    user.email?.toLowerCase().includes(searchTerm)
+  return users.value.filter(
+    (user) => user.username?.toLowerCase().includes(searchTerm) || user.email?.toLowerCase().includes(searchTerm),
   )
 })
 
 const stats = computed(() => ({
   totalUsers: users.value.length,
-  activeUsers: users.value.filter(u => u.isActive).length,
-  adminUsers: users.value.filter(u => u.isAdmin).length,
-  googleUsers: users.value.filter(u => u.provider === 'Google').length
+  activeUsers: users.value.filter((u) => u.isActive).length,
+  adminUsers: users.value.filter((u) => u.isAdmin).length,
+  googleUsers: users.value.filter((u) => u.provider === 'Google').length,
 }))
 
 async function fetchUsers() {
@@ -226,7 +199,7 @@ async function fetchUsers() {
   } catch (error) {
     notify({
       message: '載入用戶失敗',
-      color: 'danger'
+      color: 'danger',
     })
   } finally {
     loading.value = false
@@ -239,12 +212,12 @@ async function toggleUserActive(user) {
     user.isActive = !user.isActive
     notify({
       message: user.isActive ? '用戶已啟用' : '用戶已停用',
-      color: 'success'
+      color: 'success',
     })
   } catch (error) {
     notify({
       message: '操作失敗',
-      color: 'danger'
+      color: 'danger',
     })
   }
 }
@@ -252,18 +225,18 @@ async function toggleUserActive(user) {
 async function toggleUserAdmin(user) {
   const action = user.isAdmin ? '移除管理員權限' : '授予管理員權限'
   if (!confirm(`確定要${action}嗎？`)) return
-  
+
   try {
     await adminApi.toggleUserAdmin(user.id)
     user.isAdmin = !user.isAdmin
     notify({
       message: `已${action}`,
-      color: 'success'
+      color: 'success',
     })
   } catch (error) {
     notify({
       message: '操作失敗',
-      color: 'danger'
+      color: 'danger',
     })
   }
 }
@@ -284,7 +257,7 @@ function formatDate(dateString) {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
