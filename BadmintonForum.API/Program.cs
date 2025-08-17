@@ -93,6 +93,17 @@ builder.Services.AddCors(options =>
             allowedOrigins.Add(frontendUrl);
         }
 
+        // Add multiple allowed origins from environment variable
+        var allowedOriginsEnv = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS");
+        if (!string.IsNullOrEmpty(allowedOriginsEnv))
+        {
+            var origins = allowedOriginsEnv.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var origin in origins)
+            {
+                allowedOrigins.Add(origin.Trim());
+            }
+        }
+
         builder.WithOrigins(allowedOrigins.ToArray())
                .AllowAnyHeader()
                .AllowAnyMethod()
