@@ -3,6 +3,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS development
 
 WORKDIR /app
 
+# 設定 UTF-8 locale
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
 # 安裝 Entity Framework Core 工具
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"

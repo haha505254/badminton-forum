@@ -35,7 +35,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5246
-      ConnectionStrings__DefaultConnection: "Server=db;Database=${MARIADB_DATABASE:-badmintonforumdb};User=${MARIADB_USER:-badmintonuser};Password=${MARIADB_PASSWORD:-BadmintonPass123};"
+      ConnectionStrings__DefaultConnection: "Server=db;Database=${MARIADB_DATABASE:-badmintonforumdb};User=${MARIADB_USER:-badmintonuser};Password=${MARIADB_PASSWORD:-BadmintonPass123};CharSet=utf8mb4;"
       JwtSettings__Secret: ${JWT_SECRET:-ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction}
       JwtSettings__Issuer: ${JWT_ISSUER:-BadmintonForumAPI}
       JwtSettings__Audience: ${JWT_AUDIENCE:-BadmintonForumClient}
@@ -72,6 +72,7 @@ services:
       - "${WEB_PORT:-5173}:5173"
     volumes:
       - ./badminton-forum-vue:/app
+      - /app/node_modules
     depends_on:
       - api
     networks:

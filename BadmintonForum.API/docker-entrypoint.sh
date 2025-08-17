@@ -20,7 +20,7 @@ if [ "$ASPNETCORE_ENVIRONMENT" = "Development" ]; then
   dotnet ef migrations script --idempotent -o /tmp/migrations.sql
   
   echo "執行資料庫遷移..."
-  mariadb -h db -P 3306 -u badmintonuser -pBadmintonPass123 badmintonforumdb < /tmp/migrations.sql
+  mariadb -h db -P 3306 -u badmintonuser -pBadmintonPass123 --default-character-set=utf8mb4 badmintonforumdb < /tmp/migrations.sql
   
   echo "資料庫遷移完成！"
   dotnet watch run --no-launch-profile --urls http://+:5246
