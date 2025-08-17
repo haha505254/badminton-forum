@@ -14,5 +14,3 @@ coverage
 .nyc_output
 .github
 .editorconfig
-.eslintrc.js
-.eslintignore

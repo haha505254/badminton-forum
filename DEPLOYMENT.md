@@ -101,6 +101,31 @@ docker-compose build --no-cache api
 docker-compose up -d
 ```
 
+## 預設管理員帳號
+
+系統會在首次啟動時自動創建管理員帳號。
+
+### 開發環境預設值
+- **Email**: admin@badminton-forum.com
+- **Password**: Admin123456!
+
+### 生產環境設定
+**重要**：生產環境部署前必須修改 `.env` 中的管理員帳號密碼：
+```bash
+DEFAULT_ADMIN_EMAIL=your-admin@domain.com
+DEFAULT_ADMIN_PASSWORD=YourSecurePassword123!
+```
+
+首次登入後建議立即修改密碼。
+
+### 管理員功能
+管理員可以：
+- 存取管理後台 (http://localhost:5174)
+- 管理用戶（啟用/停用、授予管理員權限）
+- 管理貼文（置頂、鎖定、刪除）
+- 管理分類（新增、編輯、刪除）
+- 管理回覆（軟刪除、批次刪除）
+
 ## 備份與還原
 
 ### 備份資料庫
@@ -112,3 +137,80 @@ docker-compose exec db mysqldump -u badmintonuser -p badmintonforumdb > backup.s
 ```bash
 docker-compose exec -T db mysql -u badmintonuser -p badmintonforumdb < backup.sql
 ```
+
+## 進階部署選項
+
+### Nginx 反向代理設定
+
+如果你想使用 Nginx 作為反向代理（支援 HTTPS）：
+
+```nginx
+# /etc/nginx/sites-available/badminton-forum
+server {
+    listen 80;
+    server_name your-domain.com;
+    
+    # 自動重定向到 HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+    
+    # SSL 憑證（使用 Let's Encrypt）
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    
+    # 前端
+    location / {
+        proxy_pass http://localhost:5173;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # API
+    location /api {
+        proxy_pass http://localhost:5246;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # 管理後台
+    location /admin {
+        proxy_pass http://localhost:5174;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### SSL/HTTPS 設定（使用 Let's Encrypt）
+
+```bash
+# 安裝 Certbot
+sudo apt update
+sudo apt install certbot python3-certbot-nginx
+
+# 取得 SSL 憑證
+sudo certbot --nginx -d your-domain.com
+
+# 自動更新憑證
+sudo certbot renew --dry-run
+```
+
+### 安全性建議
+
+生產環境部署時，請確保：
+- ✅ 更改所有預設密碼（資料庫、JWT、管理員）
+- ✅ 使用 HTTPS/SSL 加密連線
+- ✅ 設定防火牆規則，只開放必要端口
+- ✅ 定期備份資料庫
+- ✅ 定期更新 Docker 映像
+- ✅ 監控服務狀態和日誌

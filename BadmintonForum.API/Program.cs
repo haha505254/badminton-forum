@@ -144,6 +144,30 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Execute database migrations and seed data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var configuration = services.GetRequiredService<IConfiguration>();
+        var logger = services.GetRequiredService<ILogger<DataSeeder>>();
+
+        // Execute migrations
+        await context.Database.MigrateAsync();
+
+        // Execute seed data
+        var seeder = new DataSeeder(context, configuration, logger);
+        await seeder.SeedAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating or seeding the database");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

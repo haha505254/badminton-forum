@@ -1,10 +1,17 @@
 #!/bin/bash
 set -e
 
+# 從環境變數取得資料庫連線資訊
+DB_HOST="${DB_HOST:-db}"
+DB_USER="${MARIADB_USER:-badmintonuser}"
+DB_PASSWORD="${MARIADB_PASSWORD:-BadmintonPass123}"
+DB_NAME="${MARIADB_DATABASE:-badmintonforumdb}"
+
 echo "等待資料庫就緒..."
+echo "連線資訊: $DB_USER@$DB_HOST (資料庫: $DB_NAME)"
 
 # 等待資料庫可用 (MariaDB)
-until mariadb -h db -P 3306 -u badmintonuser -pBadmintonPass123 -e "SELECT 1" > /dev/null 2>&1; do
+until mariadb -h $DB_HOST -P 3306 -u $DB_USER -p$DB_PASSWORD -e "SELECT 1" > /dev/null 2>&1; do
   echo "資料庫尚未就緒，等待中..."
   sleep 2
 done
@@ -20,12 +27,12 @@ if [ "$ASPNETCORE_ENVIRONMENT" = "Development" ]; then
   dotnet ef migrations script --idempotent -o /tmp/migrations.sql
   
   echo "執行資料庫遷移..."
-  mariadb -h db -P 3306 -u badmintonuser -pBadmintonPass123 --default-character-set=utf8mb4 badmintonforumdb < /tmp/migrations.sql
+  mariadb -h $DB_HOST -P 3306 -u $DB_USER -p$DB_PASSWORD --default-character-set=utf8mb4 $DB_NAME < /tmp/migrations.sql
   
   echo "資料庫遷移完成！"
   dotnet watch run --no-launch-profile --urls http://+:5246
 else
   echo "以生產模式啟動..."
-  # 生產環境直接執行已編譯的 dll
+  # 生產環境執行 DLL
   exec dotnet BadmintonForum.API.dll
 fi

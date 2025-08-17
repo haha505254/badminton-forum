@@ -44,7 +44,7 @@ FROM build AS publish
 RUN dotnet publish -c Release -o /app/publish
 
 # 多階段建置 - 生產階段
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS production
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS production
 
 WORKDIR /app
 EXPOSE 5246
@@ -52,8 +52,15 @@ EXPOSE 5246
 # 安裝 mariadb-client 用於健康檢查和遷移
 RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/lists/*
 
-# 只複製發布後的檔案
+# 複製發布後的檔案
 COPY --from=publish /app/publish .
+
+# 複製源碼和專案檔案（SDK 需要）
+COPY . .
+
+# 安裝 EF Core 工具
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
 
 # 複製 entrypoint script
 COPY docker-entrypoint.sh ./

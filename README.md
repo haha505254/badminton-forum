@@ -53,13 +53,12 @@
 git clone https://github.com/haha505254/badminton-forum.git
 cd badminton-forum
 
-# 2. 複製預設環境設定
+# 2. 複製環境設定
 cp .env.defaults .env
+# 注意：.env 檔案包含所有預設值，可直接使用
+# 生產環境請修改敏感資訊（密碼、JWT密鑰等）
 
-# 3. (選用) 如需 Google 登入功能，編輯 .env 設定你的 Google Client ID
-# nano .env
-
-# 4. 啟動所有服務
+# 3. 啟動所有服務
 docker-compose up -d
 ```
 
@@ -135,8 +134,8 @@ docker-compose up -d --build web
 ### 存取管理後台
 - **URL**: http://localhost:5174
 - **預設管理員帳號**: 
-  - Email: `123@gmail.com`
-  - 密碼: `123456`
+  - Email: `admin@badminton-forum.com`
+  - 密碼: `Admin123456!`
 
 ### 管理功能
 - **儀表板**: 即時統計數據、活動圖表、分類分佈
@@ -147,14 +146,18 @@ docker-compose up -d --build web
 
 ## 📝 預設帳號
 
-### 測試帳號
-```
-管理員帳號（用於管理後台）:
-- Email: 123@gmail.com
-- 密碼: 123456
+### 預設管理員帳號
+系統會在首次啟動時自動創建管理員帳號：
+- **Email**: admin@badminton-forum.com
+- **密碼**: Admin123456!
 
-一般用戶可透過註冊頁面建立
+生產環境部署前，請修改 `.env` 中的管理員設定：
+```bash
+DEFAULT_ADMIN_EMAIL=your-email@domain.com
+DEFAULT_ADMIN_PASSWORD=YourSecurePassword!
 ```
+
+一般用戶可透過註冊頁面建立。
 
 ### 設定新管理員
 若需要將其他用戶設為管理員：

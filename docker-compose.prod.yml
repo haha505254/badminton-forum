@@ -1,8 +1,6 @@
 # Production deployment configuration
 # Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-version: '3.8'
-
 services:
   # MariaDB - Production settings
   db:
@@ -16,8 +14,22 @@ services:
       target: production
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=db;Database=${MARIADB_DATABASE:-badmintonforumdb};User=${MARIADB_USER:-badmintonuser};Password=${MARIADB_PASSWORD:-BadmintonPass123};CharSet=utf8mb4;"
+      JwtSettings__Secret: ${JWT_SECRET:-ThisIsAVerySecretKeyForJWTTokenGenerationPleaseChangeInProduction}
+      JwtSettings__Issuer: ${JWT_ISSUER:-BadmintonForumAPI}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-BadmintonForumClient}
+      JwtSettings__ExpirationInDays: ${JWT_EXPIRATION_DAYS:-7}
+      Email__UseConsoleEmail: "true"
+      Email__BaseUrl: ${EMAIL_BASE_URL:-http://localhost:5173}
+      GoogleAuth__ClientId: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
+      DefaultAdmin__Email: ${DEFAULT_ADMIN_EMAIL:-admin@badminton-forum.com}
+      DefaultAdmin__Password: ${DEFAULT_ADMIN_PASSWORD:-Admin123456!}
       # Use ALLOWED_ORIGINS for flexible CORS configuration
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:5174}
+      # Pass MariaDB credentials to docker-entrypoint.sh
+      MARIADB_USER: ${MARIADB_USER:-badmintonuser}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-BadmintonPass123}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-badmintonforumdb}
     volumes: []  # Remove development volumes
     restart: always
 
