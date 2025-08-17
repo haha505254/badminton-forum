@@ -76,8 +76,8 @@ stop_containers() {
     print_info "Stopping existing containers..."
     
     # Check if any containers are running
-    if docker-compose -f docker-compose.prod.yml ps -q 2>/dev/null | grep -q .; then
-        docker-compose -f docker-compose.prod.yml down
+    if docker compose -f docker-compose.prod.yml ps -q 2>/dev/null | grep -q .; then
+        docker compose -f docker-compose.prod.yml down
         print_info "Existing containers stopped"
     else
         print_info "No existing containers found"
@@ -103,18 +103,18 @@ deploy_services() {
     
     # Build images with no cache to ensure fresh build
     print_info "Building Docker images (this may take a few minutes)..."
-    docker-compose -f docker-compose.prod.yml build --no-cache
+    docker compose -f docker-compose.prod.yml build --no-cache
     
     # Start services in detached mode
     print_info "Starting services..."
-    docker-compose -f docker-compose.prod.yml up -d
+    docker compose -f docker-compose.prod.yml up -d
     
     # Wait for services to be healthy
     print_info "Waiting for services to be ready..."
     sleep 10
     
     # Check service status
-    docker-compose -f docker-compose.prod.yml ps
+    docker compose -f docker-compose.prod.yml ps
 }
 
 # Function to verify deployment
@@ -126,7 +126,7 @@ verify_deployment() {
         print_info "✓ API is responding"
     else
         print_warning "API health check failed. Checking logs..."
-        docker-compose -f docker-compose.prod.yml logs --tail=20 api
+        docker compose -f docker-compose.prod.yml logs --tail=20 api
     fi
     
     # Check if web frontend is responding
@@ -144,7 +144,7 @@ verify_deployment() {
     fi
     
     # Check database connection
-    if docker-compose -f docker-compose.prod.yml exec -T db mariadb -u badmintonuser -pBadmintonPass123 -e "SELECT 1" badmintonforumdb &>/dev/null; then
+    if docker compose -f docker-compose.prod.yml exec -T db mariadb -u badmintonuser -pBadmintonPass123 -e "SELECT 1" badmintonforumdb &>/dev/null; then
         print_info "✓ Database is accessible"
     else
         print_warning "Database connection check failed"
@@ -164,10 +164,10 @@ show_summary() {
     echo "  - API: http://$(hostname -I | awk '{print $1}'):5246/swagger"
     echo ""
     echo "Useful commands:"
-    echo "  - View logs: docker-compose -f docker-compose.prod.yml logs -f [service]"
-    echo "  - Restart service: docker-compose -f docker-compose.prod.yml restart [service]"
-    echo "  - Stop all: docker-compose -f docker-compose.prod.yml down"
-    echo "  - Service status: docker-compose -f docker-compose.prod.yml ps"
+    echo "  - View logs: docker compose -f docker-compose.prod.yml logs -f [service]"
+    echo "  - Restart service: docker compose -f docker-compose.prod.yml restart [service]"
+    echo "  - Stop all: docker compose -f docker-compose.prod.yml down"
+    echo "  - Service status: docker compose -f docker-compose.prod.yml ps"
     echo ""
     
     # Show warnings if any
