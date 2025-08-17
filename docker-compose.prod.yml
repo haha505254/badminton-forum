@@ -72,6 +72,9 @@ services:
       context: ./badminton-forum-vue
       dockerfile: Dockerfile
       target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5246/api}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
     container_name: badminton-forum-web
     restart: always
     environment:
@@ -92,6 +95,10 @@ services:
       context: ./badminton-forum-admin
       dockerfile: Dockerfile
       target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5246/api}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
+        VITE_APP_NAME: ${ADMIN_APP_NAME:-羽球論壇管理後台}
     container_name: badminton-forum-admin
     restart: always
     environment:
