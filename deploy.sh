@@ -4,6 +4,8 @@
 # This script automates the deployment process on EC2 or any production server
 
 set -e  # Exit on error
+set -u  # Exit on undefined variable
+set -o pipefail  # Exit on pipe failure
 
 # Colors for output
 RED='\033[0;31m'
@@ -24,6 +26,9 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Error handler
+trap 'print_error "Deployment failed at line $LINENO"' ERR
+
 # Function to check if .env file exists and is configured
 check_env_file() {
     if [ ! -f .env ]; then
@@ -31,14 +36,23 @@ check_env_file() {
         cp .env.defaults .env
         print_error "Please edit .env file with your production settings:"
         echo "  - SERVER_IP: Your server's public IP"
-        echo "  - ALLOWED_ORIGINS: Update with your server IP"
         echo "  - VITE_API_URL: Update with your server IP"
+        echo "  - ALLOWED_ORIGINS: Update with your server IP"
+        echo "  - EMAIL_BASE_URL: Update with your server IP"
         echo "  - JWT_SECRET: Change to a secure secret key"
         echo "  - MARIADB_PASSWORD: Change to a secure password"
         echo "  - DEFAULT_ADMIN_EMAIL: Set your admin email"
         echo "  - DEFAULT_ADMIN_PASSWORD: Set a secure admin password"
         echo ""
         echo "After editing, run this script again."
+        exit 1
+    fi
+    
+    # Check if VITE_API_URL still points to localhost
+    if grep -q "VITE_API_URL=http://localhost" .env; then
+        print_error "VITE_API_URL still points to localhost! Please update to your server IP."
+        echo "Current value:"
+        grep VITE_API_URL .env
         exit 1
     fi
     
@@ -101,17 +115,20 @@ cleanup_docker() {
 deploy_services() {
     print_info "Building and starting services..."
     
-    # Build images with no cache to ensure fresh build
-    print_info "Building Docker images (this may take a few minutes)..."
-    docker compose -f docker-compose.prod.yml build --no-cache
+    # Check for --force flag
+    DOCKER_BUILD_OPTS=""
+    if [[ "${FORCE_REBUILD:-}" == "true" ]]; then
+        print_info "Force rebuild requested - using --no-cache"
+        DOCKER_BUILD_OPTS="--no-cache"
+    fi
     
-    # Start services in detached mode
-    print_info "Starting services..."
-    docker compose -f docker-compose.prod.yml up -d
+    # Build and start in one command to ensure correct image usage
+    print_info "Building Docker images and starting services (this may take a few minutes)..."
+    docker compose -f docker-compose.prod.yml up -d --build $DOCKER_BUILD_OPTS
     
     # Wait for services to be healthy
     print_info "Waiting for services to be ready..."
-    sleep 10
+    sleep 15
     
     # Check service status
     docker compose -f docker-compose.prod.yml ps
@@ -121,6 +138,9 @@ deploy_services() {
 verify_deployment() {
     print_info "Verifying deployment..."
     
+    # Source .env to get variables
+    source .env
+    
     # Check if API is responding
     if curl -f -s -o /dev/null http://localhost:5246/api/health 2>/dev/null; then
         print_info "✓ API is responding"
@@ -129,22 +149,34 @@ verify_deployment() {
         docker compose -f docker-compose.prod.yml logs --tail=20 api
     fi
     
-    # Check if web frontend is responding
-    if curl -f -s -o /dev/null http://localhost:5173 2>/dev/null; then
-        print_info "✓ Web frontend is responding"
+    # Check web frontend container and Nginx
+    if docker compose -f docker-compose.prod.yml ps web 2>/dev/null | grep -q "Up"; then
+        # Test container internal service
+        if docker compose -f docker-compose.prod.yml exec -T web wget -qO- http://localhost:80 > /dev/null 2>&1; then
+            print_info "✓ Web frontend is running"
+        else
+            print_warning "Web frontend container is up but Nginx may have issues"
+        fi
     else
-        print_warning "Web frontend check failed"
+        print_warning "Web frontend container is not running"
     fi
     
-    # Check if admin panel is responding
-    if curl -f -s -o /dev/null http://localhost:5174 2>/dev/null; then
-        print_info "✓ Admin panel is responding"
+    # Check admin panel container and Nginx
+    if docker compose -f docker-compose.prod.yml ps admin 2>/dev/null | grep -q "Up"; then
+        if docker compose -f docker-compose.prod.yml exec -T admin wget -qO- http://localhost:80 > /dev/null 2>&1; then
+            print_info "✓ Admin panel is running"
+        else
+            print_warning "Admin panel container is up but Nginx may have issues"
+        fi
     else
-        print_warning "Admin panel check failed"
+        print_warning "Admin panel container is not running"
     fi
     
-    # Check database connection
-    if docker compose -f docker-compose.prod.yml exec -T db mariadb -u badmintonuser -pBadmintonPass123 -e "SELECT 1" badmintonforumdb &>/dev/null; then
+    # Check database connection using variables from .env
+    if docker compose -f docker-compose.prod.yml exec -T db mariadb \
+        -u ${MARIADB_USER:-badmintonuser} \
+        -p${MARIADB_PASSWORD:-BadmintonPass123} \
+        -e "SELECT 1" ${MARIADB_DATABASE:-badmintonforumdb} &>/dev/null; then
         print_info "✓ Database is accessible"
     else
         print_warning "Database connection check failed"
@@ -184,6 +216,14 @@ main() {
     echo "   Badminton Forum Deployment Script"
     echo "========================================="
     echo ""
+    
+    # Check for --force flag
+    if [[ "${1:-}" == "--force" ]]; then
+        FORCE_REBUILD=true
+        print_info "Force rebuild mode enabled"
+    else
+        FORCE_REBUILD=false
+    fi
     
     # Step 1: Check environment
     print_info "Step 1: Checking environment configuration..."
