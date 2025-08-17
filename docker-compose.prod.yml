@@ -79,7 +79,7 @@ services:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:5246/api}
       VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
     ports:
-      - "${WEB_PORT:-5173}:5173"
+      - "${WEB_PORT:-5173}:80"
     # NO volumes mounting in production - use built files from image
     depends_on:
       - api
@@ -100,7 +100,7 @@ services:
       VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
       VITE_APP_NAME: ${ADMIN_APP_NAME:-羽球論壇管理後台}
     ports:
-      - "${ADMIN_PORT:-5174}:5174"
+      - "${ADMIN_PORT:-5174}:80"
     # NO volumes mounting in production - use built files from image
     depends_on:
       - api
