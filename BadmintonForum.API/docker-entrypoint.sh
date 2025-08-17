@@ -33,6 +33,24 @@ if [ "$ASPNETCORE_ENVIRONMENT" = "Development" ]; then
   dotnet watch run --no-launch-profile --urls http://+:5246
 else
   echo "以生產模式啟動..."
+  
+  # 生產環境執行預先生成的資料庫遷移
+  if [ -f "./migrations-sql/all-existing.sql" ]; then
+    echo "執行生產環境資料庫遷移..."
+    mariadb -h $DB_HOST -P 3306 -u $DB_USER -p$DB_PASSWORD --default-character-set=utf8mb4 $DB_NAME < ./migrations-sql/all-existing.sql
+    echo "資料庫遷移完成！"
+  else
+    echo "警告：找不到 migrations-sql/all-existing.sql，跳過資料庫遷移"
+  fi
+  
+  # 檢查 DLL 是否存在
+  if [ ! -f "BadmintonForum.API.dll" ]; then
+    echo "錯誤：找不到 BadmintonForum.API.dll"
+    echo "當前目錄內容："
+    ls -la
+    exit 1
+  fi
+  
   # 生產環境執行 DLL
   exec dotnet BadmintonForum.API.dll
 fi
