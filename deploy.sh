@@ -127,8 +127,31 @@ deploy_services() {
     docker compose -f docker-compose.prod.yml up -d --build $DOCKER_BUILD_OPTS
     
     # Wait for services to be healthy
-    print_info "Waiting for services to be ready..."
-    sleep 15
+    print_info "Waiting for services to be ready"
+    
+    # Wait for API to be healthy with smart retry logic
+    local max_wait=60
+    local elapsed=0
+    local interval=5
+    
+    printf "   Waiting for API health check"
+    while [ $elapsed -lt $max_wait ]; do
+        if docker compose -f docker-compose.prod.yml ps api 2>/dev/null | grep -q "(healthy)"; then
+            printf " ✓\n"
+            print_info "API is healthy"
+            break
+        fi
+        printf "."
+        sleep $interval
+        elapsed=$((elapsed + interval))
+    done
+    
+    if [ $elapsed -ge $max_wait ]; then
+        printf " ✗\n"
+        print_warning "API did not become healthy within ${max_wait} seconds"
+        print_info "Checking API logs for issues..."
+        docker compose -f docker-compose.prod.yml logs --tail=30 api
+    fi
     
     # Check service status
     docker compose -f docker-compose.prod.yml ps
@@ -141,35 +164,79 @@ verify_deployment() {
     # Source .env to get variables
     source .env
     
-    # Check if API is responding
-    if curl -f -s -o /dev/null http://localhost:5246/api/health 2>/dev/null; then
-        print_info "✓ API is responding"
-    else
-        print_warning "API health check failed. Checking logs..."
-        docker compose -f docker-compose.prod.yml logs --tail=20 api
+    # Check if API is responding with retry logic
+    local api_ready=false
+    local max_attempts=12
+    local attempt=0
+    
+    printf "   Checking API endpoint"
+    while [ $attempt -lt $max_attempts ]; do
+        if curl -f -s -o /dev/null http://localhost:5246/health 2>/dev/null; then
+            api_ready=true
+            printf " ✓\n"
+            print_info "API is responding"
+            break
+        fi
+        attempt=$((attempt + 1))
+        if [ $attempt -lt $max_attempts ]; then
+            printf "."
+            sleep 5
+        fi
+    done
+    
+    if [ "$api_ready" = false ]; then
+        printf " ✗\n"
+        print_warning "API health check failed after ${max_attempts} attempts"
+        print_info "Checking API logs for issues..."
+        docker compose -f docker-compose.prod.yml logs --tail=30 api
     fi
     
     # Check web frontend container and Nginx
-    if docker compose -f docker-compose.prod.yml ps web 2>/dev/null | grep -q "Up"; then
-        # Test container internal service
-        if docker compose -f docker-compose.prod.yml exec -T web wget -qO- http://localhost:80 > /dev/null 2>&1; then
-            print_info "✓ Web frontend is running"
-        else
-            print_warning "Web frontend container is up but Nginx may have issues"
+    printf "   Checking Web frontend"
+    local web_attempts=0
+    local web_ready=false
+    while [ $web_attempts -lt 3 ]; do
+        if docker compose -f docker-compose.prod.yml ps web 2>/dev/null | grep -q "Up"; then
+            if docker compose -f docker-compose.prod.yml exec -T web wget -qO- http://localhost:80 > /dev/null 2>&1; then
+                web_ready=true
+                printf " ✓\n"
+                print_info "Web frontend is running"
+                break
+            fi
         fi
-    else
-        print_warning "Web frontend container is not running"
+        web_attempts=$((web_attempts + 1))
+        if [ $web_attempts -lt 3 ]; then
+            printf "."
+            sleep 2
+        fi
+    done
+    if [ "$web_ready" = false ]; then
+        printf " ✗\n"
+        print_warning "Web frontend is not responding properly"
     fi
     
     # Check admin panel container and Nginx
-    if docker compose -f docker-compose.prod.yml ps admin 2>/dev/null | grep -q "Up"; then
-        if docker compose -f docker-compose.prod.yml exec -T admin wget -qO- http://localhost:80 > /dev/null 2>&1; then
-            print_info "✓ Admin panel is running"
-        else
-            print_warning "Admin panel container is up but Nginx may have issues"
+    printf "   Checking Admin panel"
+    local admin_attempts=0
+    local admin_ready=false
+    while [ $admin_attempts -lt 3 ]; do
+        if docker compose -f docker-compose.prod.yml ps admin 2>/dev/null | grep -q "Up"; then
+            if docker compose -f docker-compose.prod.yml exec -T admin wget -qO- http://localhost:80 > /dev/null 2>&1; then
+                admin_ready=true
+                printf " ✓\n"
+                print_info "Admin panel is running"
+                break
+            fi
         fi
-    else
-        print_warning "Admin panel container is not running"
+        admin_attempts=$((admin_attempts + 1))
+        if [ $admin_attempts -lt 3 ]; then
+            printf "."
+            sleep 2
+        fi
+    done
+    if [ "$admin_ready" = false ]; then
+        printf " ✗\n"
+        print_warning "Admin panel is not responding properly"
     fi
     
     # Check database connection using variables from .env

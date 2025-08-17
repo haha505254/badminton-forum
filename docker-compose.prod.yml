@@ -65,6 +65,12 @@ services:
     networks:
       - badminton-network
     command: ["./docker-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5246/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
 
   # Vue.js Frontend - Production build
   web:
@@ -85,7 +91,8 @@ services:
       - "${WEB_PORT:-5173}:80"
     # NO volumes mounting in production - use built files from image
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - badminton-network
 
@@ -110,7 +117,8 @@ services:
       - "${ADMIN_PORT:-5174}:80"
     # NO volumes mounting in production - use built files from image
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - badminton-network
 

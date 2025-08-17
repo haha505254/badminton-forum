@@ -11,8 +11,8 @@ ENV LANG=C.UTF-8 \
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-# 安裝 mariadb-client 用於健康檢查
-RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/lists/*
+# 安裝 mariadb-client 用於資料庫連線，以及 curl 用於健康檢查
+RUN apt-get update && apt-get install -y mariadb-client curl && rm -rf /var/lib/apt/lists/*
 
 # 複製專案檔案
 COPY *.csproj ./
@@ -49,8 +49,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS production
 WORKDIR /app
 EXPOSE 5246
 
-# 安裝 mariadb-client 用於執行資料庫遷移
-RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/lists/*
+# 安裝 mariadb-client 用於執行資料庫遷移，以及 curl 用於健康檢查
+RUN apt-get update && apt-get install -y mariadb-client curl && rm -rf /var/lib/apt/lists/*
 
 # 複製發布後的檔案
 COPY --from=publish /app/publish .
