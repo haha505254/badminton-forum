@@ -55,8 +55,10 @@ RUN apt-get update && apt-get install -y mariadb-client && rm -rf /var/lib/apt/l
 # 複製發布後的檔案
 COPY --from=publish /app/publish .
 
-# 複製源碼和專案檔案（SDK 需要）
-COPY . .
+# 複製 Migration 和其他必要檔案（但不覆蓋 DLL）
+COPY Migrations ./Migrations/
+COPY migrations-sql ./migrations-sql/
+COPY *.csproj ./
 
 # 安裝 EF Core 工具
 RUN dotnet tool install --global dotnet-ef
