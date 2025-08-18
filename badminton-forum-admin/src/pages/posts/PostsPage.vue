@@ -128,7 +128,11 @@ async function fetchPosts() {
     posts.value = response.data.map(post => ({
       ...post,
       author: { username: post.AuthorName || post.authorName, avatar: null },
-      category: { name: post.CategoryName || post.categoryName }
+      category: { name: post.CategoryName || post.categoryName },
+      // 確保狀態屬性名稱正確（小寫開頭）
+      isPinned: post.IsPinned !== undefined ? post.IsPinned : post.isPinned,
+      isLocked: post.IsLocked !== undefined ? post.IsLocked : post.isLocked,
+      isDeleted: post.IsDeleted !== undefined ? post.IsDeleted : post.isDeleted
     }))
     total.value = parseInt(response.headers['x-total-count'] || '0')
   } catch (error) {
