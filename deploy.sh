@@ -2,6 +2,10 @@
 
 # Badminton Forum Production Deployment Script
 # This script automates the deployment process on EC2 or any production server
+#
+# Usage:
+#   ./deploy.sh           # Normal deployment (with cache, fast)
+#   ./deploy.sh --force   # Force rebuild (no cache, slow but guaranteed fresh)
 
 set -e  # Exit on error
 set -u  # Exit on undefined variable
@@ -115,16 +119,16 @@ cleanup_docker() {
 deploy_services() {
     print_info "Building and starting services..."
     
-    # Check for --force flag
-    DOCKER_BUILD_OPTS=""
+    # Check for --force flag and build accordingly
     if [[ "${FORCE_REBUILD:-}" == "true" ]]; then
-        print_info "Force rebuild requested - using --no-cache"
-        DOCKER_BUILD_OPTS="--no-cache"
+        print_info "Force rebuild requested - building without cache"
+        print_info "This will take longer but ensures all images are freshly built..."
+        docker compose -f docker-compose.prod.yml build --no-cache
+        docker compose -f docker-compose.prod.yml up -d
+    else
+        print_info "Building Docker images and starting services (this may take a few minutes)..."
+        docker compose -f docker-compose.prod.yml up -d --build
     fi
-    
-    # Build and start in one command to ensure correct image usage
-    print_info "Building Docker images and starting services (this may take a few minutes)..."
-    docker compose -f docker-compose.prod.yml up -d --build $DOCKER_BUILD_OPTS
     
     # Wait for services to be healthy
     print_info "Waiting for services to be ready"

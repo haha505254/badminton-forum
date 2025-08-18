@@ -124,16 +124,33 @@ async function fetchPosts() {
   loading.value = true
   try {
     const response = await adminApi.getPosts(currentPage.value, perPage.value)
+    
+    // 除錯：查看原始資料
+    console.log('Raw API response:', response.data)
+    if (response.data.length > 0) {
+      console.log('First post raw data:', response.data[0])
+      console.log('IsPinned value:', response.data[0].IsPinned)
+      console.log('IsLocked value:', response.data[0].IsLocked)
+    }
+    
     // 轉換資料結構以匹配前端模板
-    posts.value = response.data.map(post => ({
-      ...post,
-      author: { username: post.AuthorName || post.authorName, avatar: null },
-      category: { name: post.CategoryName || post.categoryName },
-      // 確保狀態屬性名稱正確（小寫開頭）
-      isPinned: post.IsPinned !== undefined ? post.IsPinned : post.isPinned,
-      isLocked: post.IsLocked !== undefined ? post.IsLocked : post.isLocked,
-      isDeleted: post.IsDeleted !== undefined ? post.IsDeleted : post.isDeleted
-    }))
+    posts.value = response.data.map(post => {
+      const transformed = {
+        ...post,
+        author: { username: post.AuthorName || post.authorName, avatar: null },
+        category: { name: post.CategoryName || post.categoryName },
+        // 確保狀態屬性名稱正確（小寫開頭）
+        isPinned: post.IsPinned !== undefined ? post.IsPinned : post.isPinned,
+        isLocked: post.IsLocked !== undefined ? post.IsLocked : post.isLocked,
+        isDeleted: post.IsDeleted !== undefined ? post.IsDeleted : post.isDeleted
+      }
+      
+      // 除錯：查看轉換後的資料
+      console.log('Transformed post:', transformed)
+      return transformed
+    })
+    
+    console.log('Final posts.value:', posts.value)
     total.value = parseInt(response.headers['x-total-count'] || '0')
   } catch (error) {
     notify({
