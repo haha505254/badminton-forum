@@ -130,10 +130,10 @@ async function fetchPosts() {
       ...post,
       author: { username: post.AuthorName || post.authorName, avatar: null },
       category: { name: post.CategoryName || post.categoryName },
-      // 使用 nullish coalescing 處理 NULL 值，預設為 false
-      isPinned: post.IsPinned ?? post.isPinned ?? false,
-      isLocked: post.IsLocked ?? post.isLocked ?? false,
-      isDeleted: post.IsDeleted ?? post.isDeleted ?? false
+      // 處理 API 返回的小寫欄位名稱，確保兼容性
+      isPinned: post.isPinned || false,
+      isLocked: post.isLocked || false,
+      isDeleted: post.isDeleted || false
     }))
     total.value = parseInt(response.headers['x-total-count'] || '0')
   } catch (error) {
