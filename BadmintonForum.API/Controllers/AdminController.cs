@@ -213,6 +213,8 @@ namespace BadmintonForum.API.Controllers
                     ReplyCount = p.Replies.Count,
                     IsPinned = p.IsPinned,
                     IsLocked = p.IsLocked,
+                    IsDeleted = p.IsDeleted,
+                    DeletedAt = p.DeletedAt,
                     CreatedAt = p.CreatedAt
                 })
                 .ToListAsync();
@@ -236,7 +238,11 @@ namespace BadmintonForum.API.Controllers
                 return NotFound();
             }
 
-            _context.Posts.Remove(post);
+            // 軟刪除：標記為已刪除而非真正刪除
+            // 保留原始內容供審計和復原
+            post.IsDeleted = true;
+            post.DeletedAt = DateTime.UtcNow;
+            
             await _context.SaveChangesAsync();
 
             return NoContent();

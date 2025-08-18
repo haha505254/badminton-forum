@@ -174,10 +174,8 @@ namespace BadmintonForum.API.Services
             post.IsDeleted = true;
             post.DeletedAt = DateTime.UtcNow;
             
-            // 清空內容但保留結構
-            post.Content = "[此文章已被作者刪除]";
-            // 保留標題以維持討論脈絡
-            // post.Title = "[已刪除]";  // 可選：也可以保留原標題
+            // 保留原始內容，不做任何修改
+            // 前端會根據 IsDeleted 標記決定是否顯示內容
             
             _context.Posts.Update(post);
             await _context.SaveChangesAsync();

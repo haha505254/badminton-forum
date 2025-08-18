@@ -36,6 +36,8 @@ namespace BadmintonForum.API.DTOs
         public int ReplyCount { get; set; }
         public bool IsPinned { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 
