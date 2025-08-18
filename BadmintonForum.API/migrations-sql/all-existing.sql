@@ -10,7 +10,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     ALTER DATABASE CHARACTER SET utf8mb4;
 
@@ -24,7 +24,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE TABLE `Categories` (
         `Id` int NOT NULL AUTO_INCREMENT,
@@ -46,19 +46,22 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE TABLE `Users` (
         `Id` int NOT NULL AUTO_INCREMENT,
         `Username` varchar(50) CHARACTER SET utf8mb4 NOT NULL,
         `Email` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
-        `PasswordHash` longtext CHARACTER SET utf8mb4 NOT NULL,
+        `PasswordHash` longtext CHARACTER SET utf8mb4 NULL,
         `Avatar` longtext CHARACTER SET utf8mb4 NULL,
         `Bio` longtext CHARACTER SET utf8mb4 NULL,
         `CreatedAt` datetime(6) NOT NULL,
         `LastLoginAt` datetime(6) NULL,
         `IsActive` tinyint(1) NOT NULL,
         `IsAdmin` tinyint(1) NOT NULL,
+        `GoogleId` longtext CHARACTER SET utf8mb4 NULL,
+        `Provider` longtext CHARACTER SET utf8mb4 NULL,
+        `EmailVerified` tinyint(1) NOT NULL,
         `PlayingStyle` longtext CHARACTER SET utf8mb4 NULL,
         `YearsOfExperience` int NULL,
         `Signature` longtext CHARACTER SET utf8mb4 NULL,
@@ -77,7 +80,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE TABLE `Posts` (
         `Id` int NOT NULL AUTO_INCREMENT,
@@ -89,6 +92,8 @@ BEGIN
         `LikeCount` int NOT NULL,
         `IsPinned` tinyint(1) NOT NULL,
         `IsLocked` tinyint(1) NOT NULL,
+        `IsDeleted` tinyint(1) NOT NULL,
+        `DeletedAt` datetime(6) NULL,
         `CreatedAt` datetime(6) NOT NULL,
         `UpdatedAt` datetime(6) NULL,
         CONSTRAINT `PK_Posts` PRIMARY KEY (`Id`),
@@ -106,7 +111,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE TABLE `PostLikes` (
         `Id` int NOT NULL AUTO_INCREMENT,
@@ -128,7 +133,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE TABLE `Replies` (
         `Id` int NOT NULL AUTO_INCREMENT,
@@ -139,6 +144,8 @@ BEGIN
         `LikeCount` int NOT NULL,
         `CreatedAt` datetime(6) NOT NULL,
         `UpdatedAt` datetime(6) NULL,
+        `IsDeleted` tinyint(1) NOT NULL,
+        `DeletedAt` datetime(6) NULL,
         CONSTRAINT `PK_Replies` PRIMARY KEY (`Id`),
         CONSTRAINT `FK_Replies_Posts_PostId` FOREIGN KEY (`PostId`) REFERENCES `Posts` (`Id`) ON DELETE CASCADE,
         CONSTRAINT `FK_Replies_Replies_ParentReplyId` FOREIGN KEY (`ParentReplyId`) REFERENCES `Replies` (`Id`),
@@ -155,7 +162,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     INSERT INTO `Categories` (`Id`, `CreatedAt`, `Description`, `DisplayOrder`, `Icon`, `Name`)
     VALUES (1, TIMESTAMP '2024-01-01 00:00:00', '羽毛球相關的一般討論', 1, '💬', '綜合討論區'),
@@ -174,7 +181,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE UNIQUE INDEX `IX_PostLikes_PostId_UserId` ON `PostLikes` (`PostId`, `UserId`);
 
@@ -188,7 +195,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE INDEX `IX_PostLikes_UserId` ON `PostLikes` (`UserId`);
 
@@ -202,7 +209,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE INDEX `IX_Posts_AuthorId` ON `Posts` (`AuthorId`);
 
@@ -216,7 +223,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE INDEX `IX_Posts_CategoryId` ON `Posts` (`CategoryId`);
 
@@ -230,7 +237,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE INDEX `IX_Replies_AuthorId` ON `Replies` (`AuthorId`);
 
@@ -244,7 +251,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE INDEX `IX_Replies_ParentReplyId` ON `Replies` (`ParentReplyId`);
 
@@ -258,7 +265,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE INDEX `IX_Replies_PostId` ON `Replies` (`PostId`);
 
@@ -272,7 +279,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE UNIQUE INDEX `IX_Users_Email` ON `Users` (`Email`);
 
@@ -286,7 +293,7 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     CREATE UNIQUE INDEX `IX_Users_Username` ON `Users` (`Username`);
 
@@ -300,179 +307,10 @@ DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250723183226_InitialMariaDB') THEN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250818062840_InitialCreate') THEN
 
     INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
-    VALUES ('20250723183226_InitialMariaDB', '8.0.11');
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-COMMIT;
-
-START TRANSACTION;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250806154217_AddGoogleOAuthFields') THEN
-
-    ALTER TABLE `Users` MODIFY COLUMN `PasswordHash` longtext CHARACTER SET utf8mb4 NULL;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250806154217_AddGoogleOAuthFields') THEN
-
-    ALTER TABLE `Users` ADD `EmailVerified` tinyint(1) NOT NULL DEFAULT FALSE;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250806154217_AddGoogleOAuthFields') THEN
-
-    ALTER TABLE `Users` ADD `GoogleId` longtext CHARACTER SET utf8mb4 NULL;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250806154217_AddGoogleOAuthFields') THEN
-
-    ALTER TABLE `Users` ADD `Provider` longtext CHARACTER SET utf8mb4 NULL;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250806154217_AddGoogleOAuthFields') THEN
-
-    INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
-    VALUES ('20250806154217_AddGoogleOAuthFields', '8.0.11');
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-COMMIT;
-
-START TRANSACTION;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250813114531_AddSoftDeleteToPostsOnly') THEN
-
-    ALTER TABLE `Posts` ADD `IsDeleted` tinyint(1) NOT NULL DEFAULT FALSE;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250813114531_AddSoftDeleteToPostsOnly') THEN
-
-    ALTER TABLE `Posts` ADD `DeletedAt` datetime(6) NULL;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250813114531_AddSoftDeleteToPostsOnly') THEN
-
-    INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
-    VALUES ('20250813114531_AddSoftDeleteToPostsOnly', '8.0.11');
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-COMMIT;
-
-START TRANSACTION;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250814043836_AddSoftDeleteToReplies') THEN
-
-    ALTER TABLE `Replies` ADD `IsDeleted` tinyint(1) NOT NULL DEFAULT FALSE;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250814043836_AddSoftDeleteToReplies') THEN
-
-    ALTER TABLE `Replies` ADD `DeletedAt` datetime(6) NULL;
-
-    END IF;
-END //
-DELIMITER ;
-CALL MigrationsScript();
-DROP PROCEDURE MigrationsScript;
-
-DROP PROCEDURE IF EXISTS MigrationsScript;
-DELIMITER //
-CREATE PROCEDURE MigrationsScript()
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20250814043836_AddSoftDeleteToReplies') THEN
-
-    INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
-    VALUES ('20250814043836_AddSoftDeleteToReplies', '8.0.11');
+    VALUES ('20250818062840_InitialCreate', '8.0.11');
 
     END IF;
 END //

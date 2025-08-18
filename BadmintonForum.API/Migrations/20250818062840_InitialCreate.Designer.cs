@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BadmintonForum.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250723183226_InitialMariaDB")]
-    partial class InitialMariaDB
+    [Migration("20250818062840_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,6 +125,12 @@ namespace BadmintonForum.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("IsLocked")
                         .HasColumnType("tinyint(1)");
 
@@ -199,6 +205,12 @@ namespace BadmintonForum.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("LikeCount")
                         .HasColumnType("int");
 
@@ -243,6 +255,12 @@ namespace BadmintonForum.API.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("GoogleId")
+                        .HasColumnType("longtext");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
@@ -253,7 +271,6 @@ namespace BadmintonForum.API.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("PasswordResetToken")
@@ -263,6 +280,9 @@ namespace BadmintonForum.API.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("PlayingStyle")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Provider")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Signature")
