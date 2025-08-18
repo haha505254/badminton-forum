@@ -14,6 +14,45 @@ Full-stack badminton forum application with dual frontend architecture:
 - **Admin Panel**: Vuestic Admin with Vue 3 + TypeScript (Management dashboard)
 - **Architecture**: RESTful API with JWT authentication + Google OAuth 2.0
 
+## 🚨 CRITICAL: Deployment Preparation
+
+**IMPORTANT: All local development must ensure smooth deployment using deploy.sh script**
+
+### Before ANY Code Changes
+**Always verify your changes won't break production deployment:**
+1. Check `DEPLOYMENT.md` for complete deployment guide
+2. Ensure all new environment variables are added to `.env.defaults`
+3. Consider how your changes will affect the `deploy.sh` script
+
+### Required Environment Variables for Production
+When adding new features that need configuration:
+1. **MUST add to `.env.defaults`** - Include default values and comments
+2. **MUST update `docker-compose.prod.yml`** - Pass variables to containers if needed
+3. **MUST document in `DEPLOYMENT.md`** - Add to environment variables table
+
+### Critical Production Variables
+```bash
+# These MUST be configured on EC2/production server:
+SERVER_IP=15.168.229.18              # Your actual server IP
+VITE_API_URL=http://15.168.229.18:5246/api  # Frontend API URL (build-time)
+VITE_MAIN_APP_URL=http://15.168.229.18:5173  # Main app URL for admin panel
+ALLOWED_ORIGINS=http://15.168.229.18:5173,http://15.168.229.18:5174
+```
+
+### Deployment Checklist
+Before pushing code that will be deployed:
+- [ ] All environment variables exist in `.env.defaults`
+- [ ] Frontend build args are in `docker-compose.prod.yml` if needed
+- [ ] No hardcoded localhost URLs in production code
+- [ ] Consider production build compatibility
+
+### Common Deployment Failures
+**Remember: If deployment fails, it's usually because:**
+1. Missing environment variable in `.env.defaults`
+2. Hardcoded development URLs in code
+3. Build-time variables not passed in Dockerfile
+4. Not using `--build` flag when needed
+
 ## ⚠️ IMPORTANT: Docker Development Environment
 
 **The developer usually has Docker Compose already running! Check before executing any operations:**
@@ -279,6 +318,32 @@ GitHub Actions workflows:
 - API: http://localhost:5246
 - Swagger: http://localhost:5246/swagger
 - Adminer (Docker): http://localhost:8080 (requires `--profile tools`)
+
+## Tool Usage Notes
+
+### Bash Tool Limitations
+**IMPORTANT: The Bash tool has specific limitations you must be aware of:**
+
+1. **Glob patterns (`*`) don't work properly**
+   ```bash
+   # ❌ WRONG - Will fail
+   ls ~/.ssh/*.pem
+   
+   # ✅ CORRECT - Use find instead
+   find ~/.ssh -name "*.pem"
+   
+   # ✅ CORRECT - List files explicitly
+   ls ~/.ssh/badminton-forum-osaka-key.pem
+   ```
+
+2. **Piped commands with no output**
+   - If a piped command produces no output, Bash tool shows nothing
+   - This can be confusing when debugging
+
+3. **Workarounds**
+   - Use `find` command instead of glob patterns
+   - Use `2>&1` to see error messages
+   - Test commands without pipes first
 
 ## Common Tasks
 

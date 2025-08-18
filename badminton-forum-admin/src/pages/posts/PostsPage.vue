@@ -124,7 +124,12 @@ async function fetchPosts() {
   loading.value = true
   try {
     const response = await adminApi.getPosts(currentPage.value, perPage.value)
-    posts.value = response.data
+    // 轉換資料結構以匹配前端模板
+    posts.value = response.data.map(post => ({
+      ...post,
+      author: { username: post.AuthorName || post.authorName, avatar: null },
+      category: { name: post.CategoryName || post.categoryName }
+    }))
     total.value = parseInt(response.headers['x-total-count'] || '0')
   } catch (error) {
     notify({
@@ -187,7 +192,8 @@ async function deletePost(post) {
 }
 
 function viewPost(post) {
-  window.open(`http://localhost:5173/posts/${post.id}`, '_blank')
+  const mainAppUrl = import.meta.env.VITE_MAIN_APP_URL || 'http://localhost:5173'
+  window.open(`${mainAppUrl}/posts/${post.id}`, '_blank')
 }
 
 function updatePagination(newPagination) {
