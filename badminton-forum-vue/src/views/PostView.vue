@@ -17,8 +17,61 @@
       </div>
     </div>
 
-    <!-- Post Content -->
-    <article v-else class="card-dark mb-6">
+    <!-- Post Not Found (404) -->
+    <div v-else-if="!post && !loading" class="card-dark text-center py-12">
+      <h1 class="text-2xl font-bold text-gray-500 dark:text-gray-400 mb-4">文章不存在</h1>
+      <p class="text-gray-400 dark:text-gray-500 mb-6">此文章可能已被刪除或不存在</p>
+      <RouterLink to="/" class="btn-primary">返回首頁</RouterLink>
+    </div>
+
+    <!-- Deleted Post with Replies (Preserve Thread) -->
+    <div v-else-if="post && post.isDeleted && !isAuthor" class="space-y-6">
+      <div class="card-dark">
+        <div class="text-center py-8">
+          <h1 class="text-2xl font-bold text-gray-500 dark:text-gray-400 mb-2">{{ post.title }}</h1>
+          <p class="text-gray-400 dark:text-gray-500 text-lg mb-2">[此文章已被作者刪除]</p>
+          <p v-if="post.deletedAt" class="text-sm text-gray-400 dark:text-gray-500">
+            刪除時間：{{ formatDate(post.deletedAt) }}
+          </p>
+          <div v-if="post.replyCount > 0" class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p class="text-sm text-blue-600 dark:text-blue-400">
+              💬 雖然原文已刪除，但下方仍有 {{ post.replyCount }} 則討論內容保留供參考
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Author Viewing Own Deleted Post -->
+    <div v-else-if="post && post.isDeleted && isAuthor" class="space-y-6">
+      <div class="bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 p-4 rounded-lg">
+        <p class="text-yellow-800 dark:text-yellow-200 flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          此文章已被您刪除，其他用戶無法看到原始內容
+          <span v-if="post.replyCount > 0">，但保留了 {{ post.replyCount }} 則回覆</span>
+        </p>
+      </div>
+      <article class="card-dark mb-6">
+        <!-- Show full content for author -->
+        <div class="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+          <h1 class="text-3xl font-bold text-gray-500 dark:text-gray-400">
+            {{ post.title }} <span class="text-sm font-normal">[已刪除]</span>
+          </h1>
+        </div>
+        <div class="prose prose-lg max-w-none dark:prose-invert opacity-75">
+          <RichTextDisplay 
+            :content="post.content" 
+            display-context="post"
+            :default-expanded="true"
+          />
+        </div>
+      </article>
+    </div>
+
+    <!-- Normal Post Content -->
+    <article v-else-if="post" class="card-dark mb-6">
       <!-- Post Header -->
       <div class="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
         <div class="flex items-start justify-between mb-4">
@@ -125,8 +178,19 @@
       </div>
     </section>
     
+    <!-- Reply Form or Disabled Message -->
+    <section v-if="post && post.isLocked && !post.isDeleted" class="card-dark">
+      <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+        <svg class="w-12 h-12 mx-auto mb-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+        </svg>
+        <p class="text-lg font-medium">此文章已被鎖定</p>
+        <p class="text-sm mt-1">無法發表新的回覆</p>
+      </div>
+    </section>
+    
     <!-- Reply Form -->
-    <section v-if="authStore.isAuthenticated" class="card-dark">
+    <section v-else-if="authStore.isAuthenticated && post && !post.isDeleted && !post.isLocked" class="card-dark">
       <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
         發表回覆
       </h3>

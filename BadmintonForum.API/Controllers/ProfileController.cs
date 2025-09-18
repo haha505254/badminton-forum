@@ -85,8 +85,19 @@ namespace BadmintonForum.API.Controllers
                 return NotFound();
             }
 
+            // 檢查是否為本人
+            var currentUserId = 0;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim))
+            {
+                currentUserId = int.Parse(userIdClaim);
+            }
+            
+            bool isOwnProfile = currentUserId == id;
+
+            // 本人看所有，他人只看未刪除
             var query = _context.Posts
-                .Where(p => p.AuthorId == id)
+                .Where(p => p.AuthorId == id && (isOwnProfile || !p.IsDeleted))
                 .OrderByDescending(p => p.CreatedAt);
 
             var totalItems = await query.CountAsync();
@@ -109,6 +120,8 @@ namespace BadmintonForum.API.Controllers
                     ReplyCount = p.Replies.Count,
                     IsPinned = p.IsPinned,
                     IsLocked = p.IsLocked,
+                    IsDeleted = p.IsDeleted,
+                    DeletedAt = p.DeletedAt,
                     CreatedAt = p.CreatedAt,
                     UpdatedAt = p.UpdatedAt
                 })

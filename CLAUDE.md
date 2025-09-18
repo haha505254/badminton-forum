@@ -1,480 +1,530 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+此檔案為 Claude Code (claude.ai/code) 在此專案中工作時提供指引。
 
-## Documentation Language Policy
+## 文件語言政策
 
-**All documentation and code comments in this repository should be written in English for consistency and international collaboration.**
+**本專案的所有文件和程式碼註解應使用繁體中文撰寫，以確保團隊溝通的一致性。**
 
-## Project Overview
+## 專案概述
 
-Full-stack badminton forum application with dual frontend architecture:
-- **Backend**: ASP.NET Core 8.0 Web API with MariaDB
-- **Main Frontend**: Vue 3 SPA with Vite (Public forum)
-- **Admin Panel**: Vuestic Admin with Vue 3 + TypeScript (Management dashboard)
-- **Architecture**: RESTful API with JWT authentication + Google OAuth 2.0
+全端羽球論壇應用程式，採用雙前端架構：
+- **後端**：ASP.NET Core 8.0 Web API 搭配 MariaDB
+- **主前端**：Vue 3 SPA 搭配 Vite（公開論壇）
+- **管理後台**：Vuestic Admin 搭配 Vue 3 + TypeScript（管理儀表板）
+- **架構**：RESTful API 搭配 JWT 身份驗證 + Google OAuth 2.0
 
-## 🚨 CRITICAL: Deployment Preparation
+## 🚨 重要：部署準備
 
-**IMPORTANT: All local development must ensure smooth deployment using deploy.sh script**
+**重要提醒：所有本地開發必須確保能使用 deploy.sh 腳本順利部署**
 
-### Before ANY Code Changes
-**Always verify your changes won't break production deployment:**
-1. Check `DEPLOYMENT.md` for complete deployment guide
-2. Ensure all new environment variables are added to `.env.defaults`
-3. Consider how your changes will affect the `deploy.sh` script
+### 任何程式碼更改前
+**務必確認您的更改不會破壞生產環境部署：**
+1. 檢查 `DEPLOYMENT.md` 取得完整部署指南
+2. 確保所有新的環境變數都已加入 `.env.defaults`
+3. 考慮您的更改將如何影響 `deploy.sh` 腳本
 
-### Required Environment Variables for Production
-When adding new features that need configuration:
-1. **MUST add to `.env.defaults`** - Include default values and comments
-2. **MUST update `docker-compose.prod.yml`** - Pass variables to containers if needed
-3. **MUST document in `DEPLOYMENT.md`** - Add to environment variables table
+### 生產環境必要的環境變數
+當新增需要設定的功能時：
+1. **必須加入 `.env.defaults`** - 包含預設值和註解
+2. **必須更新 `docker-compose.prod.yml`** - 如需要則傳遞變數至容器
+3. **必須在 `DEPLOYMENT.md` 文件化** - 加入環境變數表格
 
-### Critical Production Variables
+### 關鍵生產環境變數
 ```bash
-# These MUST be configured on EC2/production server:
-SERVER_IP=15.168.229.18              # Your actual server IP
-VITE_API_URL=http://15.168.229.18:5246/api  # Frontend API URL (build-time)
-VITE_MAIN_APP_URL=http://15.168.229.18:5173  # Main app URL for admin panel
+# 這些必須在 EC2/生產伺服器上設定：
+SERVER_IP=15.168.229.18              # 您的實際伺服器 IP
+VITE_API_URL=http://15.168.229.18:5246/api  # 前端 API URL（建置時）
+VITE_MAIN_APP_URL=http://15.168.229.18:5173  # 管理後台用的主應用程式 URL
 ALLOWED_ORIGINS=http://15.168.229.18:5173,http://15.168.229.18:5174
 ```
 
-### Deployment Checklist
-Before pushing code that will be deployed:
-- [ ] All environment variables exist in `.env.defaults`
-- [ ] Frontend build args are in `docker-compose.prod.yml` if needed
-- [ ] No hardcoded localhost URLs in production code
-- [ ] Consider production build compatibility
+### 部署檢查清單
+推送將要部署的程式碼前：
+- [ ] 所有環境變數都存在於 `.env.defaults`
+- [ ] 前端建置參數在 `docker-compose.prod.yml` 中（如需要）
+- [ ] 生產程式碼中沒有寫死的 localhost URL
+- [ ] 考慮生產建置相容性
 
-### Common Deployment Failures
-**Remember: If deployment fails, it's usually because:**
-1. Missing environment variable in `.env.defaults`
-2. Hardcoded development URLs in code
-3. Build-time variables not passed in Dockerfile
-4. Not using `--build` flag when needed
+### 常見部署失敗原因
+**請記住：部署失敗通常是因為：**
+1. `.env.defaults` 中缺少環境變數
+2. 程式碼中寫死了開發環境 URL
+3. Dockerfile 中未傳遞建置時變數
+4. 需要時未使用 `--build` 標誌
 
-## ⚠️ IMPORTANT: Docker Development Environment
+## ⚠️ 重要：Docker 開發環境
 
-**The developer usually has Docker Compose already running! Check before executing any operations:**
+**開發者通常已經有 Docker Compose 在執行中！執行任何操作前請先檢查：**
 
 ```bash
-# Check Docker container status
+# 檢查 Docker 容器狀態
 docker-compose ps
 
-# Check if specific ports are in use
-lsof -i :5173  # Frontend
+# 檢查特定埠號是否使用中
+lsof -i :5173  # 前端
 lsof -i :5246  # API
-lsof -i :5174  # Admin Panel
+lsof -i :5174  # 管理後台
 ```
 
-### Running Service Endpoints
-When Docker Compose is running, these services are available:
-- **Frontend**: http://localhost:5173
-- **API**: http://localhost:5246 (Swagger UI: /swagger)
-- **Admin Panel**: http://localhost:5174  
-- **MariaDB**: localhost:3306
-- **Adminer** (optional): http://localhost:8080 (requires `--profile tools`)
+### 執行中的服務端點
+當 Docker Compose 執行時，這些服務可用：
+- **前端**：http://localhost:5173
+- **API**：http://localhost:5246（Swagger UI：/swagger）
+- **管理後台**：http://localhost:5174  
+- **MariaDB**：localhost:3306
+- **Adminer**（選用）：http://localhost:8080（需要 `--profile tools`）
 
-### ❌ DO NOT
-- **DO NOT** run `docker-compose up` again - causes port conflicts
-- **DO NOT** run `dotnet run` or `npm run dev` inside containers
-- **DO NOT** attempt to recreate existing containers
+### ❌ 請勿執行
+- **請勿**再次執行 `docker-compose up` - 會造成埠號衝突
+- **請勿**在容器內執行 `dotnet run` 或 `npm run dev`
+- **請勿**嘗試重新建立現有容器
 
-### ✅ Correct Operations
+### ✅ 正確操作
 ```bash
-# To restart services
+# 重新啟動服務
 docker-compose restart [service-name]
 
-# View logs
+# 查看日誌
 docker-compose logs -f [service-name]
 
-# Enter running containers
+# 進入執行中的容器
 docker-compose exec api bash
 docker-compose exec web sh
 docker-compose exec admin sh
 
-# If you really need to restart everything
+# 如果真的需要重新啟動所有服務
 docker-compose down && docker-compose up
 ```
 
-### Development Workflow
-1. **Assume Docker Compose is already running**
-2. Edit code locally (hot-reload will apply changes automatically)
-3. For .NET commands, use `docker-compose exec api dotnet [command]`
-4. For npm commands, use `docker-compose exec web npm [command]` or `docker-compose exec admin npm [command]`
+### 開發工作流程
+1. **假設 Docker Compose 已在執行中**
+2. 在本地編輯程式碼（熱重載會自動套用更改）
+3. 對於 .NET 指令，使用 `docker-compose exec api dotnet [command]`
+4. 對於 npm 指令，使用 `docker-compose exec web npm [command]` 或 `docker-compose exec admin npm [command]`
 
-## Quick Start Commands
+## 快速開始指令
 
 ```bash
-# First time setup
+# 首次設定
 cp .env.defaults .env
 docker-compose up
 
-# Regular development
+# 一般開發
 docker-compose up
 
-# Local development (without Docker)
-# Terminal 1: Backend
+# 本地開發（不使用 Docker）
+# 終端機 1：後端
 cd BadmintonForum.API && dotnet run
 
-# Terminal 2: Main Frontend  
+# 終端機 2：主前端  
 cd badminton-forum-vue && npm run dev
 
-# Terminal 3: Admin Panel
+# 終端機 3：管理後台
 cd badminton-forum-admin && npm run dev
 ```
 
-## Environment Setup
+## 環境設定
 
-### Environment Files
-- **`.env`** - Main configuration (copy from `.env.defaults`)
-- **`badminton-forum-vue/.env.development`** - Main frontend config (includes defaults)
-- **`badminton-forum-admin/.env.development`** - Admin panel config
+### 環境檔案
+- **`.env`** - 主要設定（從 `.env.defaults` 複製）
+- **`badminton-forum-vue/.env.development`** - 主前端設定（包含預設值）
+- **`badminton-forum-admin/.env.development`** - 管理後台設定
 
-### Key Environment Variables
-- `GOOGLE_CLIENT_ID` - Set this to enable Google OAuth (optional)
-- `JWT_SECRET` - Must change for production
-- `MARIADB_PASSWORD` - Must change for production
-- `ADMIN_PORT` - Admin panel port (default: 5174)
-- `ADMIN_APP_NAME` - Admin panel title (default: 羽球論壇管理後台)
+### 關鍵環境變數
+- `GOOGLE_CLIENT_ID` - 設定此項以啟用 Google OAuth（選用）
+- `JWT_SECRET` - 生產環境必須更改
+- `MARIADB_PASSWORD` - 生產環境必須更改
+- `ADMIN_PORT` - 管理後台埠號（預設：5174）
+- `ADMIN_APP_NAME` - 管理後台標題（預設：羽球論壇管理後台）
 
-## Development Credentials
+## 開發憑證
 
-### Database Access
+### 資料庫存取
 ```
-MariaDB Connection:
-- Host: localhost (or 'db' in Docker)
-- Port: 3306
-- Database: badmintonforumdb
-- Username: badmintonuser
-- Password: BadmintonPass123
-- Root Password: rootpass123
+MariaDB 連線：
+- 主機：localhost（或 Docker 中的 'db'）
+- 埠號：3306
+- 資料庫：badmintonforumdb
+- 使用者名稱：badmintonuser
+- 密碼：BadmintonPass123
+- Root 密碼：rootpass123
 
-Quick connect via Docker:
+透過 Docker 快速連線：
 docker-compose exec db mysql -u badmintonuser -pBadmintonPass123 badmintonforumdb
 
-Adminer Web UI:
-- URL: http://localhost:8080
-- Server: db
-- Username: badmintonuser
-- Password: BadmintonPass123
-- Database: badmintonforumdb
+Adminer 網頁介面：
+- URL：http://localhost:8080
+- 伺服器：db
+- 使用者名稱：badmintonuser
+- 密碼：BadmintonPass123
+- 資料庫：badmintonforumdb
 ```
 
-### Test Accounts
+### 測試帳號
 ```
-Admin Account:
-- Email: 123@gmail.com
-- Password: 123456
-- Role: Administrator
-- Use for: Testing admin panel at http://localhost:5174
+管理員帳號：
+- 電子郵件：123@gmail.com
+- 密碼：123456
+- 角色：Administrator
+- 用途：測試管理後台 http://localhost:5174
 
-Regular test users can be created via registration
+一般測試使用者可透過註冊建立
 ```
 
-## Essential Development Commands
+## 必要開發指令
 
-### Backend (.NET)
+### 後端（.NET）
 ```bash
-# Database migrations
-dotnet ef migrations add [Name]      # Create migration
-dotnet ef database update            # Apply migrations
+# 資料庫遷移
+dotnet ef migrations add [Name]      # 建立遷移
+dotnet ef database update            # 套用遷移
 
-# Testing
-dotnet test                          # Run tests
-dotnet format                        # Format code (required by CI)
+# 測試
+dotnet test                          # 執行測試
+dotnet format                        # 格式化程式碼（CI 要求）
 
-# User secrets (development)
+# 使用者密鑰（開發環境）
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Database=badmintonforumdb;User=badmintonuser;Password=your-password"
 dotnet user-secrets set "JwtSettings:Secret" "your-secret-key-at-least-32-chars"
 ```
 
-### Frontend (Vue)
+### 前端（Vue）
 ```bash
-# Development
-npm run dev                          # Start dev server
-npm run build                        # Build for production
-npm run test:e2e                     # Run E2E tests
+# 開發
+npm run dev                          # 啟動開發伺服器
+npm run build                        # 建置生產版本
+npm run test:e2e                     # 執行 E2E 測試
 ```
 
-### Docker Operations
+### Docker 操作
 ```bash
-docker-compose logs -f [service]     # View logs
-docker-compose exec api dotnet ef database update  # Run migrations in Docker
-docker-compose down -v               # Clean everything
+docker-compose logs -f [service]     # 查看日誌
+docker-compose exec api dotnet ef database update  # 在 Docker 中執行遷移
+docker-compose down -v               # 清理所有內容
 ```
 
-## High-Level Architecture
+## 高階架構
 
-### Backend Structure
+### 後端結構
 ```
 BadmintonForum.API/
-├── Controllers/          # API endpoints (Auth, Posts, Admin, Replies, Profile, etc.)
-├── Models/              # Entity models (User, Post, Reply, Category, PostLike)
-├── DTOs/                # Data transfer objects
-├── Services/            # Business logic (JwtService, EmailService)
-├── Data/                # DbContext and configurations
-├── Migrations/          # EF Core migrations
-└── migrations-sql/      # Idempotent SQL scripts for safe re-execution
+├── Controllers/          # API 端點（Auth、Posts、Admin、Replies、Profile 等）
+├── Models/              # 實體模型（User、Post、Reply、Category、PostLike）
+├── DTOs/                # 資料傳輸物件
+├── Services/            # 商業邏輯（JwtService、EmailService）
+├── Data/                # DbContext 和設定
+├── Migrations/          # EF Core 遷移
+└── migrations-sql/      # 可重複執行的 SQL 腳本，確保安全執行
 ```
 
-**Key patterns**:
-- Repository pattern with Entity Framework Core
-- JWT Bearer authentication with custom JwtService
-- Service layer for business logic
-- DTOs for API responses
-- Async/await throughout
+**關鍵模式**：
+- 使用 Entity Framework Core 的儲存庫模式
+- JWT Bearer 身份驗證搭配自訂 JwtService
+- 商業邏輯的服務層
+- API 回應的 DTOs
+- 全面使用 Async/await
 
-### Main Frontend Structure
+### 主前端結構
 ```
 badminton-forum-vue/
 ├── src/
-│   ├── views/           # Page components (Home, Post, Profile, Settings, etc.)
-│   ├── components/      # Reusable UI components
-│   │   ├── ui/          # UI component library
-│   │   ├── BadmintonCourtDiagram.vue  # Tactical board editor
-│   │   ├── BadmintonCourtViewer.vue   # Tactical board viewer
-│   │   ├── ReplyThread.vue            # Reply thread component
-│   │   └── RichTextEditor.vue         # TipTap rich text editor
-│   ├── api/            # Axios API client modules
-│   ├── stores/         # Pinia state management
-│   └── router/         # Vue Router configuration
-└── e2e/                # Playwright E2E tests (currently disabled)
+│   ├── views/           # 頁面元件（Home、Post、Profile、Settings 等）
+│   ├── components/      # 可重用 UI 元件
+│   │   ├── ui/          # UI 元件庫
+│   │   ├── BadmintonCourtDiagram.vue  # 戰術板編輯器
+│   │   ├── BadmintonCourtViewer.vue   # 戰術板檢視器
+│   │   ├── ReplyThread.vue            # 回覆討論串元件
+│   │   └── RichTextEditor.vue         # TipTap 富文本編輯器
+│   ├── api/            # Axios API 客戶端模組
+│   ├── stores/         # Pinia 狀態管理
+│   └── router/         # Vue Router 設定
+└── e2e/                # Playwright E2E 測試（目前停用）
 ```
 
-### Admin Panel Structure
+### 管理後台結構
 ```
 badminton-forum-admin/
 ├── src/
-│   ├── pages/           # Admin pages
-│   │   ├── admin/dashboard/    # Dashboard with statistics
-│   │   ├── users/              # User management
-│   │   ├── posts/              # Post management
-│   │   ├── categories/         # Category management
-│   │   ├── replies/            # Reply management
-│   │   └── auth/               # Admin login
-│   ├── components/      # Vuestic UI components
-│   │   ├── navbar/      # Navigation bar
-│   │   ├── sidebar/     # Side navigation
-│   │   └── custom/      # Shared components from main app
-│   ├── api/            # API client modules
-│   ├── stores/         # Pinia stores (auth, user)
-│   ├── router/         # Vue Router with auth guards
-│   └── layouts/        # App and Auth layouts
-└── public/             # Static assets
+│   ├── pages/           # 管理頁面
+│   │   ├── admin/dashboard/    # 儀表板與統計
+│   │   ├── users/              # 使用者管理
+│   │   ├── posts/              # 貼文管理
+│   │   ├── categories/         # 分類管理
+│   │   ├── replies/            # 回覆管理
+│   │   └── auth/               # 管理員登入
+│   ├── components/      # Vuestic UI 元件
+│   │   ├── navbar/      # 導覽列
+│   │   ├── sidebar/     # 側邊導覽
+│   │   └── custom/      # 從主應用程式共用的元件
+│   ├── api/            # API 客戶端模組
+│   ├── stores/         # Pinia 儲存（auth、user）
+│   ├── router/         # Vue Router 搭配身份驗證守衛
+│   └── layouts/        # App 和 Auth 版面配置
+└── public/             # 靜態資源
 ```
 
-**Key patterns**:
-- Composition API with Vue 3 + TypeScript
-- Vuestic UI component framework
-- Pinia for state management
-- Axios interceptors for JWT token handling
-- TipTap for rich text editing
-- Route guards for admin authentication
-- **Badminton Court Diagram**: Interactive tactical board using Konva.js
-- **Soft Delete**: Posts and Replies support soft deletion (IsDeleted, DeletedAt)
+**關鍵模式**：
+- Vue 3 + TypeScript 的 Composition API
+- Vuestic UI 元件框架
+- Pinia 狀態管理
+- Axios 攔截器處理 JWT 權杖
+- TipTap 富文本編輯
+- 管理員身份驗證的路由守衛
+- **羽球場地圖**：使用 Konva.js 的互動式戰術板
+- **軟刪除**：貼文和回覆支援軟刪除（IsDeleted、DeletedAt）
 
-## Critical Configuration
+## 關鍵設定
 
-### Environment Setup
-- Backend uses .NET User Secrets for sensitive data in development
-- Frontend uses `.env` files for API URL configuration
-- Docker uses environment variables in docker-compose files
+### 環境設定
+- 後端在開發中使用 .NET User Secrets 儲存敏感資料
+- 前端使用 `.env` 檔案設定 API URL
+- Docker 在 docker-compose 檔案中使用環境變數
 
-### Authentication Flow
-1. User login → API returns JWT token
-2. Frontend stores token in localStorage
-3. Axios interceptor adds token to all requests
-4. API validates token on protected endpoints
+### 身份驗證流程
+1. 使用者登入 → API 回傳 JWT 權杖
+2. 前端將權杖儲存在 localStorage
+3. Axios 攔截器將權杖加入所有請求
+4. API 在受保護的端點驗證權杖
 
-### Email Service
-- Development: `ConsoleEmailService` (logs to console)
-- Production: `EmailService` with SMTP (MailKit)
-- Configure in `appsettings.json` or environment variables
+### 電子郵件服務
+- 開發環境：`ConsoleEmailService`（記錄到控制台）
+- 生產環境：`EmailService` 搭配 SMTP（MailKit）
+- 在 `appsettings.json` 或環境變數中設定
 
-## Testing Approach
+## 測試方法
 
-- **Unit tests**: Currently minimal, would use xUnit for .NET
-- **E2E tests**: Playwright tests disabled (package.json shows "E2E tests are disabled")
-- **API testing**: Use Swagger UI at `/swagger` or `BadmintonForum.API.http` file
+- **單元測試**：目前最少，會使用 xUnit for .NET
+- **E2E 測試**：Playwright 測試已停用（package.json 顯示「E2E 測試已停用」）
+- **API 測試**：使用 `/swagger` 的 Swagger UI 或 `BadmintonForum.API.http` 檔案
 
-## CI/CD Pipeline
+## CI/CD 管線
 
-GitHub Actions workflows:
-1. **CI** (`ci-cd.yml`): Runs on all branches
-   - .NET format check
-   - API tests with PostgreSQL service (Note: production uses MariaDB)
-   - Frontend build
-   - Docker build verification
+GitHub Actions 工作流程：
+1. **CI**（`ci-cd.yml`）：在所有分支執行
+   - .NET 格式檢查
+   - 使用 PostgreSQL 服務的 API 測試（注意：生產環境使用 MariaDB）
+   - 前端建置
+   - Docker 建置驗證
 
-2. **Security** (`security.yml`): Weekly CodeQL scans
+2. **Security**（`security.yml`）：每週 CodeQL 掃描
 
-3. **Test** (`test-cicd.yml`): Simple workflow for testing CI/CD
+3. **Test**（`test-cicd.yml`）：測試 CI/CD 的簡單工作流程
 
-## Development URLs
+## 開發 URL
 
-- Main Frontend: http://localhost:5173 (Public forum)
-- Admin Panel: http://localhost:5174 (Management dashboard)
-- API: http://localhost:5246
-- Swagger: http://localhost:5246/swagger
-- Adminer (Docker): http://localhost:8080 (requires `--profile tools`)
+- 主前端：http://localhost:5173（公開論壇）
+- 管理後台：http://localhost:5174（管理儀表板）
+- API：http://localhost:5246
+- Swagger：http://localhost:5246/swagger
+- Adminer（Docker）：http://localhost:8080（需要 `--profile tools`）
 
-## Tool Usage Notes
+## 工具使用注意事項
 
-### Bash Tool Limitations
-**IMPORTANT: The Bash tool has specific limitations you must be aware of:**
+### Bash 工具限制
+**重要：Bash 工具有您必須了解的特定限制：**
 
-1. **Glob patterns (`*`) don't work properly**
+1. **萬用字元（`*`）無法正常運作**
    ```bash
-   # ❌ WRONG - Will fail
+   # ❌ 錯誤 - 會失敗
    ls ~/.ssh/*.pem
    
-   # ✅ CORRECT - Use find instead
+   # ✅ 正確 - 改用 find
    find ~/.ssh -name "*.pem"
    
-   # ✅ CORRECT - List files explicitly
+   # ✅ 正確 - 明確列出檔案
    ls ~/.ssh/badminton-forum-osaka-key.pem
    ```
 
-2. **Piped commands with no output**
-   - If a piped command produces no output, Bash tool shows nothing
-   - This can be confusing when debugging
+2. **沒有輸出的管道指令**
+   - 如果管道指令沒有產生輸出，Bash 工具不會顯示任何內容
+   - 偵錯時可能會造成困惑
 
-3. **Workarounds**
-   - Use `find` command instead of glob patterns
-   - Use `2>&1` to see error messages
-   - Test commands without pipes first
+3. **解決方法**
+   - 使用 `find` 指令取代萬用字元模式
+   - 使用 `2>&1` 查看錯誤訊息
+   - 先測試不含管道的指令
 
-## Common Tasks
+## 常見任務
 
-### Add a new API endpoint
-1. Create controller in `Controllers/`
-2. Add DTOs if needed in `DTOs/`
-3. Add service logic in `Services/`
-4. Update Swagger annotations
-5. Add frontend API client in `badminton-forum-vue/src/api/`
-6. If admin-related, also add to `badminton-forum-admin/src/api/`
+### 新增 API 端點
+1. 在 `Controllers/` 建立控制器
+2. 如需要在 `DTOs/` 新增 DTOs
+3. 在 `Services/` 新增服務邏輯
+4. 更新 Swagger 註解
+5. 在 `badminton-forum-vue/src/api/` 新增前端 API 客戶端
+6. 如果與管理相關，也要新增到 `badminton-forum-admin/src/api/`
 
-### Modify database schema
-1. Update model in `Models/`
-2. Run `dotnet ef migrations add [Name]`
-3. Generate idempotent SQL: `dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
-4. Test the SQL script locally
-5. If successful, regenerate for all migrations: `dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
-6. Docker will automatically apply migrations on startup using the idempotent SQL
+### 修改資料庫架構
+1. 在 `Models/` 更新模型
+2. 執行 `dotnet ef migrations add [Name]`
+3. 產生可重複執行的 SQL：`dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
+4. 在本地測試 SQL 腳本
+5. 如果成功，為所有遷移重新產生：`dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
+6. Docker 會在啟動時使用可重複執行的 SQL 自動套用遷移
 
-### ⚠️ Database Migration Rules (CRITICAL - MUST FOLLOW)
+### ⚠️ 資料庫遷移規則（關鍵 - 必須遵循）
 
-**NEVER DO THIS:**
-1. ❌ **NEVER modify database directly in Docker containers**
-2. ❌ **NEVER use raw SQL ALTER TABLE statements**
-3. ❌ **NEVER skip the Migration workflow**
+**絕對不要這樣做：**
+1. ❌ **絕對不要直接在 Docker 容器中修改資料庫**
+2. ❌ **絕對不要使用原始 SQL ALTER TABLE 陳述式**
+3. ❌ **絕對不要跳過遷移工作流程**
 
-**ALWAYS DO THIS:**
-1. Modify Model class (Models/*.cs)
-2. Run `dotnet ef migrations add [DescriptiveName]`
-3. Generate idempotent SQL: `dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
-4. Test the SQL execution locally
-5. If successful, update: `dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
+**永遠要這樣做：**
+1. 修改 Model 類別（Models/*.cs）
+2. 執行 `dotnet ef migrations add [描述性名稱]`
+3. 產生可重複執行的 SQL：`dotnet ef migrations script --idempotent -o migrations-sql/test.sql`
+4. 在本地測試 SQL 執行
+5. 如果成功，更新：`dotnet ef migrations script --idempotent -o migrations-sql/all-existing.sql`
 
-**Why this matters:**
-- MariaDB DDL operations are non-transactional (cannot rollback)
-- Manual changes break Migration history consistency
-- Other developers cannot reproduce your changes
-- Production deployments will fail
+**為什麼這很重要：**
+- MariaDB DDL 操作是非交易性的（無法復原）
+- 手動更改會破壞遷移歷史一致性
+- 其他開發者無法重現您的更改
+- 生產部署將會失敗
 
-**REMEMBER: If you need to add a column, STOP and use the Migration workflow!**
+**請記住：如果您需要新增欄位，請停止並使用遷移工作流程！**
 
-### Add new frontend page
-**For main frontend:**
-1. Create component in `badminton-forum-vue/src/views/`
-2. Add route in `badminton-forum-vue/src/router/index.js`
-3. Add API calls in `badminton-forum-vue/src/api/`
-4. Update navigation if needed
+### 新增前端頁面
+**主前端：**
+1. 在 `badminton-forum-vue/src/views/` 建立元件
+2. 在 `badminton-forum-vue/src/router/index.js` 新增路由
+3. 在 `badminton-forum-vue/src/api/` 新增 API 呼叫
+4. 如需要更新導覽
 
-**For admin panel:**
-1. Create component in `badminton-forum-admin/src/pages/`
-2. Add route in `badminton-forum-admin/src/router/index.ts`
-3. Add API calls in `badminton-forum-admin/src/api/`
-4. Update sidebar navigation in `NavigationRoutes.ts`
+**管理後台：**
+1. 在 `badminton-forum-admin/src/pages/` 建立元件
+2. 在 `badminton-forum-admin/src/router/index.ts` 新增路由
+3. 在 `badminton-forum-admin/src/api/` 新增 API 呼叫
+4. 在 `NavigationRoutes.ts` 更新側邊欄導覽
 
-## Important Notes
+## 重要注意事項
 
-- ⚠️ **Database changes MUST use EF Core Migrations - NEVER modify database directly**
-- Database uses UTC timestamps by default
-- Frontend displays in Traditional Chinese (zh-TW)
-- Categories are predefined: General Discussion, Technical Exchange, Equipment Discussion, Tournament Zone, Regional Players Club
-- Admin panel is a separate application at http://localhost:5174 (not a route)
-- Main app shows external link to admin panel for admin users
-- Profile URLs use numeric user IDs (e.g., `/profile/123`)
-- Password reset tokens expire after 24 hours
-- Posts and Replies support soft deletion (IsDeleted flag)
-- Tactical board diagrams can be embedded in posts and replies
-- Rich text editor supports formatting, images, and embedded diagrams
+- ⚠️ **資料庫更改必須使用 EF Core 遷移 - 絕對不要直接修改資料庫**
+- 資料庫預設使用 UTC 時間戳記
+- 前端以繁體中文（zh-TW）顯示
+- 分類是預定義的：綜合討論、技術交流、裝備討論、賽事專區、地方球友會
+- 管理後台是獨立的應用程式，位於 http://localhost:5174（不是路由）
+- 主應用程式為管理員使用者顯示管理後台的外部連結
+- 個人檔案 URL 使用數字使用者 ID（例如 `/profile/123`）
+- 密碼重設權杖 24 小時後過期
+- 貼文和回覆支援軟刪除（IsDeleted 標記）
+- 戰術板圖表可以嵌入貼文和回覆中
+- 富文本編輯器支援格式化、圖片和嵌入圖表
 
-## Admin Panel Features
+## 管理後台功能
 
-The Vuestic Admin panel provides comprehensive management capabilities:
+Vuestic Admin 後台提供全面的管理功能：
 
-### Dashboard (儀表板)
-- Real-time statistics (users, posts, replies, views)
-- Interactive charts and data visualization
-- Daily activity trends
-- Category distribution analysis
+### 儀表板
+- 即時統計（使用者、貼文、回覆、瀏覽數）
+- 互動式圖表和資料視覺化
+- 每日活動趨勢
+- 分類分布分析
 
-### User Management (用戶管理)
-- View all users with pagination and search
-- Toggle user active/inactive status
-- Grant/revoke admin privileges
-- Filter by provider (local, Google)
-- View user profiles (links to main app)
+### 使用者管理
+- 查看所有使用者，支援分頁和搜尋
+- 切換使用者啟用/停用狀態
+- 授予/撤銷管理員權限
+- 按提供者（本地、Google）篩選
+- 查看使用者個人檔案（連結到主應用程式）
 
-### Post Management (貼文管理)
-- View all posts with search and filters
-- Pin/unpin posts
-- Lock/unlock posts for replies
-- Soft delete posts
-- Filter by category and author
+### 貼文管理
+- 查看所有貼文，支援搜尋和篩選
+- 置頂/取消置頂貼文
+- 鎖定/解鎖貼文回覆
+- 軟刪除貼文
+- 按分類和作者篩選
 
-### Category Management (分類管理)
-- Create, edit, delete categories
-- Set display order
-- Manage category icons
-- View post count per category
-- Protected deletion (prevents deleting categories with posts)
+### 分類管理
+- 建立、編輯、刪除分類
+- 設定顯示順序
+- 管理分類圖示
+- 查看每個分類的貼文數量
+- 受保護的刪除（防止刪除有貼文的分類）
 
-### Reply Management (回覆管理)
-- Advanced search (content, author, date range)
-- View nested reply threads
-- Soft delete individual replies
-- Batch delete multiple replies
-- Track parent-child reply relationships
+### 回覆管理
+- 進階搜尋（內容、作者、日期範圍）
+- 查看巢狀回覆討論串
+- 軟刪除個別回覆
+- 批次刪除多個回覆
+- 追蹤父子回覆關係
 
-### Authentication
-- Separate admin login system
-- JWT token authentication
-- Admin role verification
-- Automatic session management
+### 身份驗證
+- 獨立的管理員登入系統
+- JWT 權杖身份驗證
+- 管理員角色驗證
+- 自動會話管理
 
 
-## Git Commit Guidelines
+## Git 提交指引
 
-To maintain a clear and consistent version history, please follow these commit message guidelines:
+### 🔐 重要：隱私資訊安全檢查
 
-1.  **Commit Frequency**: **Commit after each logical unit of change.** Make it a habit to commit after completing each paragraph or section of work. This creates a more granular history and makes it easier to track changes or revert if needed.
+**⚠️ 警告：在執行任何 Git 操作前，必須先檢查是否包含隱私資訊！**
 
-2.  **Refer to Existing Style**: Before committing, please check the recent history with `git log` to maintain a consistent style.
+#### 提交前必須檢查的隱私資訊
+- **API 金鑰和密鑰**：JWT_SECRET、API keys、第三方服務金鑰
+- **資料庫憑證**：資料庫密碼、連線字串
+- **OAuth 憑證**：Google Client Secret、其他 OAuth 密鑰
+- **個人資訊**：真實 email、電話號碼、個人地址
+- **生產環境資訊**：實際 IP 位址、生產環境網址、伺服器憑證
+- **雲端服務憑證**：AWS credentials、Azure keys、其他雲端服務金鑰
+- **.env 檔案**：確保 .env 檔案不會被提交
 
-3.  **Language Consistency**: **Commit messages MUST be written in Traditional Chinese.** Avoid mixing English and Chinese within a single commit message.
+#### 檢查指令
+```bash
+# 1. 檢查即將提交的更改（暫存區）
+git diff --cached
 
-4.  **Recommended Format (Conventional Commits)**: It is recommended to follow the Conventional Commits format for structured and trackable messages.
+# 2. 檢查所有未提交的更改
+git diff
+
+# 3. 確認 .gitignore 包含敏感檔案
+cat .gitignore | grep -E "\.env|secret|key|credential"
+
+# 4. 搜尋可能的敏感資訊
+git diff --cached | grep -i -E "password|secret|key|token|credential"
+
+# 5. 列出所有將被提交的檔案
+git status
+```
+
+#### 如果發現隱私資訊
+1. **立即停止提交操作**
+2. 使用 `git reset HEAD <file>` 將檔案從暫存區移除
+3. 將敏感資訊移至適當位置：
+   - 開發環境：使用 `.env` 檔案或 `dotnet user-secrets`
+   - 生產環境：使用環境變數或安全的密鑰管理服務
+4. 確保 `.gitignore` 包含所有敏感檔案
+5. 重新檢查後再提交
+
+#### 最佳實踐
+- **永遠不要**將真實的密碼、金鑰寫在程式碼中
+- **永遠不要**提交 `.env` 檔案（使用 `.env.defaults` 作為範本）
+- **定期檢查** Git 歷史記錄是否包含敏感資訊
+- **使用** `git-secrets` 或類似工具自動防止敏感資訊提交
+
+---
+
+### 提交訊息規範
+
+為了維持清晰一致的版本歷史，請遵循以下提交訊息指引：
+
+1.  **提交頻率**：**每完成一個邏輯單元的更改後提交。**養成在完成每個段落或工作區段後提交的習慣。這會建立更細緻的歷史記錄，並使追蹤更改或需要時復原更容易。
+
+2.  **參考現有風格**：提交前，請使用 `git log` 檢查最近的歷史以維持一致的風格。
+
+3.  **語言一致性**：**提交訊息必須使用繁體中文撰寫。**避免在單一提交訊息中混用英文和中文。
+
+4.  **建議格式（Conventional Commits）**：建議遵循 Conventional Commits 格式以獲得結構化且可追蹤的訊息。
     ```
     <type>(<scope>): <subject>
     ```
-    - **type**: It is recommended to keep the English keywords, such as `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, etc., as this helps with CI/CD tool integration.
-    - **scope**: The module affected by the change. This should be in Traditional Chinese, e.g., `驗證`, `貼文`, `使用者`.
-    - **subject**: A concise description of the change in Traditional Chinese.
-    - **Examples**:
+    - **type**：建議保留英文關鍵字，如 `feat`、`fix`、`docs`、`style`、`refactor`、`test`、`chore` 等，這有助於 CI/CD 工具整合。
+    - **scope**：受更改影響的模組。應使用繁體中文，例如 `驗證`、`貼文`、`使用者`。
+    - **subject**：繁體中文的簡潔更改描述。
+    - **範例**：
       - `feat(驗證): 新增使用者註冊端點`
       - `fix(貼文): 修正分頁邏輯錯誤`
       - `docs(說明文件): 更新安裝說明`

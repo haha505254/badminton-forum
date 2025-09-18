@@ -26,7 +26,7 @@ namespace BadmintonForum.API.Controllers
                     Name = c.Name,
                     Description = c.Description,
                     Icon = c.Icon,
-                    PostCount = c.Posts.Count
+                    PostCount = c.Posts.Count(p => !p.IsDeleted)
                 })
                 .OrderBy(c => c.Id)
                 .ToListAsync();
@@ -45,7 +45,7 @@ namespace BadmintonForum.API.Controllers
                     Name = c.Name,
                     Description = c.Description,
                     Icon = c.Icon,
-                    PostCount = c.Posts.Count
+                    PostCount = c.Posts.Count(p => !p.IsDeleted)
                 })
                 .FirstOrDefaultAsync();
 
@@ -61,7 +61,7 @@ namespace BadmintonForum.API.Controllers
         public async Task<ActionResult<IEnumerable<PostDto>>> GetCategoryPosts(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var query = _context.Posts
-                .Where(p => p.CategoryId == id)
+                .Where(p => p.CategoryId == id && !p.IsDeleted)
                 .OrderByDescending(p => p.IsPinned)
                 .ThenByDescending(p => p.CreatedAt);
 

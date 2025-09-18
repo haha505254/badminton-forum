@@ -18,6 +18,7 @@ namespace BadmintonForum.API.Services
         public async Task<(IEnumerable<PostDto> posts, int totalCount)> GetPostsAsync(int page, int pageSize, int? userId = null)
         {
             var query = _context.Posts
+                .Where(p => !p.IsDeleted)  // 過濾已刪除的文章
                 .OrderByDescending(p => p.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -53,7 +54,7 @@ namespace BadmintonForum.API.Services
         public async Task<(IEnumerable<PostDto> posts, int totalCount)> SearchPostsAsync(string keyword, int page, int pageSize, int? userId = null)
         {
             var query = _context.Posts
-                .Where(p => p.Title.Contains(keyword) || p.Content.Contains(keyword))
+                .Where(p => !p.IsDeleted && (p.Title.Contains(keyword) || p.Content.Contains(keyword)))
                 .OrderByDescending(p => p.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -88,29 +89,100 @@ namespace BadmintonForum.API.Services
 
         public async Task<PostDto?> GetPostByIdAsync(int id, int? userId = null)
         {
-            return await _context.Posts
-                .Where(p => p.Id == id)
-                .Select(p => new PostDto
+            var post = await _context.Posts
+                .Include(p => p.Author)
+                .Include(p => p.Category)
+                .Include(p => p.Replies)
+                .Include(p => p.PostLikes)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (post == null)
+                return null;
+
+            // 處理已刪除文章
+            if (post.IsDeleted)
+            {
+                // 檢查是否為作者本人
+                bool isAuthor = userId.HasValue && post.AuthorId == userId.Value;
+                
+                if (isAuthor)
                 {
-                    Id = p.Id,
-                    Title = p.Title,
-                    Content = p.Content,
-                    AuthorId = p.AuthorId,
-                    AuthorName = p.Author.Username,
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.Category.Name,
-                    ViewCount = p.ViewCount,
-                    LikeCount = p.LikeCount,
-                    ReplyCount = p.Replies.Count,
-                    IsPinned = p.IsPinned,
-                    IsLocked = p.IsLocked,
-                    IsDeleted = p.IsDeleted,
-                    DeletedAt = p.DeletedAt,
-                    IsLiked = userId.HasValue && userId > 0 && p.PostLikes.Any(pl => pl.UserId == userId),
-                    CreatedAt = p.CreatedAt,
-                    UpdatedAt = p.UpdatedAt
-                })
-                .FirstOrDefaultAsync();
+                    // 作者看到完整內容
+                    return new PostDto
+                    {
+                        Id = post.Id,
+                        Title = post.Title,
+                        Content = post.Content,  // 保留原始內容
+                        AuthorId = post.AuthorId,
+                        AuthorName = post.Author.Username,
+                        CategoryId = post.CategoryId,
+                        CategoryName = post.Category.Name,
+                        ViewCount = post.ViewCount,
+                        LikeCount = post.LikeCount,
+                        ReplyCount = post.Replies.Count(r => !r.IsDeleted),
+                        IsPinned = post.IsPinned,
+                        IsLocked = post.IsLocked,
+                        IsDeleted = true,
+                        DeletedAt = post.DeletedAt,
+                        IsLiked = false,
+                        CreatedAt = post.CreatedAt,
+                        UpdatedAt = post.UpdatedAt
+                    };
+                }
+
+                // 檢查是否有未刪除的回覆
+                bool hasActiveReplies = post.Replies.Any(r => !r.IsDeleted);
+                
+                if (hasActiveReplies)
+                {
+                    // 有回覆：顯示討論串框架
+                    return new PostDto
+                    {
+                        Id = post.Id,
+                        Title = post.Title,  // 保留標題
+                        Content = "[此文章已被作者刪除]",
+                        AuthorId = 0,
+                        AuthorName = "[已刪除]",
+                        CategoryId = post.CategoryId,
+                        CategoryName = post.Category.Name,
+                        ViewCount = 0,
+                        LikeCount = 0,
+                        ReplyCount = post.Replies.Count(r => !r.IsDeleted),
+                        IsPinned = false,
+                        IsLocked = true,  // 已刪除文章視為鎖定
+                        IsDeleted = true,
+                        DeletedAt = post.DeletedAt,
+                        IsLiked = false,
+                        CreatedAt = post.CreatedAt,
+                        UpdatedAt = post.UpdatedAt
+                    };
+                }
+                
+                // 無回覆：不顯示（404）
+                return null;
+            }
+
+            // 正常文章處理
+            return new PostDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                AuthorId = post.AuthorId,
+                AuthorName = post.Author.Username,
+                CategoryId = post.CategoryId,
+                CategoryName = post.Category.Name,
+                ViewCount = post.ViewCount,
+                LikeCount = post.LikeCount,
+                ReplyCount = post.Replies.Count(r => !r.IsDeleted),
+                IsPinned = post.IsPinned,
+                IsLocked = post.IsLocked,
+                IsDeleted = false,
+                DeletedAt = null,
+                IsLiked = userId.HasValue && userId > 0 && post.PostLikes.Any(pl => pl.UserId == userId),
+                CreatedAt = post.CreatedAt,
+                UpdatedAt = post.UpdatedAt
+            };
         }
 
         public async Task<PostDto> CreatePostAsync(CreatePostDto createPostDto, int userId)
